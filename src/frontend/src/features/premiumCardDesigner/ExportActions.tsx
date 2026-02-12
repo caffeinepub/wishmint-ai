@@ -1,11 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { Download, Share2, MessageCircle, Copy } from 'lucide-react';
-import { toast } from 'sonner';
-import { useState } from 'react';
-import type { PremiumDesignerState } from './types';
+import { Download, Share2, Copy } from 'lucide-react';
+import { SiWhatsapp, SiInstagram } from 'react-icons/si';
 import { exportPremiumCard } from '../cardExport/canvasExport';
 import { copyToClipboard } from '../../lib/clipboard';
 import { createWhatsAppLink } from '../../lib/whatsapp';
+import { toast } from 'sonner';
+import type { PremiumDesignerState } from './types';
 
 interface ExportActionsProps {
   designerState: PremiumDesignerState;
@@ -14,134 +14,129 @@ interface ExportActionsProps {
 }
 
 export function ExportActions({ designerState, wishText, recipientName }: ExportActionsProps) {
-  const [isExporting, setIsExporting] = useState(false);
-
   const handleDownloadSquare = async () => {
-    if (!wishText || !recipientName) {
-      toast.error('Missing wish text or recipient name');
-      return;
-    }
-
-    setIsExporting(true);
     try {
-      await exportPremiumCard(wishText, recipientName, designerState, 'square');
-      toast.success('Card downloaded!');
+      await exportPremiumCard(wishText, recipientName, designerState, 'square', false);
+      toast.success('Square card downloaded!');
     } catch (error) {
-      console.error('Export failed:', error);
-      toast.error('Failed to export card');
-    } finally {
-      setIsExporting(false);
+      console.error('Download failed:', error);
+      toast.error('Failed to download card');
     }
   };
 
   const handleDownloadStory = async () => {
-    if (!wishText || !recipientName) {
-      toast.error('Missing wish text or recipient name');
-      return;
-    }
-
-    setIsExporting(true);
     try {
-      await exportPremiumCard(wishText, recipientName, designerState, 'story');
-      toast.success('Instagram Story downloaded!');
+      await exportPremiumCard(wishText, recipientName, designerState, 'story', false);
+      toast.success('Story card downloaded!');
     } catch (error) {
-      console.error('Export failed:', error);
-      toast.error('Failed to export story');
-    } finally {
-      setIsExporting(false);
+      console.error('Download failed:', error);
+      toast.error('Failed to download card');
+    }
+  };
+
+  const handleShareWhatsApp = async () => {
+    try {
+      const blob = await exportPremiumCard(wishText, recipientName, designerState, 'square', true);
+      if (!blob) {
+        toast.error('Failed to generate card for sharing');
+        return;
+      }
+
+      // For WhatsApp, we'll use the text link approach
+      const message = `🎉 Happy Birthday ${recipientName}! 🎂\n\n${wishText}\n\nMade with ❤️ by WishMint AI`;
+      const url = createWhatsAppLink(message);
+      window.open(url, '_blank');
+      toast.success('Opening WhatsApp...');
+    } catch (error) {
+      console.error('Share failed:', error);
+      toast.error('Failed to share on WhatsApp');
+    }
+  };
+
+  const handleShareInstagram = async () => {
+    try {
+      const blob = await exportPremiumCard(wishText, recipientName, designerState, 'story', true);
+      if (!blob) {
+        toast.error('Failed to generate card for sharing');
+        return;
+      }
+
+      // Try Web Share API
+      if (navigator.share && navigator.canShare) {
+        const file = new File([blob], `birthday-card-${recipientName}.png`, { type: 'image/png' });
+        
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: `Happy Birthday ${recipientName}!`,
+            text: 'Check out this birthday card!',
+          });
+          toast.success('Shared successfully!');
+          return;
+        }
+      }
+
+      // Fallback: download the image
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `birthday-story-${recipientName.toLowerCase().replace(/\s+/g, '-')}.png`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.info('Card downloaded! Share it on Instagram from your gallery.');
+    } catch (error) {
+      console.error('Share failed:', error);
+      toast.error('Failed to share on Instagram');
     }
   };
 
   const handleCopyText = () => {
-    copyToClipboard(wishText);
+    const message = `🎉 Happy Birthday ${recipientName}! 🎂\n\n${wishText}\n\nMade with ❤️ by WishMint AI`;
+    copyToClipboard(message);
     toast.success('Text copied to clipboard!');
   };
 
-  const handleWhatsAppShare = () => {
-    const url = createWhatsAppLink(wishText);
-    window.open(url, '_blank');
-  };
-
-  const handleInstagramShare = async () => {
-    if (!wishText || !recipientName) {
-      toast.error('Missing wish text or recipient name');
-      return;
-    }
-
-    // Try Web Share API first
-    if (navigator.share) {
-      try {
-        // Generate the image first
-        setIsExporting(true);
-        const blob = await exportPremiumCard(wishText, recipientName, designerState, 'story', true);
-        setIsExporting(false);
-
-        if (blob) {
-          const file = new File([blob], 'birthday-card.png', { type: 'image/png' });
-          await navigator.share({
-            files: [file],
-            title: `Happy Birthday ${recipientName}!`,
-            text: wishText,
-          });
-          toast.success('Shared successfully!');
-        }
-      } catch (error) {
-        console.error('Share failed:', error);
-        toast.info('Download the image and upload it to Instagram manually');
-      }
-    } else {
-      toast.info('Download the image and upload it to Instagram manually');
-    }
-  };
-
   return (
-    <div className="space-y-3">
-      <div className="grid grid-cols-2 gap-3">
-        <Button
-          onClick={handleDownloadSquare}
-          disabled={isExporting}
-          className="gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Download Image
-        </Button>
-        <Button
-          onClick={handleDownloadStory}
-          disabled={isExporting}
-          className="gap-2"
-        >
-          <Download className="w-4 h-4" />
-          Instagram Story
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-3 gap-3">
-        <Button
-          onClick={handleWhatsAppShare}
-          variant="outline"
-          className="gap-2"
-        >
-          <MessageCircle className="w-4 h-4" />
-          WhatsApp
-        </Button>
-        <Button
-          onClick={handleInstagramShare}
-          variant="outline"
-          className="gap-2"
-          disabled={isExporting}
-        >
-          <Share2 className="w-4 h-4" />
-          Instagram
-        </Button>
-        <Button
-          onClick={handleCopyText}
-          variant="outline"
-          className="gap-2"
-        >
-          <Copy className="w-4 h-4" />
-          Copy Text
-        </Button>
-      </div>
+    <div className="flex flex-wrap gap-3 justify-center p-4 bg-card/40 backdrop-blur-sm rounded-lg border border-border/50">
+      <Button
+        onClick={handleDownloadSquare}
+        className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold"
+      >
+        <Download className="w-4 h-4 mr-2" />
+        Download Square
+      </Button>
+      <Button
+        onClick={handleDownloadStory}
+        variant="outline"
+        className="border-neon-purple/50 hover:bg-neon-purple/10"
+      >
+        <Download className="w-4 h-4 mr-2" />
+        Download Story
+      </Button>
+      <Button
+        onClick={handleShareWhatsApp}
+        variant="outline"
+        className="border-neon-green/50 hover:bg-neon-green/10"
+      >
+        <SiWhatsapp className="w-4 h-4 mr-2" />
+        WhatsApp
+      </Button>
+      <Button
+        onClick={handleShareInstagram}
+        variant="outline"
+        className="border-neon-purple/50 hover:bg-neon-purple/10"
+      >
+        <SiInstagram className="w-4 h-4 mr-2" />
+        Instagram
+      </Button>
+      <Button
+        onClick={handleCopyText}
+        variant="outline"
+        className="border-border hover:bg-accent"
+      >
+        <Copy className="w-4 h-4 mr-2" />
+        Copy Text
+      </Button>
     </div>
   );
 }

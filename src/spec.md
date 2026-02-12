@@ -1,11 +1,16 @@
 # Specification
 
 ## Summary
-**Goal:** Make all upgrade actions open an in-app pricing modal first, with an explicit in-modal confirmation before starting Razorpay, and prevent any full-page navigation during payment initiation.
+**Goal:** Improve single-page navigation and scrolling UX with a sticky, branded navbar, section anchors, active highlighting, scroll progress, and mobile-friendly floating actions.
 
 **Planned changes:**
-- Update all upgrade entry points (e.g., “Upgrade to Pro/Creator”, “Unlock Premium”, “Upgrade Plan”) to only open `PricingComparisonModal` and keep the user on the current page (no external/checkout navigation on first click).
-- Modify `PricingComparisonModal` so selecting a plan shows an in-modal confirmation step; only an explicit “Proceed to payment” (or equivalent) action initiates Razorpay.
-- Adjust `useRazorpayUpgrade` client behavior to avoid any full-page redirects; if checkout cannot open (e.g., SDK/config missing), show a clear English error toast and keep the app usable.
+- Add a sticky top navigation bar styled to match the existing WishMint premium dark + neon (purple/green) gradient branding, with menu items: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ.
+- Add/ensure section anchor IDs exist exactly as: home, create-wish, templates, marketplace, pricing, dashboard, faq; implement smooth scrolling with sticky-header offset so headings aren’t hidden.
+- Implement active-section highlighting in the navbar that updates smoothly and avoids flicker near section boundaries.
+- Add a thin scroll progress indicator bar at the very top of the viewport with a smooth, branded gradient fill reflecting scroll percentage.
+- Add a floating “Back to Top” button (bottom-right) that appears after ~30% scroll and smoothly scrolls to Home; keep it mobile-safe and non-obstructive.
+- Add a floating quick action button labeled exactly “🎂 Create Wish” that smoothly scrolls to the Wish Generator section (create-wish), with mobile-safe placement.
+- Add mobile optimization: collapse navbar into a hamburger menu at mobile breakpoints; menu opens/closes cleanly, closes on selection, and preserves smooth anchor scrolling without pointer-events/overlay issues.
+- Ensure any new user-facing text is English and that new UI elements do not introduce horizontal overflow or regress existing section layouts; preserve existing /pricing behavior (scroll to Pricing and open the pricing modal).
 
-**User-visible outcome:** Clicking any upgrade button opens the in-app pricing modal; choosing a plan requires a confirmation inside the modal before payment begins, and payment failures show an English error without navigating away from the app.
+**User-visible outcome:** Users can navigate the page via a sticky navbar (desktop and mobile hamburger), see which section they’re in, track scroll progress, and quickly jump to the top or directly to “🎂 Create Wish” with smooth, branded scrolling.

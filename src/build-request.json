@@ -1,75 +1,181 @@
 {
   "kind": "build_request",
-  "title": "Change Upgrade behavior to open in-app modal instead of payment page",
+  "title": "Upgrade navigation + scrolling UX with sticky navbar, anchors, progress bar, and floating actions",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-94",
-      "text": "Change all upgrade entry points (e.g., “Upgrade to Pro”, “Upgrade to Creator”, “Unlock Premium”, and any “Upgrade Plan” button) so that clicking them only opens the in-app PricingComparisonModal and does not immediately open or navigate to an external/full payment page.",
+      "id": "REQ-133",
+      "text": "Add a sticky top navigation bar that remains fixed while scrolling and matches the existing WishMint premium dark + neon (purple/green) gradient branding. The navbar must include menu items: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ. Clicking a menu item must smoothly scroll to the corresponding section.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "change the behavior (open modal instead of full payment page)"
+          "ADD STICKY NAVIGATION BAR ... Navigation Menu Items: • Home • Create Wish • Templates • Marketplace • Pricing • Dashboard • FAQ ... Stay fixed at top ... Smooth scroll to selected section"
         ]
       },
       "acceptanceCriteria": [
-        "Clicking any upgrade CTA keeps the user on the current page and opens the in-app pricing modal (Dialog) instead of navigating away.",
-        "No upgrade CTA directly calls the Razorpay initiation function on first click; it only opens the PricingComparisonModal.",
-        "The browser URL is not redirected to any Razorpay/checkout URL as a result of the initial upgrade click."
+        "A sticky navigation bar is visible at the top of the page and stays fixed during scroll.",
+        "Navbar includes exactly these labels: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ.",
+        "Clicking each navbar item performs a smooth scroll to the correct section (no abrupt jump).",
+        "Navbar styling uses the existing WishMint neon gradient look and does not introduce horizontal overflow."
       ]
     },
     {
-      "id": "REQ-95",
-      "text": "Update PricingComparisonModal so plan upgrade buttons do not immediately initiate Razorpay checkout. Instead, the modal must present an in-modal confirmation step (or secondary button) that the user explicitly clicks to proceed to payment, keeping the user in the app modal flow until they confirm.",
+      "id": "REQ-134",
+      "text": "Assign anchor IDs to the major website sections using the exact IDs specified: Home id=\"home\"; Wish Generator id=\"create-wish\"; Templates id=\"templates\"; Marketplace id=\"marketplace\"; Pricing id=\"pricing\"; Dashboard id=\"dashboard\"; FAQ id=\"faq\". Ensure existing scroll/ref behaviors continue to work and scrolling accounts for the sticky header so section titles are not hidden under the navbar.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "change the behavior (open modal instead of full payment page)"
+          "ADD SECTION ID LINKS ... Home Section → id=\"home\" ... Wish Generator → id=\"create-wish\" ... Templates → id=\"templates\" ... Marketplace → id=\"marketplace\" ... Pricing → id=\"pricing\" ... Dashboard → id=\"dashboard\" ... FAQ → id=\"faq\""
         ]
       },
       "acceptanceCriteria": [
-        "Inside PricingComparisonModal, clicking “Upgrade to Pro/Creator” first shows a clear in-modal confirmation UI (still within the app) and does not open Razorpay immediately.",
-        "Only after the user clicks a “Proceed to payment” (or equivalent) control inside the modal should the Razorpay flow be initiated.",
-        "Closing/cancelling the confirmation step returns to the pricing modal content without navigating away from the app."
+        "The DOM contains elements for each major section with the exact IDs: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
+        "Navbar clicks scroll to these anchored sections reliably.",
+        "When a section is scrolled to, its heading/content is not obscured by the sticky navbar (header offset is handled).",
+        "Existing special navigation behavior for /pricing (scrolling to Pricing and opening the pricing modal) continues to work."
       ]
     },
     {
-      "id": "REQ-96",
-      "text": "Ensure the Razorpay upgrade initiation (useRazorpayUpgrade) never performs a full-page navigation/redirect as part of the client flow; if checkout cannot be opened as an in-context experience, show a clear English error toast explaining that payment could not be started and to try again later, without leaving the app.",
+      "id": "REQ-135",
+      "text": "Implement active-section highlighting in the sticky navigation bar: as the user scrolls, the currently viewed section’s corresponding nav item must be visibly highlighted. The highlight must update smoothly and be stable (no rapid flicker).",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-6"
         ],
         "quotes": [
-          "change the behavior (open modal instead of full payment page)"
+          "Highlight current active section"
         ]
       },
       "acceptanceCriteria": [
-        "Initiating payment does not change window.location or navigate the SPA to a new page.",
-        "If Razorpay cannot open (SDK missing/not loaded/config missing), the app shows an English toast error and remains usable.",
-        "The existing payment-configuration missing message remains English and actionable."
+        "As the user scrolls through the page, the nav item for the visible section is highlighted.",
+        "The highlight changes when the viewport enters a new section and does not flicker excessively while near boundaries.",
+        "Highlight styling is clearly visible in the existing premium dark theme."
+      ]
+    },
+    {
+      "id": "REQ-136",
+      "text": "Add a thin scroll progress indicator bar at the very top of the page that shows the user’s scroll percentage through the main page content. The bar must use a gradient progress color consistent with WishMint branding and animate smoothly as the user scrolls.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "ADD SCROLL PROGRESS INDICATOR ... Add thin progress bar at top of page showing scroll percentage ... Gradient progress color ... Smooth animated fill while scrolling"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A thin progress bar is rendered at the top edge of the viewport and remains visible while scrolling.",
+        "The progress bar fill reflects scroll progress from 0% (top) to 100% (bottom).",
+        "The fill animates smoothly and uses a purple/green gradient consistent with the existing theme."
+      ]
+    },
+    {
+      "id": "REQ-137",
+      "text": "Add a floating “Back to Top” button positioned at the bottom-right of the viewport. It must appear only after the user scrolls at least 30% down the page and must smoothly scroll the user back to the top (Home). Style it as a glowing WishMint button and ensure it does not block important UI on mobile.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "ADD BACK TO TOP BUTTON ... Appear after user scrolls 30% down page ... Positioned bottom right ... Smooth scroll user back to top ... Use glowing WishMint style button"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The Back to Top button is hidden near the top of the page and becomes visible after scrolling beyond ~30% of total scroll height.",
+        "Clicking the button smoothly scrolls to the top/home section.",
+        "The button is positioned bottom-right and is visually consistent with the existing neon/glow style.",
+        "On small screens, the button does not cover primary actions/inputs (uses safe spacing and responsive sizing)."
+      ]
+    },
+    {
+      "id": "REQ-138",
+      "text": "Add a floating quick action button labeled exactly \"🎂 Create Wish\" that scrolls the user directly to the Wish Generator section (id=\"create-wish\"). This button must be mobile-safe (not blocking content) and visually consistent with WishMint glowing/neon styling.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "ADD QUICK ACTION FLOAT BUTTON (Optional but recommended) ... Floating button labeled: \"🎂 Create Wish\" ... Scroll user directly to wish generator section"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A floating button labeled exactly \"🎂 Create Wish\" is available and clickable.",
+        "Clicking the button smoothly scrolls to the create-wish section.",
+        "Button placement/sizing is responsive and does not obstruct core content on mobile."
+      ]
+    },
+    {
+      "id": "REQ-139",
+      "text": "Implement mobile optimization for the new navigation system: on mobile breakpoints, collapse the sticky navigation items into a hamburger menu that can be opened/closed. The menu must retain smooth scrolling to section anchors and must not introduce overlay/pointer-events issues that block page interaction.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "MOBILE OPTIMIZATION ... Convert navigation bar into hamburger menu ... Maintain smooth scroll navigation ... Ensure floating buttons do not block content"
+        ]
+      },
+      "acceptanceCriteria": [
+        "On mobile widths, the navbar displays a hamburger menu instead of the full horizontal menu.",
+        "Opening the hamburger menu shows the full list of nav items (Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ).",
+        "Selecting an item closes the menu and smoothly scrolls to the target section.",
+        "No overlay layers block pointer events on underlying content when the menu is closed."
+      ]
+    },
+    {
+      "id": "REQ-140",
+      "text": "Ensure any user-facing text introduced by the new navigation/scroller features is in English, and the new UI elements (sticky navbar, progress bar, floating buttons, hamburger menu) preserve the existing premium dark gradient look and do not regress current section layouts.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Use English for any user-facing text in the build request."
+        ]
+      },
+      "acceptanceCriteria": [
+        "All new labels/tooltips/toasts/messages related to navigation are in English.",
+        "The new navigation elements visually match the existing WishMint premium dark + neon gradient style.",
+        "No new horizontal scrolling is introduced by the navigation UI (mobile and desktop)."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, or frontend/src/hooks/useActor.ts (immutable paths).",
-    "Keep the app as a single-page React app; do not add Next.js-style routing/pages.",
-    "All user-facing text must be in English."
+    "Frontend changes only; no backend changes required.",
+    "Do not edit files under frontend immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
+    "Preserve existing /pricing pseudo-route behavior in frontend/src/App.tsx (scroll to Pricing and open PricingComparisonModal).",
+    "Keep all scrolling smooth; respect reduced-motion preferences where applicable.",
+    "Do not introduce horizontal overflow; floating/sticky elements must stay within viewport on mobile."
   ],
   "nonGoals": [
-    "Implementing server-side Razorpay order creation, webhook verification, or backend subscription activation logic.",
-    "Adding new payment providers or external databases.",
-    "Changing plan definitions/entitlements beyond what is needed to support the modal-first upgrade behavior."
+    "Do not redesign or change the content of existing sections (Generator, Templates, Marketplace, Pricing, Dashboard, FAQ) beyond adding the required anchor IDs and navigation affordances.",
+    "Do not add new pages or a multi-page router; keep the app as a single-page scroll experience.",
+    "Do not change payment, subscription, quota, generation, or export logic."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

@@ -8,6 +8,18 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const _CaffeineStorageCreateCertificateResult = IDL.Record({
+  'method' : IDL.Text,
+  'blob_hash' : IDL.Text,
+});
+export const _CaffeineStorageRefillInformation = IDL.Record({
+  'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const _CaffeineStorageRefillResult = IDL.Record({
+  'success' : IDL.Opt(IDL.Bool),
+  'topped_up_amount' : IDL.Opt(IDL.Nat),
+});
+export const ExternalBlob = IDL.Vec(IDL.Nat8);
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
@@ -16,6 +28,22 @@ export const UserRole = IDL.Variant({
 export const TemplateId = IDL.Nat;
 export const PostId = IDL.Nat;
 export const ListingId = IDL.Nat;
+export const PlanType = IDL.Variant({
+  'pro' : IDL.Null,
+  'creator' : IDL.Null,
+  'free' : IDL.Null,
+});
+export const SubscriptionState = IDL.Variant({
+  'active' : IDL.Null,
+  'canceled' : IDL.Null,
+  'expired' : IDL.Null,
+});
+export const Subscription = IDL.Record({
+  'status' : SubscriptionState,
+  'premiumUntil' : IDL.Opt(IDL.Int),
+  'userId' : IDL.Principal,
+  'plan' : PlanType,
+});
 export const CommunityPost = IDL.Record({
   'id' : PostId,
   'title' : IDL.Text,
@@ -33,6 +61,23 @@ export const MarketplaceListing = IDL.Record({
   'description' : IDL.Text,
   'price' : IDL.Nat,
 });
+export const PaymentStatus = IDL.Variant({
+  'pending' : IDL.Null,
+  'approved' : IDL.Null,
+  'rejected' : IDL.Null,
+});
+export const PaymentRequest = IDL.Record({
+  'id' : IDL.Text,
+  'utr' : IDL.Text,
+  'status' : PaymentStatus,
+  'userId' : IDL.Principal,
+  'createdAt' : IDL.Int,
+  'plan' : PlanType,
+  'reviewedAt' : IDL.Opt(IDL.Int),
+  'email' : IDL.Text,
+  'amount' : IDL.Nat,
+  'screenshot' : IDL.Opt(ExternalBlob),
+});
 export const DownloadRecord = IDL.Record({
   'contentId' : IDL.Nat,
   'contentType' : IDL.Text,
@@ -41,16 +86,6 @@ export const DownloadRecord = IDL.Record({
 export const SavedTemplate = IDL.Record({
   'templateId' : IDL.Nat,
   'savedAt' : IDL.Int,
-});
-export const PlanType = IDL.Variant({
-  'pro' : IDL.Null,
-  'creator' : IDL.Null,
-  'free' : IDL.Null,
-});
-export const SubscriptionState = IDL.Variant({
-  'active' : IDL.Null,
-  'canceled' : IDL.Null,
-  'expired' : IDL.Null,
 });
 export const SubscriptionStatus = IDL.Record({
   'startedAt' : IDL.Int,
@@ -78,7 +113,34 @@ export const UserAuth = IDL.Record({
 });
 
 export const idlService = IDL.Service({
+  '_caffeineStorageBlobIsLive' : IDL.Func(
+      [IDL.Vec(IDL.Nat8)],
+      [IDL.Bool],
+      ['query'],
+    ),
+  '_caffeineStorageBlobsToDelete' : IDL.Func(
+      [],
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      ['query'],
+    ),
+  '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+      [IDL.Vec(IDL.Vec(IDL.Nat8))],
+      [],
+      [],
+    ),
+  '_caffeineStorageCreateCertificate' : IDL.Func(
+      [IDL.Text],
+      [_CaffeineStorageCreateCertificateResult],
+      [],
+    ),
+  '_caffeineStorageRefillCashier' : IDL.Func(
+      [IDL.Opt(_CaffeineStorageRefillInformation)],
+      [_CaffeineStorageRefillResult],
+      [],
+    ),
+  '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addScreenshotToPayment' : IDL.Func([IDL.Text, ExternalBlob], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createCommunityPost' : IDL.Func(
       [
@@ -100,13 +162,29 @@ export const idlService = IDL.Service({
       [],
     ),
   'createOrUpdateUserAuth' : IDL.Func([IDL.Text], [], []),
+  'createPaymentRequest' : IDL.Func(
+      [IDL.Text, PlanType, IDL.Nat, IDL.Text, IDL.Opt(ExternalBlob)],
+      [IDL.Text],
+      [],
+    ),
+  'createSubscription' : IDL.Func(
+      [IDL.Principal, PlanType, SubscriptionState],
+      [],
+      [],
+    ),
   'createSurpriseLink' : IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
+  'getAllActiveSubscriptions' : IDL.Func(
+      [],
+      [IDL.Vec(Subscription)],
+      ['query'],
+    ),
   'getAllCommunityPosts' : IDL.Func([], [IDL.Vec(CommunityPost)], ['query']),
   'getAllMarketplaceListings' : IDL.Func(
       [],
       [IDL.Vec(MarketplaceListing)],
       ['query'],
     ),
+  'getAllPaymentRequests' : IDL.Func([], [IDL.Vec(PaymentRequest)], ['query']),
   'getCallerDownloadHistory' : IDL.Func(
       [],
       [IDL.Vec(DownloadRecord)],
@@ -144,17 +222,25 @@ export const idlService = IDL.Service({
       [IDL.Record({ 'total' : IDL.Nat, 'remaining' : IDL.Nat })],
       ['query'],
     ),
+  'getPaymentRequest' : IDL.Func(
+      [IDL.Text],
+      [IDL.Opt(PaymentRequest)],
+      ['query'],
+    ),
   'getSurprisePayload' : IDL.Func(
       [IDL.Text],
       [IDL.Opt(SurprisePayload)],
       ['query'],
     ),
   'getUserAuth' : IDL.Func([], [IDL.Opt(UserAuth)], ['query']),
+  'getUserPaymentRequests' : IDL.Func([], [IDL.Vec(PaymentRequest)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
       ['query'],
     ),
+  'getUserSubscriptions' : IDL.Func([], [IDL.Vec(Subscription)], ['query']),
+  'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
   'recordDownload' : IDL.Func([IDL.Text, IDL.Nat], [], []),
   'recordListingInteraction' : IDL.Func([ListingId], [], []),
@@ -162,6 +248,8 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'saveTemplate' : IDL.Func([IDL.Nat], [], []),
   'subscribeToCreator' : IDL.Func([IDL.Principal], [], []),
+  'updatePaymentRequestStatus' : IDL.Func([IDL.Text, PaymentStatus], [], []),
+  'updatePaymentStatus' : IDL.Func([IDL.Text, PaymentStatus], [], []),
   'updateSubscriptionStatus' : IDL.Func(
       [IDL.Principal, PlanType, SubscriptionState, IDL.Opt(IDL.Int)],
       [],
@@ -172,6 +260,18 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const _CaffeineStorageCreateCertificateResult = IDL.Record({
+    'method' : IDL.Text,
+    'blob_hash' : IDL.Text,
+  });
+  const _CaffeineStorageRefillInformation = IDL.Record({
+    'proposed_top_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const _CaffeineStorageRefillResult = IDL.Record({
+    'success' : IDL.Opt(IDL.Bool),
+    'topped_up_amount' : IDL.Opt(IDL.Nat),
+  });
+  const ExternalBlob = IDL.Vec(IDL.Nat8);
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
@@ -180,6 +280,22 @@ export const idlFactory = ({ IDL }) => {
   const TemplateId = IDL.Nat;
   const PostId = IDL.Nat;
   const ListingId = IDL.Nat;
+  const PlanType = IDL.Variant({
+    'pro' : IDL.Null,
+    'creator' : IDL.Null,
+    'free' : IDL.Null,
+  });
+  const SubscriptionState = IDL.Variant({
+    'active' : IDL.Null,
+    'canceled' : IDL.Null,
+    'expired' : IDL.Null,
+  });
+  const Subscription = IDL.Record({
+    'status' : SubscriptionState,
+    'premiumUntil' : IDL.Opt(IDL.Int),
+    'userId' : IDL.Principal,
+    'plan' : PlanType,
+  });
   const CommunityPost = IDL.Record({
     'id' : PostId,
     'title' : IDL.Text,
@@ -203,6 +319,23 @@ export const idlFactory = ({ IDL }) => {
     'description' : IDL.Text,
     'price' : IDL.Nat,
   });
+  const PaymentStatus = IDL.Variant({
+    'pending' : IDL.Null,
+    'approved' : IDL.Null,
+    'rejected' : IDL.Null,
+  });
+  const PaymentRequest = IDL.Record({
+    'id' : IDL.Text,
+    'utr' : IDL.Text,
+    'status' : PaymentStatus,
+    'userId' : IDL.Principal,
+    'createdAt' : IDL.Int,
+    'plan' : PlanType,
+    'reviewedAt' : IDL.Opt(IDL.Int),
+    'email' : IDL.Text,
+    'amount' : IDL.Nat,
+    'screenshot' : IDL.Opt(ExternalBlob),
+  });
   const DownloadRecord = IDL.Record({
     'contentId' : IDL.Nat,
     'contentType' : IDL.Text,
@@ -211,16 +344,6 @@ export const idlFactory = ({ IDL }) => {
   const SavedTemplate = IDL.Record({
     'templateId' : IDL.Nat,
     'savedAt' : IDL.Int,
-  });
-  const PlanType = IDL.Variant({
-    'pro' : IDL.Null,
-    'creator' : IDL.Null,
-    'free' : IDL.Null,
-  });
-  const SubscriptionState = IDL.Variant({
-    'active' : IDL.Null,
-    'canceled' : IDL.Null,
-    'expired' : IDL.Null,
   });
   const SubscriptionStatus = IDL.Record({
     'startedAt' : IDL.Int,
@@ -248,7 +371,34 @@ export const idlFactory = ({ IDL }) => {
   });
   
   return IDL.Service({
+    '_caffeineStorageBlobIsLive' : IDL.Func(
+        [IDL.Vec(IDL.Nat8)],
+        [IDL.Bool],
+        ['query'],
+      ),
+    '_caffeineStorageBlobsToDelete' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        ['query'],
+      ),
+    '_caffeineStorageConfirmBlobDeletion' : IDL.Func(
+        [IDL.Vec(IDL.Vec(IDL.Nat8))],
+        [],
+        [],
+      ),
+    '_caffeineStorageCreateCertificate' : IDL.Func(
+        [IDL.Text],
+        [_CaffeineStorageCreateCertificateResult],
+        [],
+      ),
+    '_caffeineStorageRefillCashier' : IDL.Func(
+        [IDL.Opt(_CaffeineStorageRefillInformation)],
+        [_CaffeineStorageRefillResult],
+        [],
+      ),
+    '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addScreenshotToPayment' : IDL.Func([IDL.Text, ExternalBlob], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createCommunityPost' : IDL.Func(
         [
@@ -270,11 +420,31 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'createOrUpdateUserAuth' : IDL.Func([IDL.Text], [], []),
+    'createPaymentRequest' : IDL.Func(
+        [IDL.Text, PlanType, IDL.Nat, IDL.Text, IDL.Opt(ExternalBlob)],
+        [IDL.Text],
+        [],
+      ),
+    'createSubscription' : IDL.Func(
+        [IDL.Principal, PlanType, SubscriptionState],
+        [],
+        [],
+      ),
     'createSurpriseLink' : IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
+    'getAllActiveSubscriptions' : IDL.Func(
+        [],
+        [IDL.Vec(Subscription)],
+        ['query'],
+      ),
     'getAllCommunityPosts' : IDL.Func([], [IDL.Vec(CommunityPost)], ['query']),
     'getAllMarketplaceListings' : IDL.Func(
         [],
         [IDL.Vec(MarketplaceListing)],
+        ['query'],
+      ),
+    'getAllPaymentRequests' : IDL.Func(
+        [],
+        [IDL.Vec(PaymentRequest)],
         ['query'],
       ),
     'getCallerDownloadHistory' : IDL.Func(
@@ -326,17 +496,29 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Record({ 'total' : IDL.Nat, 'remaining' : IDL.Nat })],
         ['query'],
       ),
+    'getPaymentRequest' : IDL.Func(
+        [IDL.Text],
+        [IDL.Opt(PaymentRequest)],
+        ['query'],
+      ),
     'getSurprisePayload' : IDL.Func(
         [IDL.Text],
         [IDL.Opt(SurprisePayload)],
         ['query'],
       ),
     'getUserAuth' : IDL.Func([], [IDL.Opt(UserAuth)], ['query']),
+    'getUserPaymentRequests' : IDL.Func(
+        [],
+        [IDL.Vec(PaymentRequest)],
+        ['query'],
+      ),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],
         ['query'],
       ),
+    'getUserSubscriptions' : IDL.Func([], [IDL.Vec(Subscription)], ['query']),
+    'isAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
     'recordDownload' : IDL.Func([IDL.Text, IDL.Nat], [], []),
     'recordListingInteraction' : IDL.Func([ListingId], [], []),
@@ -344,6 +526,8 @@ export const idlFactory = ({ IDL }) => {
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'saveTemplate' : IDL.Func([IDL.Nat], [], []),
     'subscribeToCreator' : IDL.Func([IDL.Principal], [], []),
+    'updatePaymentRequestStatus' : IDL.Func([IDL.Text, PaymentStatus], [], []),
+    'updatePaymentStatus' : IDL.Func([IDL.Text, PaymentStatus], [], []),
     'updateSubscriptionStatus' : IDL.Func(
         [IDL.Principal, PlanType, SubscriptionState, IDL.Opt(IDL.Int)],
         [],

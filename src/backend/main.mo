@@ -1,37 +1,40 @@
-import Map "mo:core/Map";
-import Principal "mo:core/Principal";
-import Runtime "mo:core/Runtime";
 import List "mo:core/List";
+import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import Int "mo:core/Int";
 import Time "mo:core/Time";
 import Text "mo:core/Text";
+import Principal "mo:core/Principal";
+import Iter "mo:core/Iter";
+import Runtime "mo:core/Runtime";
+import MixinStorage "blob-storage/Mixin";
+import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
 
 
 
 actor {
-  // User Auth Record
+  // Initialize the access control system (Not persisted)
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
+
+  include MixinStorage();
+
+  // Auth Types
   public type UserAuth = {
     provider : Text;
     createdAt : Int;
     lastLoginAt : Int;
   };
 
-  let userAuth = Map.empty<Principal, UserAuth>();
-
-  // Initialize the access control system (Not persisted)
-  let accessControlState = AccessControl.initState();
-  include MixinAuthorization(accessControlState);
-
-  // User Profile Type
+  // User Profile Types
   public type UserProfile = {
     name : Text;
     bio : Text;
   };
 
-  // Plan Types
+  // Subscription Types
   public type PlanType = {
     #free;
     #pro;
@@ -54,7 +57,7 @@ actor {
 
   public type MessageQuota = {
     count : Nat;
-    lastResetDate : Text; // YYYY-MM-DD format
+    lastResetDate : Text;
   };
 
   public type SurprisePayload = {
@@ -110,47 +113,52 @@ actor {
     timestamp : Int;
   };
 
+  // Payment and Subscription types
+  public type PaymentStatus = {
+    #pending;
+    #approved;
+    #rejected;
+  };
+
+  public type PaymentRequest = {
+    id : Text;
+    userId : Principal;
+    email : Text;
+    plan : PlanType;
+    amount : Nat;
+    utr : Text;
+    screenshot : ?Storage.ExternalBlob;
+    status : PaymentStatus;
+    createdAt : Int;
+    reviewedAt : ?Int;
+  };
+
+  public type Subscription = {
+    userId : Principal;
+    plan : PlanType;
+    premiumUntil : ?Int;
+    status : SubscriptionState;
+  };
+
   // State variables
   var nextPostId : Nat = 1;
   var nextListingId : Nat = 1;
   var nextSurpriseId : Nat = 1;
+  var nextPaymentId : Nat = 1;
 
+  let userAuth = Map.empty<Principal, UserAuth>();
   let userProfiles = Map.empty<Principal, UserProfile>();
   let communityPosts = Map.empty<PostId, CommunityPost>();
   let marketplaceListings = Map.empty<ListingId, MarketplaceListing>();
-  let subscriptions = Map.empty<Principal, List.List<Principal>>();
-
-  // New state for subscription management
+  let subscriptionsMap = Map.empty<Principal, List.List<Principal>>();
   let userSubscriptionStatus = Map.empty<Principal, SubscriptionStatus>();
   let messageQuotas = Map.empty<Principal, MessageQuota>();
   let surprisePayloads = Map.empty<Text, SurprisePayload>();
   let downloadHistory = Map.empty<Principal, List.List<DownloadRecord>>();
   let savedTemplates = Map.empty<Principal, List.List<SavedTemplate>>();
   let listingInteractions = Map.empty<ListingId, List.List<ListingInteraction>>();
-
-  // Persistent login verification and create-if-not-exists
-  public shared ({ caller }) func createOrUpdateUserAuth(provider : Text) : async () {
-    let now = Time.now();
-    let newAuth : UserAuth = {
-      provider;
-      createdAt = now;
-      lastLoginAt = now;
-    };
-
-    switch (userAuth.get(caller)) {
-      case (null) {
-        userAuth.add(caller, newAuth);
-      };
-      case (?existing) {
-        let updatedAuth = { existing with lastLoginAt = now };
-        userAuth.add(caller, updatedAuth);
-      };
-    };
-  };
-
-  public query ({ caller }) func getUserAuth() : async ?UserAuth {
-    userAuth.get(caller);
-  };
+  let paymentRequests = Map.empty<Text, PaymentRequest>();
+  let subscriptions = Map.empty<Principal, Subscription>();
 
   // Helper function to get current date string
   private func getCurrentDateString() : Text {
@@ -163,7 +171,6 @@ actor {
   private func hasRequiredPlan(caller : Principal, requiredPlan : PlanType) : Bool {
     switch (userSubscriptionStatus.get(caller)) {
       case (null) {
-        // No subscription = Free plan
         switch (requiredPlan) {
           case (#free) { true };
           case (_) { false };
@@ -196,17 +203,17 @@ actor {
   // Helper function to check and enforce message quota
   private func canGenerateMessage(caller : Principal) : Bool {
     if (hasRequiredPlan(caller, #pro)) {
-      return true; // Pro and Creator have unlimited messages
+      return true;
     };
 
     let currentDate = getCurrentDateString();
     switch (messageQuotas.get(caller)) {
-      case (null) { true }; // First message
+      case (null) { true };
       case (?quota) {
         if (quota.lastResetDate != currentDate) {
-          true; // New day, quota resets
+          true;
         } else {
-          quota.count < 3; // Check if under limit
+          quota.count < 3;
         };
       };
     };
@@ -215,7 +222,7 @@ actor {
   // Helper function to increment message count
   private func incrementMessageCount(caller : Principal) {
     if (hasRequiredPlan(caller, #pro)) {
-      return; // No quota for Pro/Creator
+      return;
     };
 
     let currentDate = getCurrentDateString();
@@ -231,6 +238,30 @@ actor {
         };
       };
     };
+  };
+
+  // Persistent login verification and create-if-not-exists
+  public shared ({ caller }) func createOrUpdateUserAuth(provider : Text) : async () {
+    let now = Time.now();
+    let newAuth : UserAuth = {
+      provider;
+      createdAt = now;
+      lastLoginAt = now;
+    };
+
+    switch (userAuth.get(caller)) {
+      case (null) {
+        userAuth.add(caller, newAuth);
+      };
+      case (?existing) {
+        let updatedAuth = { existing with lastLoginAt = now };
+        userAuth.add(caller, updatedAuth);
+      };
+    };
+  };
+
+  public query ({ caller }) func getUserAuth() : async ?UserAuth {
+    userAuth.get(caller);
   };
 
   // User Profile Functions
@@ -263,7 +294,6 @@ actor {
 
     switch (userSubscriptionStatus.get(caller)) {
       case (null) {
-        // Default to Free plan
         {
           plan = #free;
           state = #active;
@@ -282,9 +312,7 @@ actor {
     state : SubscriptionState,
     expiresAt : ?Int,
   ) : async () {
-    // This should be called after payment verification
-    // For now, allow admins or the user themselves (for testing)
-    if (not AccessControl.isAdmin(accessControlState, caller) and caller != user) {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can update subscription status");
     };
 
@@ -309,7 +337,7 @@ actor {
     };
 
     if (hasRequiredPlan(caller, #pro)) {
-      return { remaining = 999999; total = 999999 }; // Unlimited
+      return { remaining = 999999; total = 999999 };
     };
 
     let currentDate = getCurrentDateString();
@@ -337,7 +365,6 @@ actor {
     incrementMessageCount(caller);
   };
 
-  // Surprise Mode Functions (Pro/Creator only)
   public shared ({ caller }) func createSurpriseLink(
     recipientName : Text,
     message : Text,
@@ -365,12 +392,12 @@ actor {
     surpriseId;
   };
 
-  public query func getSurprisePayload(surpriseId : Text) : async ?SurprisePayload {
-    // Public access - anyone with the link can view
+  public query ({ caller }) func getSurprisePayload(surpriseId : Text) : async ?SurprisePayload {
+    // Anyone can view surprise payloads (intended for sharing)
     surprisePayloads.get(surpriseId);
   };
 
-  // Dashboard Functions
+  // Dashboard and Utilities
   public query ({ caller }) func getCallerDownloadHistory() : async [DownloadRecord] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can access download history");
@@ -446,7 +473,6 @@ actor {
       Runtime.trap("Unauthorized: Creator earnings require Creator plan");
     };
 
-    // Calculate total interactions for this creator's listings
     let creatorListings = marketplaceListings.values().toArray().filter(
       func(listing) { listing.creator == caller }
     );
@@ -463,7 +489,7 @@ actor {
 
     {
       totalDownloads;
-      totalRevenue = 0; // Placeholder - full payout system not implemented
+      totalRevenue = 0;
     };
   };
 
@@ -493,26 +519,29 @@ actor {
   };
 
   public query ({ caller }) func getCommunityPost(id : PostId) : async ?CommunityPost {
+    // Public access - anyone can view community posts
     communityPosts.get(id);
   };
 
   public query ({ caller }) func getAllCommunityPosts() : async [CommunityPost] {
+    // Public access - anyone can view community posts
     communityPosts.values().toArray();
   };
 
   public query ({ caller }) func getCreatorPosts(creator : Principal) : async [CommunityPost] {
+    // Public access - anyone can view creator posts
     let allPosts = communityPosts.values().toArray();
     let filteredPosts = allPosts.filter(func(post) { post.creator == creator });
     filteredPosts;
   };
 
-  // Subscription Functions
+  // Subscription and Marketplace Functions
   public shared ({ caller }) func subscribeToCreator(creator : Principal) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can subscribe");
     };
 
-    let currentSubs = switch (subscriptions.get(creator)) {
+    let currentSubs = switch (subscriptionsMap.get(creator)) {
       case (null) { List.empty<Principal>() };
       case (?subs) { subs };
     };
@@ -524,20 +553,19 @@ actor {
 
     let updatedSubs = List.fromArray(currentSubs.toArray());
     updatedSubs.add(caller);
-    subscriptions.add(creator, updatedSubs);
+    subscriptionsMap.add(creator, updatedSubs);
   };
 
   public query ({ caller }) func getCreatorSubscribers(creator : Principal) : async [Principal] {
     if (caller != creator and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only the creator or admin can view subscribers");
     };
-    switch (subscriptions.get(creator)) {
+    switch (subscriptionsMap.get(creator)) {
       case (null) { [] };
       case (?subs) { subs.toArray() };
     };
   };
 
-  // Marketplace Functions
   public shared ({ caller }) func createMarketplaceListing(
     title : Text,
     description : Text,
@@ -548,7 +576,6 @@ actor {
       Runtime.trap("Unauthorized: Only users can create listings");
     };
 
-    // Restrict marketplace listing creation to Creator plan only
     if (not hasRequiredPlan(caller, #creator)) {
       Runtime.trap("Unauthorized: Creating marketplace listings requires Creator plan");
     };
@@ -570,16 +597,17 @@ actor {
   };
 
   public query ({ caller }) func getMarketplaceListing(id : ListingId) : async ?MarketplaceListing {
-    // Anyone can browse listings
+    // Public access - anyone can view marketplace listings
     marketplaceListings.get(id);
   };
 
   public query ({ caller }) func getAllMarketplaceListings() : async [MarketplaceListing] {
-    // Anyone can browse listings
+    // Public access - anyone can view marketplace listings
     marketplaceListings.values().toArray();
   };
 
   public query ({ caller }) func getCreatorListings(creator : Principal) : async [MarketplaceListing] {
+    // Public access - anyone can view creator listings
     let allListings = marketplaceListings.values().toArray();
     let filteredListings = allListings.filter(func(listing) { listing.creator == creator });
     filteredListings;
@@ -607,7 +635,6 @@ actor {
   };
 
   public query ({ caller }) func getListingInteractionCount(listingId : ListingId) : async Nat {
-    // Listing creator or admin can view interaction counts
     switch (marketplaceListings.get(listingId)) {
       case (null) { Runtime.trap("Listing not found") };
       case (?listing) {
@@ -621,5 +648,192 @@ actor {
         };
       };
     };
+  };
+
+  // Payment Functions
+  public shared ({ caller }) func createPaymentRequest(
+    email : Text,
+    plan : PlanType,
+    amount : Nat,
+    utr : Text,
+    screenshot : ?Storage.ExternalBlob,
+  ) : async Text {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can create payment requests");
+    };
+
+    let id = nextPaymentId.toText();
+    nextPaymentId += 1;
+
+    let payment : PaymentRequest = {
+      id;
+      userId = caller;
+      email;
+      plan;
+      amount;
+      utr;
+      screenshot;
+      status = #pending;
+      createdAt = Time.now();
+      reviewedAt = null;
+    };
+
+    paymentRequests.add(id, payment);
+    id;
+  };
+
+  public query ({ caller }) func getPaymentRequest(id : Text) : async ?PaymentRequest {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view payment requests");
+    };
+
+    switch (paymentRequests.get(id)) {
+      case (null) { null };
+      case (?payment) {
+        // Users can only view their own payment requests, admins can view all
+        if (payment.userId != caller and not AccessControl.isAdmin(accessControlState, caller)) {
+          Runtime.trap("Unauthorized: Can only view your own payment requests");
+        };
+        ?payment;
+      };
+    };
+  };
+
+  public query ({ caller }) func getUserPaymentRequests() : async [PaymentRequest] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view payment requests");
+    };
+
+    let payments = paymentRequests.values().filter(
+      func(p) { p.userId == caller }
+    );
+    payments.toArray();
+  };
+
+  public shared ({ caller }) func updatePaymentStatus(
+    paymentId : Text,
+    newStatus : PaymentStatus,
+  ) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can change payment status");
+    };
+
+    switch (paymentRequests.get(paymentId)) {
+      case (null) { Runtime.trap("Payment not found") };
+      case (?payment) {
+        let updatedPayment = { payment with status = newStatus; reviewedAt = ?Time.now() };
+        paymentRequests.add(paymentId, updatedPayment);
+      };
+    };
+  };
+
+  public shared ({ caller }) func createSubscription(
+    userId : Principal,
+    plan : PlanType,
+    status : SubscriptionState,
+  ) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can create subscriptions");
+    };
+
+    let subscription : Subscription = {
+      userId;
+      plan;
+      premiumUntil = null;
+      status;
+    };
+
+    subscriptions.add(userId, subscription);
+  };
+
+  public shared ({ caller }) func updatePaymentRequestStatus(
+    paymentId : Text,
+    newStatus : PaymentStatus,
+  ) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can update payment request status");
+    };
+
+    switch (paymentRequests.get(paymentId)) {
+      case (null) { Runtime.trap("Payment request not found") };
+      case (?payment) {
+        let updatedPayment = {
+          payment with
+          status = newStatus;
+          reviewedAt = ?Time.now();
+        };
+        paymentRequests.add(paymentId, updatedPayment);
+
+        if (newStatus == #approved) {
+          let premiumUntil = Time.now() + 30 * 24 * 60 * 60 * 1_000_000_000;
+          switch (userSubscriptionStatus.get(payment.userId)) {
+            case (null) {
+              let newStatus : SubscriptionStatus = {
+                plan = payment.plan;
+                state = #active;
+                startedAt = Time.now();
+                expiresAt = ?premiumUntil;
+                updatedAt = Time.now();
+              };
+              userSubscriptionStatus.add(payment.userId, newStatus);
+            };
+            case (?existing) {
+              let updatedStatus = {
+                existing with
+                plan = payment.plan;
+                state = #active;
+                expiresAt = ?premiumUntil;
+                updatedAt = Time.now();
+              };
+              userSubscriptionStatus.add(payment.userId, updatedStatus);
+            };
+          };
+        };
+      };
+    };
+  };
+
+  public query ({ caller }) func getAllPaymentRequests() : async [PaymentRequest] {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view all payment requests");
+    };
+    paymentRequests.values().toArray();
+  };
+
+  public query ({ caller }) func getUserSubscriptions() : async [Subscription] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can view subscriptions");
+    };
+
+    subscriptions.values().filter(func(s) { s.userId == caller }).toArray();
+  };
+
+  public shared ({ caller }) func addScreenshotToPayment(paymentId : Text, screenshot : Storage.ExternalBlob) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only users can add screenshots");
+    };
+
+    switch (paymentRequests.get(paymentId)) {
+      case (null) { Runtime.trap("Payment not found") };
+      case (?payment) {
+        if (payment.userId != caller) {
+          Runtime.trap("Unauthorized: Only the payment creator can add a screenshot");
+        };
+
+        let updatedPayment = { payment with screenshot = ?screenshot };
+        paymentRequests.add(paymentId, updatedPayment);
+      };
+    };
+  };
+
+  public query ({ caller }) func getAllActiveSubscriptions() : async [Subscription] {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can view all subscriptions");
+    };
+    subscriptions.values().filter(func(s) { s.status == #active }).toArray();
+  };
+
+  public query ({ caller }) func isAdmin() : async Bool {
+    AccessControl.isAdmin(accessControlState, caller);
   };
 };

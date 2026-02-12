@@ -65,7 +65,11 @@ export default {
                 card: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1), 0 0 0 1px oklch(var(--neon-purple) / 0.1)'
             },
             fontFamily: {
-                sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+                sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+                'display-cute': ['Comic Sans MS', 'Chalkboard SE', 'cursive'],
+                'display-luxury': ['Georgia', 'Garamond', 'serif'],
+                'display-modern': ['Inter', 'system-ui', 'sans-serif'],
+                'script': ['Brush Script MT', 'cursive']
             },
             letterSpacing: {
                 tighter: '-0.02em',

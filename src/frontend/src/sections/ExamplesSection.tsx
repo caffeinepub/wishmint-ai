@@ -1,28 +1,53 @@
 import { forwardRef, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
 import { Reveal } from '../components/Reveal';
 import { SAMPLE_WISHES } from '../features/examples/sampleWishes';
+import { ExampleWishCard } from '../features/examples/components/ExampleWishCard';
+import { useAppContext } from '../App';
+import type { SampleWish } from '../features/examples/sampleWishes';
+import type { Relationship, Tone } from '../features/generator/types';
 
 export const ExamplesSection = forwardRef<HTMLDivElement>((_, ref) => {
   const [toneFilter, setToneFilter] = useState<string>('all');
+  const { setFormData } = useAppContext();
 
   const filteredWishes =
     toneFilter === 'all'
       ? SAMPLE_WISHES
       : SAMPLE_WISHES.filter((wish) => wish.tone === toneFilter);
 
+  const handleUseStyle = (wish: SampleWish) => {
+    // Prefill generator form with example data
+    setFormData((prev) => ({
+      ...prev,
+      name: wish.name,
+      relationship: wish.relationship as Relationship,
+      tone: wish.tone as Tone,
+    }));
+
+    // Scroll to generator section
+    const generatorSection = document.querySelector('[data-section="generator"]');
+    if (generatorSection) {
+      generatorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      
+      // Focus name input after scroll
+      setTimeout(() => {
+        const nameInput = document.querySelector<HTMLInputElement>('input[name="name"]');
+        nameInput?.focus();
+      }, 500);
+    }
+  };
+
   return (
     <section ref={ref} className="section-padding px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-neon-green/5 to-background">
-      <div className="section-container max-w-6xl">
+      <div className="section-container max-w-7xl">
         <Reveal>
           <div className="text-center mb-12 space-y-4">
             <h2 className="section-heading bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
               Example Wishes
             </h2>
             <p className="section-subheading mb-6">
-              Get inspired by these sample birthday wishes
+              Premium social-style birthday cards to inspire your perfect message
             </p>
 
             <div className="flex justify-center">
@@ -46,27 +71,13 @@ export const ExamplesSection = forwardRef<HTMLDivElement>((_, ref) => {
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+        {/* Masonry-like responsive grid */}
+        <div className="examples-gallery">
           {filteredWishes.map((wish, index) => (
-            <Reveal key={index} delay={index * 0.1}>
-              <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 hover:border-neon-purple/40 transition-all shadow-card h-full">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-lg font-semibold flex items-center justify-between">
-                    <span>{wish.name}</span>
-                  </CardTitle>
-                  <div className="flex gap-2 flex-wrap pt-1">
-                    <Badge variant="outline" className="border-neon-purple/50 text-xs">
-                      {wish.tone}
-                    </Badge>
-                    <Badge variant="outline" className="border-neon-green/50 text-xs">
-                      {wish.relationship}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-foreground/90 leading-relaxed text-sm">{wish.wish}</p>
-                </CardContent>
-              </Card>
+            <Reveal key={`${wish.name}-${wish.relationship}-${index}`} delay={index * 0.05}>
+              <div className="examples-gallery-item">
+                <ExampleWishCard wish={wish} onUseStyle={handleUseStyle} />
+              </div>
             </Reveal>
           ))}
         </div>

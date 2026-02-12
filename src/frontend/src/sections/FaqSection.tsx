@@ -1,78 +1,78 @@
+import { forwardRef } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { HelpCircle } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 
-export function FaqSection() {
+export const FaqSection = forwardRef<HTMLDivElement>((props, ref) => {
   const faqs = [
     {
       question: 'How does WishMint AI work?',
       answer:
-        'WishMint AI uses advanced template-based generation to create personalized birthday wishes. Simply fill in the details about the person, select your preferences for tone and style, and our system generates a complete Birthday Pack with multiple formats perfect for different platforms.',
+        'WishMint AI uses advanced language models to generate personalized birthday wishes based on your inputs like relationship, tone, and special memories. Simply fill in the form and let AI create heartfelt messages for you.',
     },
     {
-      question: 'Is my data private and secure?',
+      question: 'Is WishMint AI free to use?',
       answer:
-        'Yes! All generation happens locally in your browser. We do not store or transmit any personal information you enter. Your privacy is our top priority, and no data leaves your device during the wish generation process.',
+        'Yes! WishMint AI offers a free plan with 3 messages per day. For unlimited messages and premium features, you can upgrade to Pro (₹49/month) or Creator (₹149/month) plans.',
     },
     {
-      question: 'What languages are supported?',
+      question: 'Can I customize the generated wishes?',
       answer:
-        'WishMint AI currently supports English, Hinglish (a mix of Hindi and English), and Hindi. We are working on adding more languages to serve a wider audience. Each language option generates culturally appropriate wishes.',
+        'Absolutely! You can adjust the tone, language, personality, and add special memories to make each wish unique. You can also choose from multiple card templates to match your style.',
     },
     {
-      question: 'How can I share the wishes?',
+      question: 'What is Surprise Mode?',
       answer:
-        'You can share wishes in multiple ways: copy individual sections to your clipboard, copy the entire Birthday Pack, share directly to WhatsApp with our one-click button, or download a beautiful card image to share on any platform.',
+        'Surprise Mode (Pro feature) lets you create a special shareable link with a birthday wish. When the recipient opens it, they see a beautiful animated reveal with your personalized message.',
     },
     {
-      question: 'Can I customize the templates?',
+      question: 'How do I sign in with Google?',
       answer:
-        'Yes! We offer 8 different template styles ranging from Minimal to Anime. Select any template to preview how your wish will look, and download it as a shareable card image. Pro users get access to unlimited premium templates.',
+        'Click "Continue with Google" to sign in using Internet Identity, a secure authentication system. For developers: This uses the Internet Computer\'s Internet Identity service. Configure II_URL in your environment to use a custom identity provider.',
     },
     {
-      question: 'What is included in the Birthday Pack?',
+      question: 'Can I sell my own templates?',
       answer:
-        'Each Birthday Pack includes 5 components: a Main Wish (detailed and heartfelt), WhatsApp Short (perfect for quick messages), Instagram Caption (social media ready), Mini Speech (10-15 seconds when spoken), and Hashtags (for social posts).',
-    },
-    {
-      question: 'How does authentication work? (Developer Note)',
-      answer:
-        'The "Continue with Google" button is a UX label for Internet Identity authentication on the Internet Computer. This project does not use Google OAuth 2.0, NextAuth, or traditional JWT sessions. Authentication is handled by Internet Identity (configured via II_URL environment variable). For production deployment on the Internet Computer, ensure your canister is properly configured with the correct Internet Identity URL for the IC mainnet.',
+        'Yes! With the Creator plan (₹149/month), you can create and sell your own templates on the WishMint Marketplace. Earn revenue from your creative designs.',
     },
   ];
 
   return (
-    <section className="section-padding px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background to-neon-purple/5">
-      <div className="section-container max-w-4xl">
-        <Reveal>
-          <div className="text-center mb-12 space-y-3">
-            <h2 className="section-heading bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
-              Frequently Asked Questions
-            </h2>
-            <p className="section-subheading">
-              Everything you need to know about WishMint AI
-            </p>
+    <section id="faq" ref={ref} className="scroll-mt-16 w-full py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-muted/20 to-background">
+      <Reveal className="max-w-4xl mx-auto">
+        <div className="text-center mb-12 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon-purple/10 border border-neon-purple/30 mb-2">
+            <HelpCircle className="w-4 h-4 text-neon-purple" />
+            <span className="text-sm font-medium text-neon-purple">FAQ</span>
           </div>
-        </Reveal>
+          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
+            Frequently Asked Questions
+          </h2>
+          <p className="text-lg text-muted-foreground">
+            Everything you need to know about WishMint AI
+          </p>
+        </div>
 
-        <Reveal delay={0.2}>
-          <Accordion type="single" collapsible className="space-y-3">
-            {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className="bg-card/70 backdrop-blur-sm border border-neon-purple/20 rounded-lg px-5 data-[state=open]:border-neon-purple/40 shadow-card"
-              >
-                <AccordionTrigger className="text-left hover:no-underline py-4">
-                  <span className="font-semibold text-base">{faq.question}</span>
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </Reveal>
-      </div>
+        <Card className="border-neon-purple/20 shadow-card">
+          <CardContent className="pt-6">
+            <Accordion type="single" collapsible className="w-full">
+              {faqs.map((faq, index) => (
+                <AccordionItem key={index} value={`item-${index}`}>
+                  <AccordionTrigger className="text-left font-semibold hover:text-neon-purple transition-colors">
+                    {faq.question}
+                  </AccordionTrigger>
+                  <AccordionContent className="text-muted-foreground leading-relaxed">
+                    {faq.answer}
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </CardContent>
+        </Card>
+      </Reveal>
     </section>
   );
-}
+});
+
+FaqSection.displayName = 'FaqSection';

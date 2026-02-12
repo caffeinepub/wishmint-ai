@@ -28,6 +28,7 @@ export interface DownloadRecord {
   'contentType' : string,
   'timestamp' : bigint,
 }
+export type ExternalBlob = Uint8Array;
 export type ListingId = bigint;
 export interface MarketplaceListing {
   'id' : ListingId,
@@ -39,11 +40,32 @@ export interface MarketplaceListing {
   'description' : string,
   'price' : bigint,
 }
+export interface PaymentRequest {
+  'id' : string,
+  'utr' : string,
+  'status' : PaymentStatus,
+  'userId' : Principal,
+  'createdAt' : bigint,
+  'plan' : PlanType,
+  'reviewedAt' : [] | [bigint],
+  'email' : string,
+  'amount' : bigint,
+  'screenshot' : [] | [ExternalBlob],
+}
+export type PaymentStatus = { 'pending' : null } |
+  { 'approved' : null } |
+  { 'rejected' : null };
 export type PlanType = { 'pro' : null } |
   { 'creator' : null } |
   { 'free' : null };
 export type PostId = bigint;
 export interface SavedTemplate { 'templateId' : bigint, 'savedAt' : bigint }
+export interface Subscription {
+  'status' : SubscriptionState,
+  'premiumUntil' : [] | [bigint],
+  'userId' : Principal,
+  'plan' : PlanType,
+}
 export type SubscriptionState = { 'active' : null } |
   { 'canceled' : null } |
   { 'expired' : null };
@@ -71,8 +93,35 @@ export interface UserProfile { 'bio' : string, 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addScreenshotToPayment' : ActorMethod<[string, ExternalBlob], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createCommunityPost' : ActorMethod<
     [string, string, { 'template' : TemplateId } | { 'sticker' : bigint }],
@@ -89,9 +138,19 @@ export interface _SERVICE {
     ListingId
   >,
   'createOrUpdateUserAuth' : ActorMethod<[string], undefined>,
+  'createPaymentRequest' : ActorMethod<
+    [string, PlanType, bigint, string, [] | [ExternalBlob]],
+    string
+  >,
+  'createSubscription' : ActorMethod<
+    [Principal, PlanType, SubscriptionState],
+    undefined
+  >,
   'createSurpriseLink' : ActorMethod<[string, string], string>,
+  'getAllActiveSubscriptions' : ActorMethod<[], Array<Subscription>>,
   'getAllCommunityPosts' : ActorMethod<[], Array<CommunityPost>>,
   'getAllMarketplaceListings' : ActorMethod<[], Array<MarketplaceListing>>,
+  'getAllPaymentRequests' : ActorMethod<[], Array<PaymentRequest>>,
   'getCallerDownloadHistory' : ActorMethod<[], Array<DownloadRecord>>,
   'getCallerSavedTemplates' : ActorMethod<[], Array<SavedTemplate>>,
   'getCallerSubscriptionStatus' : ActorMethod<[], SubscriptionStatus>,
@@ -108,9 +167,13 @@ export interface _SERVICE {
     [],
     { 'total' : bigint, 'remaining' : bigint }
   >,
+  'getPaymentRequest' : ActorMethod<[string], [] | [PaymentRequest]>,
   'getSurprisePayload' : ActorMethod<[string], [] | [SurprisePayload]>,
   'getUserAuth' : ActorMethod<[], [] | [UserAuth]>,
+  'getUserPaymentRequests' : ActorMethod<[], Array<PaymentRequest>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'getUserSubscriptions' : ActorMethod<[], Array<Subscription>>,
+  'isAdmin' : ActorMethod<[], boolean>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'recordDownload' : ActorMethod<[string, bigint], undefined>,
   'recordListingInteraction' : ActorMethod<[ListingId], undefined>,
@@ -118,6 +181,11 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'saveTemplate' : ActorMethod<[bigint], undefined>,
   'subscribeToCreator' : ActorMethod<[Principal], undefined>,
+  'updatePaymentRequestStatus' : ActorMethod<
+    [string, PaymentStatus],
+    undefined
+  >,
+  'updatePaymentStatus' : ActorMethod<[string, PaymentStatus], undefined>,
   'updateSubscriptionStatus' : ActorMethod<
     [Principal, PlanType, SubscriptionState, [] | [bigint]],
     undefined

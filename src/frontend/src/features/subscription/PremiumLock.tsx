@@ -1,39 +1,36 @@
-import { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
 import { useAppContext } from '../../App';
 
 interface PremiumLockProps {
-  children: ReactNode;
-  isLocked: boolean;
   feature?: string;
-  requiredPlan?: 'pro' | 'creator';
 }
 
-export function PremiumLock({ children, isLocked, feature, requiredPlan }: PremiumLockProps) {
+export function PremiumLock({ feature = 'This feature' }: PremiumLockProps) {
   const { openPricingModal } = useAppContext();
 
   const handleUnlock = () => {
-    console.log('Upgrade clicked', requiredPlan || 'premium');
-    openPricingModal(requiredPlan);
+    console.log('Premium lock unlock clicked');
+    openPricingModal('pro');
   };
 
-  if (!isLocked) {
-    return <>{children}</>;
-  }
-
   return (
-    <div className="relative">
-      <div className="pointer-events-none select-none blur-sm opacity-50">
-        {children}
-      </div>
-      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+      <div className="text-center space-y-4 p-6">
+        <div className="w-16 h-16 rounded-full bg-neon-purple/10 flex items-center justify-center mx-auto">
+          <Lock className="w-8 h-8 text-neon-purple" />
+        </div>
+        <div>
+          <h3 className="text-xl font-bold mb-2">{feature} is Premium</h3>
+          <p className="text-muted-foreground text-sm">
+            Upgrade to Pro or Creator plan to unlock this feature
+          </p>
+        </div>
         <Button
           type="button"
           onClick={handleUnlock}
-          className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold shadow-neon relative z-50 pointer-events-auto"
+          className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold relative z-20 pointer-events-auto"
         >
-          <Lock className="w-4 h-4 mr-2" />
           Unlock Premium
         </Button>
       </div>

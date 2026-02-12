@@ -16,14 +16,14 @@ export const PricingSection = forwardRef<HTMLDivElement>((props, ref) => {
       period: 'forever',
       icon: Sparkles,
       features: [
-        '3 wishes per day',
-        'Watermark',
-        'Limited templates',
+        '3 messages per day',
+        'Basic templates',
+        'Standard export',
+        'Community access',
       ],
-      cta: 'Get Started',
-      variant: 'outline' as const,
+      cta: 'Current Plan',
       highlight: false,
-      planKey: null,
+      plan: null,
     },
     {
       name: 'Pro',
@@ -31,16 +31,15 @@ export const PricingSection = forwardRef<HTMLDivElement>((props, ref) => {
       period: 'per month',
       icon: Zap,
       features: [
-        'Unlimited wishes',
-        'Remove watermark',
-        'HD download',
+        'Unlimited messages',
         'Premium templates',
-        'Surprise mode',
+        'HD export',
+        'Surprise Mode',
+        'Priority support',
       ],
       cta: 'Upgrade to Pro',
-      variant: 'default' as const,
       highlight: true,
-      planKey: 'pro' as const,
+      plan: 'pro' as const,
     },
     {
       name: 'Creator',
@@ -48,164 +47,92 @@ export const PricingSection = forwardRef<HTMLDivElement>((props, ref) => {
       period: 'per month',
       icon: Crown,
       features: [
-        'Sell templates',
-        'Voice wishes',
-        'Reel export',
+        'Everything in Pro',
         'Marketplace access',
+        'Sell templates',
+        'Creator analytics',
+        'Revenue sharing',
       ],
       cta: 'Upgrade to Creator',
-      variant: 'outline' as const,
       highlight: false,
-      planKey: 'creator' as const,
+      plan: 'creator' as const,
     },
   ];
 
-  const handlePlanClick = (planKey: 'pro' | 'creator' | null) => {
-    console.log('Upgrade clicked', planKey || 'free');
-    if (planKey) {
-      openPricingModal(planKey);
-    }
-  };
-
   return (
-    <section id="pricing" ref={ref} className="w-full section-padding px-4 sm:px-6 lg:px-8">
-      <div className="section-container max-w-7xl">
-        <Reveal>
-          <div className="text-center mb-12 space-y-3">
-            <h2 className="section-heading bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
-              Choose Your Plan
-            </h2>
-            <p className="section-subheading">
-              Unlock more features and create unlimited wishes
-            </p>
+    <section id="pricing" ref={ref} className="scroll-mt-16 w-full py-16 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background to-muted/20">
+      <Reveal className="max-w-7xl mx-auto">
+        <div className="text-center mb-12 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon-purple/10 border border-neon-purple/30 mb-2">
+            <Crown className="w-4 h-4 text-neon-purple" />
+            <span className="text-sm font-medium text-neon-purple">Pricing Plans</span>
           </div>
-        </Reveal>
+          <h2 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
+            Choose Your Plan
+          </h2>
+          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            Start free, upgrade when you need more
+          </p>
+        </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-          {plans.map((plan, index) => {
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+          {plans.map((plan) => {
             const Icon = plan.icon;
             return (
-              <Reveal key={plan.name} delay={index * 0.1}>
-                <Card
-                  className={`relative bg-card/60 backdrop-blur-sm border-neon-purple/20 shadow-card h-full flex flex-col ${
-                    plan.highlight ? 'ring-2 ring-neon-purple' : ''
-                  }`}
-                >
-                  {plan.highlight && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
-                      <Badge className="bg-gradient-to-r from-neon-purple to-neon-green text-white border-0">
-                        Most Popular
-                      </Badge>
+              <Card
+                key={plan.name}
+                className={`relative overflow-hidden transition-all hover:scale-105 ${
+                  plan.highlight
+                    ? 'border-neon-purple shadow-neon ring-2 ring-neon-purple/20'
+                    : 'border-border/40'
+                }`}
+              >
+                {plan.highlight && (
+                  <div className="absolute top-0 right-0 bg-gradient-to-r from-neon-purple to-neon-green text-white text-xs font-semibold px-3 py-1 rounded-bl-lg">
+                    Most Popular
+                  </div>
+                )}
+                <CardHeader className="text-center space-y-4 pb-8">
+                  <div className="mx-auto w-12 h-12 rounded-full bg-gradient-to-r from-neon-purple/20 to-neon-green/20 flex items-center justify-center">
+                    <Icon className="w-6 h-6 text-neon-purple" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-2xl font-bold mb-2">{plan.name}</CardTitle>
+                    <div className="flex items-baseline justify-center gap-1">
+                      <span className="text-4xl font-bold bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
+                        {plan.price}
+                      </span>
+                      <span className="text-sm text-muted-foreground">/{plan.period}</span>
                     </div>
-                  )}
-                  <CardHeader className="text-center space-y-4 pb-6">
-                    <div className="mx-auto w-12 h-12 rounded-full bg-neon-purple/10 flex items-center justify-center">
-                      <Icon className="w-6 h-6 text-neon-purple" />
-                    </div>
-                    <div>
-                      <CardTitle className="text-2xl font-bold">{plan.name}</CardTitle>
-                      <div className="mt-3">
-                        <span className="text-4xl font-bold">{plan.price}</span>
-                        <span className="text-muted-foreground ml-2">/ {plan.period}</span>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col justify-between space-y-6">
-                    <ul className="space-y-3">
-                      {plan.features.map((feature) => (
-                        <li key={feature} className="flex items-start gap-3">
-                          <Check className="w-5 h-5 text-neon-green flex-shrink-0 mt-0.5" />
-                          <span className="text-sm">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                    <Button
-                      type="button"
-                      onClick={() => handlePlanClick(plan.planKey)}
-                      variant={plan.variant}
-                      className={
-                        plan.variant === 'default'
-                          ? 'w-full bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold relative z-20 pointer-events-auto'
-                          : 'w-full border-neon-purple/50 hover:bg-neon-purple/10 relative z-20 pointer-events-auto'
-                      }
-                    >
-                      {plan.cta}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </Reveal>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <ul className="space-y-3">
+                    {plan.features.map((feature, index) => (
+                      <li key={index} className="flex items-start gap-3">
+                        <Check className="w-5 h-5 text-neon-green shrink-0 mt-0.5" />
+                        <span className="text-sm text-muted-foreground">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Button
+                    type="button"
+                    onClick={() => plan.plan && openPricingModal(plan.plan)}
+                    disabled={!plan.plan}
+                    className={`w-full py-6 font-semibold transition-all ${
+                      plan.highlight
+                        ? 'bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white shadow-neon'
+                        : 'bg-muted hover:bg-muted/80'
+                    }`}
+                  >
+                    {plan.cta}
+                  </Button>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
-
-        <Reveal delay={0.4}>
-          <Card className="bg-card/60 backdrop-blur-sm border-neon-purple/20 shadow-card overflow-x-auto">
-            <CardHeader>
-              <CardTitle className="text-center">Feature Comparison</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[600px]">
-                  <thead>
-                    <tr className="border-b border-border">
-                      <th className="text-left py-3 px-4">Feature</th>
-                      <th className="text-center py-3 px-4">Free</th>
-                      <th className="text-center py-3 px-4">Pro</th>
-                      <th className="text-center py-3 px-4">Creator</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr className="border-b border-border">
-                      <td className="py-3 px-4">Wishes per day</td>
-                      <td className="text-center py-3 px-4">3</td>
-                      <td className="text-center py-3 px-4">Unlimited</td>
-                      <td className="text-center py-3 px-4">Unlimited</td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 px-4">Templates</td>
-                      <td className="text-center py-3 px-4">Limited</td>
-                      <td className="text-center py-3 px-4">Premium</td>
-                      <td className="text-center py-3 px-4">Premium</td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 px-4">Watermark</td>
-                      <td className="text-center py-3 px-4">Yes</td>
-                      <td className="text-center py-3 px-4">Removed</td>
-                      <td className="text-center py-3 px-4">Removed</td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 px-4">HD Download</td>
-                      <td className="text-center py-3 px-4">-</td>
-                      <td className="text-center py-3 px-4">
-                        <Check className="w-5 h-5 text-neon-green mx-auto" />
-                      </td>
-                      <td className="text-center py-3 px-4">
-                        <Check className="w-5 h-5 text-neon-green mx-auto" />
-                      </td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 px-4">Surprise Mode</td>
-                      <td className="text-center py-3 px-4">-</td>
-                      <td className="text-center py-3 px-4">
-                        <Check className="w-5 h-5 text-neon-green mx-auto" />
-                      </td>
-                      <td className="text-center py-3 px-4">
-                        <Check className="w-5 h-5 text-neon-green mx-auto" />
-                      </td>
-                    </tr>
-                    <tr className="border-b border-border">
-                      <td className="py-3 px-4">Marketplace</td>
-                      <td className="text-center py-3 px-4">Browse</td>
-                      <td className="text-center py-3 px-4">Browse</td>
-                      <td className="text-center py-3 px-4">Sell</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </CardContent>
-          </Card>
-        </Reveal>
-      </div>
+      </Reveal>
     </section>
   );
 });

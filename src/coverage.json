@@ -1,51 +1,149 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T14:35:47.547Z",
+  "generatedAt": "2026-02-12T19:06:11.106Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 8,
+    "implemented": 8,
     "items": [
       {
-        "id": "REQ-94",
-        "summary": "Change all upgrade entry points (e.g., “Upgrade to Pro”, “Upgrade to Creator”, “Unlock Premium”, and any “Upgrade Plan” button) so that clicking them only opens the in-app PricingComparisonModal and does not immediately open or navigate to an external/full payment page.",
+        "id": "REQ-133",
+        "summary": "Add a sticky top navigation bar that remains fixed while scrolling and matches the existing WishMint premium dark + neon (purple/green) gradient branding. The navbar must include menu items: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ. Clicking a menu item must smoothly scroll to the corresponding section.",
         "status": "implemented",
         "plannedFiles": [
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/lib/scroll.ts",
           "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/lib/scroll.ts",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-134",
+        "summary": "Assign anchor IDs to the major website sections using the exact IDs specified: Home id=\"home\"; Wish Generator id=\"create-wish\"; Templates id=\"templates\"; Marketplace id=\"marketplace\"; Pricing id=\"pricing\"; Dashboard id=\"dashboard\"; FAQ id=\"faq\". Ensure existing scroll/ref behaviors continue to work and scrolling accounts for the sticky header so section titles are not hidden under the navbar.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/sections/HeroSection.tsx",
+          "frontend/src/sections/GeneratorSection.tsx",
+          "frontend/src/sections/TemplatesSection.tsx",
           "frontend/src/sections/PricingSection.tsx",
-          "frontend/src/features/subscription/PremiumLock.tsx",
-          "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md"
+          "frontend/src/sections/DashboardSection.tsx",
+          "frontend/src/sections/FaqSection.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md"
+          "frontend/src/sections/HeroSection.tsx",
+          "frontend/src/sections/GeneratorSection.tsx",
+          "frontend/src/sections/TemplatesSection.tsx",
+          "frontend/src/sections/PricingSection.tsx",
+          "frontend/src/sections/DashboardSection.tsx",
+          "frontend/src/sections/FaqSection.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
         ]
       },
       {
-        "id": "REQ-95",
-        "summary": "Update PricingComparisonModal so plan upgrade buttons do not immediately initiate Razorpay checkout. Instead, the modal must present an in-modal confirmation step (or secondary button) that the user explicitly clicks to proceed to payment, keeping the user in the app modal flow until they confirm.",
+        "id": "REQ-135",
+        "summary": "Implement active-section highlighting in the sticky navigation bar: as the user scrolls, the currently viewed section’s corresponding nav item must be visibly highlighted. The highlight must update smoothly and be stable (no rapid flicker).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/subscription/PricingComparisonModal.tsx"
+          "frontend/src/hooks/useActiveSection.ts",
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/features/subscription/PricingComparisonModal.tsx"
+          "frontend/src/hooks/useActiveSection.ts",
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/index.css"
         ]
       },
       {
-        "id": "REQ-96",
-        "summary": "Ensure the Razorpay upgrade initiation (useRazorpayUpgrade) never performs a full-page navigation/redirect as part of the client flow; if checkout cannot be opened as an in-context experience, show a clear English error toast explaining that payment could not be started and to try again later, without leaving the app.",
+        "id": "REQ-136",
+        "summary": "Add a thin scroll progress indicator bar at the very top of the page that shows the user’s scroll percentage through the main page content. The bar must use a gradient progress color consistent with WishMint branding and animate smoothly as the user scrolls.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/payments/razorpay.ts",
-          "frontend/src/features/subscription/PricingComparisonModal.tsx"
+          "frontend/src/hooks/useScrollProgress.ts",
+          "frontend/src/components/navigation/ScrollProgressBar.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/features/payments/razorpay.ts",
-          "frontend/src/features/subscription/PricingComparisonModal.tsx"
+          "frontend/src/hooks/useScrollProgress.ts",
+          "frontend/src/components/navigation/ScrollProgressBar.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-137",
+        "summary": "Add a floating “Back to Top” button positioned at the bottom-right of the viewport. It must appear only after the user scrolls at least 30% down the page and must smoothly scroll the user back to the top (Home). Style it as a glowing WishMint button and ensure it does not block important UI on mobile.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-138",
+        "summary": "Add a floating quick action button labeled exactly \"🎂 Create Wish\" that scrolls the user directly to the Wish Generator section (id=\"create-wish\"). This button must be mobile-safe (not blocking content) and visually consistent with WishMint glowing/neon styling.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-139",
+        "summary": "Implement mobile optimization for the new navigation system: on mobile breakpoints, collapse the sticky navigation items into a hamburger menu that can be opened/closed. The menu must retain smooth scrolling to section anchors and must not introduce overlay/pointer-events issues that block page interaction.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/index.css"
+        ]
+      },
+      {
+        "id": "REQ-140",
+        "summary": "Ensure any user-facing text introduced by the new navigation/scroller features is in English, and the new UI elements (sticky navbar, progress bar, floating buttons, hamburger menu) preserve the existing premium dark gradient look and do not regress current section layouts.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/components/navigation/ScrollProgressBar.tsx",
+          "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+          "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+          "frontend/src/index.css"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/components/navigation/ScrollProgressBar.tsx",
+          "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+          "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+          "frontend/src/index.css"
         ]
       }
     ]
@@ -55,9 +153,21 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/features/payments/razorpay.ts",
-    "frontend/src/features/subscription/PricingComparisonModal.tsx",
-    "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md",
+    "frontend/src/App.tsx",
+    "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+    "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+    "frontend/src/components/navigation/ScrollProgressBar.tsx",
+    "frontend/src/components/navigation/StickyNavbar.tsx",
+    "frontend/src/hooks/useActiveSection.ts",
+    "frontend/src/hooks/useScrollProgress.ts",
+    "frontend/src/index.css",
+    "frontend/src/lib/scroll.ts",
+    "frontend/src/sections/DashboardSection.tsx",
+    "frontend/src/sections/FaqSection.tsx",
+    "frontend/src/sections/GeneratorSection.tsx",
+    "frontend/src/sections/HeroSection.tsx",
+    "frontend/src/sections/PricingSection.tsx",
+    "frontend/src/sections/TemplatesSection.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

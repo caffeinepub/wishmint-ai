@@ -1,73 +1,257 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Modal-first upgrade flow with in-modal payment confirmation and no redirects",
+  "title": "WishMint single-page navigation UX: sticky navbar, anchored smooth scrolling, scroll spy, progress bar, and floating actions",
   "requirements": [
     {
-      "id": "REQ-94",
-      "summary": "Ensure all upgrade CTAs only open the in-app PricingComparisonModal and never initiate payment or navigate externally on first click.",
+      "id": "REQ-133",
+      "summary": "Add a sticky top navigation bar matching WishMint dark + neon gradient branding with smooth-scroll menu items for all major sections.",
       "acceptanceCriteria": [
-        "Clicking any upgrade CTA keeps the user on the current page and opens the in-app pricing modal (Dialog) instead of navigating away.",
-        "No upgrade CTA directly calls the Razorpay initiation function on first click; it only opens the PricingComparisonModal.",
-        "The browser URL is not redirected to any Razorpay/checkout URL as a result of the initial upgrade click."
+        "A sticky navigation bar is visible at the top of the page and stays fixed during scroll.",
+        "Navbar includes exactly these labels: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ.",
+        "Clicking each navbar item performs a smooth scroll to the correct section (no abrupt jump).",
+        "Navbar styling uses the existing WishMint neon gradient look and does not introduce horizontal overflow."
       ],
       "file_operations": [
         {
+          "path": "frontend/src/components/navigation/StickyNavbar.tsx",
+          "operation": "create",
+          "description": "Create a sticky top navigation component rendering exactly: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ; implement click handlers that trigger smooth scrolling to the corresponding anchor IDs while respecting reduced-motion preferences. Use shadcn-ui Button (and other existing shadcn-ui primitives if needed) for consistent styling and focus states. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/lib/scroll.ts",
+          "operation": "create",
+          "description": "Add a small scroll utility to smoothly scroll to a given anchor ID with a sticky-header offset and reduced-motion support."
+        },
+        {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Audit and ensure the single app-level upgrade entry point (openPricingModal) remains modal-only (no payment initiation, no external navigation), and confirm all sections/components use it for upgrade CTAs. Verify the component's usage instructions before implementing."
+          "description": "Wire StickyNavbar into the single-page layout so it is present during normal browsing (non-surprise, non-premium-designer flows) and does not disrupt existing section rendering; ensure nav item clicks call the shared scroll helper."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add theme-consistent navbar styling helpers (gradient background, blur, glow, z-index) and guard against horizontal overflow caused by fixed/sticky elements."
+        }
+      ]
+    },
+    {
+      "id": "REQ-134",
+      "summary": "Assign exact anchor IDs to major sections and ensure sticky-header offset handling while preserving existing /pricing behavior.",
+      "acceptanceCriteria": [
+        "The DOM contains elements for each major section with the exact IDs: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
+        "Navbar clicks scroll to these anchored sections reliably.",
+        "When a section is scrolled to, its heading/content is not obscured by the sticky navbar (header offset is handled).",
+        "Existing special navigation behavior for /pricing (scrolling to Pricing and opening the pricing modal) continues to work."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/sections/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Add id=\"home\" to the top-level Home section element and apply an anchor/offset class so it is not hidden beneath the sticky navbar when navigated to."
+        },
+        {
+          "path": "frontend/src/sections/GeneratorSection.tsx",
+          "operation": "modify",
+          "description": "Add id=\"create-wish\" to the Wish Generator section container element (the one used for scrolling) and apply sticky-header offset handling via a shared class."
+        },
+        {
+          "path": "frontend/src/sections/TemplatesSection.tsx",
+          "operation": "modify",
+          "description": "Add id=\"templates\" to the Templates section container element and apply sticky-header offset handling via a shared class."
         },
         {
           "path": "frontend/src/sections/PricingSection.tsx",
           "operation": "modify",
-          "description": "Confirm Pricing section upgrade buttons only call openPricingModal (never useRazorpayUpgrade) and do not open any external checkout URL. Verify the component's usage instructions before implementing."
+          "description": "Add id=\"pricing\" to the Pricing section container element (the same one referenced by the existing ref) and apply sticky-header offset handling via a shared class; keep layout/content intact."
         },
         {
-          "path": "frontend/src/features/subscription/PremiumLock.tsx",
+          "path": "frontend/src/sections/DashboardSection.tsx",
           "operation": "modify",
-          "description": "Ensure the Unlock Premium CTA continues to only open PricingComparisonModal via openPricingModal and never initiates payment directly. Verify the component's usage instructions before implementing."
+          "description": "Add id=\"dashboard\" to the Dashboard section container element and apply sticky-header offset handling via a shared class."
         },
         {
-          "path": "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md",
+          "path": "frontend/src/sections/FaqSection.tsx",
           "operation": "modify",
-          "description": "Update checklist to reflect modal-first behavior for all upgrade CTAs and verify no upgrade click triggers Razorpay until explicit in-modal confirmation. Verify the component's usage instructions before implementing."
+          "description": "Add id=\"faq\" to the FAQ section container element and apply sticky-header offset handling via a shared class."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Preserve the existing /pricing pseudo-route behavior in this file while updating scrolling to use the shared offset-aware scroll helper (so Pricing headings are not obscured by the sticky navbar) and still opening PricingComparisonModal as currently implemented."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Introduce a shared anchor offset rule (e.g., a class applied to anchored sections) using scroll-margin-top based on the sticky navbar height so scrollIntoView/anchor navigation does not hide headings."
         }
       ]
     },
     {
-      "id": "REQ-95",
-      "summary": "Add an in-modal confirmation step in PricingComparisonModal so plan upgrade buttons do not start Razorpay until the user explicitly confirms.",
+      "id": "REQ-135",
+      "summary": "Highlight the active section in the sticky navbar using a stable scroll-spy mechanism.",
       "acceptanceCriteria": [
-        "Inside PricingComparisonModal, clicking “Upgrade to Pro/Creator” first shows a clear in-modal confirmation UI (still within the app) and does not open Razorpay immediately.",
-        "Only after the user clicks a “Proceed to payment” (or equivalent) control inside the modal should the Razorpay flow be initiated.",
-        "Closing/cancelling the confirmation step returns to the pricing modal content without navigating away from the app."
+        "As the user scrolls through the page, the nav item for the visible section is highlighted.",
+        "The highlight changes when the viewport enters a new section and does not flicker excessively while near boundaries.",
+        "Highlight styling is clearly visible in the existing premium dark theme."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/subscription/PricingComparisonModal.tsx",
+          "path": "frontend/src/hooks/useActiveSection.ts",
+          "operation": "create",
+          "description": "Create a scroll-spy hook based on IntersectionObserver to determine the currently active anchored section (home, create-wish, templates, marketplace, pricing, dashboard, faq) with stability controls to prevent boundary flicker."
+        },
+        {
+          "path": "frontend/src/components/navigation/StickyNavbar.tsx",
           "operation": "modify",
-          "description": "Refactor PricingComparisonModal to use shadcn-ui Dialog content to include a secondary in-modal confirmation state per selected plan: initial click selects plan and reveals confirmation UI; only the confirmation control calls useRazorpayUpgrade.initiateUpgrade; add cancel/back to return to the comparison view without navigation. Verify the component's usage instructions before implementing."
+          "description": "Use the active-section hook to apply a clear neon/glow highlight style to the corresponding nav item, updating smoothly without rapid flicker. Use shadcn-ui Button styling variants if appropriate. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add a theme-consistent active nav item style (neon border/underline/glow) that remains legible in the premium dark theme."
         }
       ]
     },
     {
-      "id": "REQ-96",
-      "summary": "Prevent any full-page navigation during Razorpay initiation and show clear English toast errors when checkout cannot open, keeping the app usable.",
+      "id": "REQ-136",
+      "summary": "Add a thin, top-of-viewport scroll progress indicator with WishMint gradient and smooth animation.",
       "acceptanceCriteria": [
-        "Initiating payment does not change window.location or navigate the SPA to a new page.",
-        "If Razorpay cannot open (SDK missing/not loaded/config missing), the app shows an English toast error and remains usable.",
-        "The existing payment-configuration missing message remains English and actionable."
+        "A thin progress bar is rendered at the top edge of the viewport and remains visible while scrolling.",
+        "The progress bar fill reflects scroll progress from 0% (top) to 100% (bottom).",
+        "The fill animates smoothly and uses a purple/green gradient consistent with the existing theme."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/payments/razorpay.ts",
-          "operation": "modify",
-          "description": "Harden useRazorpayUpgrade so initiating payment never triggers full-page navigation: add explicit guards against missing SDK/config, surface a clear English toast when the SDK fails to load or checkout cannot be opened, and ensure all error messaging remains actionable and keeps the user in-app (no window.location changes). Verify the component's usage instructions before implementing."
+          "path": "frontend/src/hooks/useScrollProgress.ts",
+          "operation": "create",
+          "description": "Create a hook that computes scroll progress (0..1) for the main document using requestAnimationFrame-driven scroll/resize listeners for smooth updates and minimal jank."
         },
         {
-          "path": "frontend/src/features/subscription/PricingComparisonModal.tsx",
+          "path": "frontend/src/components/navigation/ScrollProgressBar.tsx",
+          "operation": "create",
+          "description": "Create a thin fixed progress bar component at the very top of the viewport that renders a WishMint purple/green gradient fill and animates smoothly based on useScrollProgress; respect reduced-motion preferences. Use shadcn-ui primitives only if helpful. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Ensure the confirmation step integrates with the updated useRazorpayUpgrade failure states: if initiation fails, keep the modal open and show the English toast error without navigating away. Verify the component's usage instructions before implementing."
+          "description": "Wire ScrollProgressBar so it renders during the main single-page experience (not in surprise mode / premium designer mode), and ensure its z-index stacks correctly above the page without causing layout shift."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add minimal global styles for the progress bar (height, gradient, transform origin, z-index) and ensure it does not introduce horizontal overflow."
+        }
+      ]
+    },
+    {
+      "id": "REQ-137",
+      "summary": "Add a floating Back to Top button that appears after ~30% scroll and smoothly scrolls to Home, mobile-safe and neon-styled.",
+      "acceptanceCriteria": [
+        "The Back to Top button is hidden near the top of the page and becomes visible after scrolling beyond ~30% of total scroll height.",
+        "Clicking the button smoothly scrolls to the top/home section.",
+        "The button is positioned bottom-right and is visually consistent with the existing neon/glow style.",
+        "On small screens, the button does not cover primary actions/inputs (uses safe spacing and responsive sizing)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+          "operation": "create",
+          "description": "Create a floating bottom-right Back to Top control that becomes visible after scroll progress >= 0.3, and on click smoothly scrolls to id=\"home\" using the shared offset-aware scroll helper; ensure responsive sizing and safe-area spacing for mobile. Use shadcn-ui Button for consistent interaction states. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Render the FloatingBackToTopButton during the main single-page experience and ensure it does not overlap critical UI (stacking/spacing with the quick action button)."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add utility styles for floating action positioning (safe-area inset padding, max-width constraints, glow) to avoid horizontal overflow and mobile obstruction."
+        }
+      ]
+    },
+    {
+      "id": "REQ-138",
+      "summary": "Add a floating quick action button labeled exactly \"🎂 Create Wish\" that scrolls to the Wish Generator section.",
+      "acceptanceCriteria": [
+        "A floating button labeled exactly \"🎂 Create Wish\" is available and clickable.",
+        "Clicking the button smoothly scrolls to the create-wish section.",
+        "Button placement/sizing is responsive and does not obstruct core content on mobile."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+          "operation": "create",
+          "description": "Create a floating quick action button labeled exactly \"🎂 Create Wish\" that smoothly scrolls to id=\"create-wish\" using the shared scroll helper; ensure mobile-safe placement (bottom-right with spacing from viewport edges and other floating actions). Use shadcn-ui Button for consistent styling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Render FloatingCreateWishButton alongside other navigation affordances, ensuring it is present in the main single-page experience and does not block key inputs on mobile."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add/adjust floating action container styles so multiple floating buttons can stack without overflow (responsive sizing + safe-area spacing)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-139",
+      "summary": "Optimize navigation for mobile by collapsing nav items into a hamburger menu with smooth scrolling and no pointer-events issues.",
+      "acceptanceCriteria": [
+        "On mobile widths, the navbar displays a hamburger menu instead of the full horizontal menu.",
+        "Opening the hamburger menu shows the full list of nav items (Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ).",
+        "Selecting an item closes the menu and smoothly scrolls to the target section.",
+        "No overlay layers block pointer events on underlying content when the menu is closed."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/navigation/StickyNavbar.tsx",
+          "operation": "modify",
+          "description": "Implement responsive behavior: show full horizontal nav on desktop and a hamburger-triggered menu on mobile; ensure selecting a menu item closes the menu and performs offset-aware smooth scrolling. Use shadcn-ui Button (and optionally a shadcn-ui menu/sheet primitive if already present) for accessible interactions. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add mobile menu layout styles (backdrop/overlay only when open, correct z-index, pointer-events toggling when closed) ensuring underlying page remains interactive when the menu is closed and no horizontal overflow is introduced."
+        }
+      ]
+    },
+    {
+      "id": "REQ-140",
+      "summary": "Ensure new navigation UI uses English text, matches existing premium dark + neon gradient styling, respects reduced motion, and does not regress layouts or introduce horizontal overflow.",
+      "acceptanceCriteria": [
+        "All new labels/tooltips/toasts/messages related to navigation are in English.",
+        "The new navigation elements visually match the existing WishMint premium dark + neon gradient style.",
+        "No new horizontal scrolling is introduced by the navigation UI (mobile and desktop)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/navigation/StickyNavbar.tsx",
+          "operation": "modify",
+          "description": "Audit all user-facing text introduced by navbar/mobile menu for English-only labels; ensure styling aligns with the existing premium dark + neon gradient theme and includes accessible aria-labels in English. Use shadcn-ui components for consistent typography/focus states where applicable. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/navigation/ScrollProgressBar.tsx",
+          "operation": "modify",
+          "description": "Ensure progress bar animation respects reduced-motion preferences (minimize/disable animated transitions when reduced motion is enabled) and uses theme-consistent gradient styling."
+        },
+        {
+          "path": "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+          "operation": "modify",
+          "description": "Ensure Back to Top button uses English aria-label/title text (if any), respects reduced-motion, and remains mobile-safe (no overlap with primary inputs). Use shadcn-ui Button where applicable. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+          "operation": "modify",
+          "description": "Ensure quick action button styling matches neon/glow theme and remains mobile-safe; keep label exactly \"🎂 Create Wish\" and ensure any accessibility text is English. Use shadcn-ui Button where applicable. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add final guardrails to prevent horizontal overflow from fixed/sticky/floating UI (e.g., clamp widths to viewport, use safe-area insets, and avoid negative margins) while preserving existing section layouts."
         }
       ]
     }

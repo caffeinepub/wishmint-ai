@@ -15,15 +15,20 @@ import { DeployDiagnosticsBanner } from './components/DeployDiagnosticsBanner';
 import { PremiumCardDesignerModule } from './features/premiumCardDesigner/PremiumCardDesignerModule';
 import { SurpriseView } from './features/surprise/SurpriseView';
 import { PricingComparisonModal } from './features/subscription/PricingComparisonModal';
+import { StickyNavbar } from './components/navigation/StickyNavbar';
+import { ScrollProgressBar } from './components/navigation/ScrollProgressBar';
+import { FloatingBackToTopButton } from './components/navigation/FloatingBackToTopButton';
+import { FloatingCreateWishButton } from './components/navigation/FloatingCreateWishButton';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useUserAuthUpsert } from './features/auth/useUserAuthUpsert';
 import { generateBirthdayPack } from './features/generator/generateBirthdayPack';
+import { smoothScrollToAnchor } from './lib/scroll';
 import type { GeneratorFormData, BirthdayPack, TemplateId } from './features/generator/types';
 import type { PlanType } from './backend';
 
 interface AppContextValue {
   formData: GeneratorFormData;
-  setFormData: (data: GeneratorFormData) => void;
+  setFormData: (data: GeneratorFormData | ((prev: GeneratorFormData) => GeneratorFormData)) => void;
   outputs: BirthdayPack | null;
   setOutputs: (outputs: BirthdayPack | null) => void;
   selectedTemplate: TemplateId;
@@ -96,9 +101,9 @@ function App() {
     const handlePricingRoute = () => {
       const path = window.location.pathname;
       if (path === '/pricing' || path.endsWith('/pricing')) {
-        // Scroll to pricing section
+        // Scroll to pricing section using new scroll utility
         setTimeout(() => {
-          pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          smoothScrollToAnchor('pricing');
           // Also open the pricing modal
           setPricingModalOpen(true);
         }, 300);
@@ -130,21 +135,21 @@ function App() {
   useEffect(() => {
     if (isAuthenticated && dashboardRef.current) {
       const timer = setTimeout(() => {
-        dashboardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        smoothScrollToAnchor('dashboard');
       }, 500);
       return () => clearTimeout(timer);
     }
   }, [isAuthenticated]);
 
   const scrollToGenerator = () => {
-    generatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    smoothScrollToAnchor('create-wish');
     setTimeout(() => {
       nameInputRef.current?.focus();
     }, 500);
   };
 
   const scrollToPricing = () => {
-    pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    smoothScrollToAnchor('pricing');
   };
 
   const scrollToExamples = () => {
@@ -169,7 +174,7 @@ function App() {
     setOutputs(pack);
     
     setTimeout(() => {
-      generatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      smoothScrollToAnchor('create-wish');
     }, 100);
   };
 
@@ -199,7 +204,7 @@ function App() {
     
     // Scroll to pricing section
     setTimeout(() => {
-      pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      smoothScrollToAnchor('pricing');
     }, 100);
   };
 
@@ -245,10 +250,15 @@ function App() {
     closePricingModal,
   };
 
+  // Show navigation only in main app view (not in surprise or premium designer modes)
+  const showNavigation = !surpriseMode && !premiumDesignerOpen;
+
   return (
     <AppContext.Provider value={contextValue}>
       <div className="w-full min-h-screen bg-background text-foreground">
         <DeployDiagnosticsBanner />
+        {showNavigation && <ScrollProgressBar />}
+        {showNavigation && <StickyNavbar />}
         {surpriseMode ? (
           <SurpriseView surpriseId={surpriseMode} onBackHome={handleBackFromSurprise} />
         ) : premiumDesignerOpen ? (
@@ -273,6 +283,8 @@ function App() {
             <FaqSection />
             <LegalSections />
             <FooterSection />
+            {showNavigation && <FloatingCreateWishButton />}
+            {showNavigation && <FloatingBackToTopButton />}
           </>
         )}
         <PricingComparisonModal

@@ -7,6 +7,13 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export class ExternalBlob {
+    getBytes(): Promise<Uint8Array<ArrayBuffer>>;
+    getDirectURL(): string;
+    static fromURL(url: string): ExternalBlob;
+    static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
+    withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
+}
 export interface UserAuth {
     provider: string;
     lastLoginAt: bigint;
@@ -16,26 +23,18 @@ export interface CreatorEarnings {
     totalRevenue: bigint;
     totalDownloads: bigint;
 }
-export type PostId = bigint;
 export type TemplateId = bigint;
+export type PostId = bigint;
 export interface DownloadRecord {
     contentId: bigint;
     contentType: string;
     timestamp: bigint;
 }
-export interface CommunityPost {
-    id: PostId;
-    title: string;
-    creator: Principal;
-    contentType: {
-        __kind__: "template";
-        template: TemplateId;
-    } | {
-        __kind__: "sticker";
-        sticker: bigint;
-    };
-    createdAt: bigint;
-    description: string;
+export interface Subscription {
+    status: SubscriptionState;
+    premiumUntil?: bigint;
+    userId: Principal;
+    plan: PlanType;
 }
 export interface SavedTemplate {
     templateId: bigint;
@@ -57,6 +56,32 @@ export interface MarketplaceListing {
     price: bigint;
 }
 export type ListingId = bigint;
+export interface CommunityPost {
+    id: PostId;
+    title: string;
+    creator: Principal;
+    contentType: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    };
+    createdAt: bigint;
+    description: string;
+}
+export interface PaymentRequest {
+    id: string;
+    utr: string;
+    status: PaymentStatus;
+    userId: Principal;
+    createdAt: bigint;
+    plan: PlanType;
+    reviewedAt?: bigint;
+    email: string;
+    amount: bigint;
+    screenshot?: ExternalBlob;
+}
 export interface SubscriptionStatus {
     startedAt: bigint;
     expiresAt?: bigint;
@@ -75,6 +100,11 @@ export interface SurprisePayload {
     message: string;
     recipientName: string;
 }
+export enum PaymentStatus {
+    pending = "pending",
+    approved = "approved",
+    rejected = "rejected"
+}
 export enum PlanType {
     pro = "pro",
     creator = "creator",
@@ -91,6 +121,7 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    addScreenshotToPayment(paymentId: string, screenshot: ExternalBlob): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createCommunityPost(title: string, description: string, contentType: {
         __kind__: "template";
@@ -107,9 +138,13 @@ export interface backendInterface {
         sticker: bigint;
     }): Promise<ListingId>;
     createOrUpdateUserAuth(provider: string): Promise<void>;
+    createPaymentRequest(email: string, plan: PlanType, amount: bigint, utr: string, screenshot: ExternalBlob | null): Promise<string>;
+    createSubscription(userId: Principal, plan: PlanType, status: SubscriptionState): Promise<void>;
     createSurpriseLink(recipientName: string, message: string): Promise<string>;
+    getAllActiveSubscriptions(): Promise<Array<Subscription>>;
     getAllCommunityPosts(): Promise<Array<CommunityPost>>;
     getAllMarketplaceListings(): Promise<Array<MarketplaceListing>>;
+    getAllPaymentRequests(): Promise<Array<PaymentRequest>>;
     getCallerDownloadHistory(): Promise<Array<DownloadRecord>>;
     getCallerSavedTemplates(): Promise<Array<SavedTemplate>>;
     getCallerSubscriptionStatus(): Promise<SubscriptionStatus>;
@@ -126,9 +161,13 @@ export interface backendInterface {
         total: bigint;
         remaining: bigint;
     }>;
+    getPaymentRequest(id: string): Promise<PaymentRequest | null>;
     getSurprisePayload(surpriseId: string): Promise<SurprisePayload | null>;
     getUserAuth(): Promise<UserAuth | null>;
+    getUserPaymentRequests(): Promise<Array<PaymentRequest>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getUserSubscriptions(): Promise<Array<Subscription>>;
+    isAdmin(): Promise<boolean>;
     isCallerAdmin(): Promise<boolean>;
     recordDownload(contentType: string, contentId: bigint): Promise<void>;
     recordListingInteraction(listingId: ListingId): Promise<void>;
@@ -136,5 +175,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveTemplate(templateId: bigint): Promise<void>;
     subscribeToCreator(creator: Principal): Promise<void>;
+    updatePaymentRequestStatus(paymentId: string, newStatus: PaymentStatus): Promise<void>;
+    updatePaymentStatus(paymentId: string, newStatus: PaymentStatus): Promise<void>;
     updateSubscriptionStatus(user: Principal, plan: PlanType, state: SubscriptionState, expiresAt: bigint | null): Promise<void>;
 }

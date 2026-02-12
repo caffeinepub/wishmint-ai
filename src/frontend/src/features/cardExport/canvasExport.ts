@@ -2,81 +2,150 @@ import type { TemplateId } from '../generator/types';
 import type { PremiumDesignerState } from '../premiumCardDesigner/types';
 import { TEMPLATES } from '../templates/templates';
 import { getThemeById } from '../premiumCardDesigner/themes';
-import { wrapText } from './textWrap';
+import { wrapTextEmojiAware } from './textWrap';
 import { loadCardBackgroundImage } from './loadCardBackgroundImage';
+import { formatCardTextContent } from './cardTextRules';
+import { convertToShortWish } from './shortWishConverter';
+import { getThemeConfig, type CardTheme } from './cardThemes';
+import { fitTextInBounds, calculateSafeTextRegion } from './fitText';
+import {
+  drawVignetteOverlay,
+  drawTextWithGlow,
+  drawTextWithShadow,
+  drawEdgeSparkles,
+  drawEdgeConfetti,
+  drawMinimalCorners,
+} from './canvasEffects';
+import { enhanceCanvasRender } from './enhanceCanvasRender';
+import { getVariationParams, type CardVariationParams } from './generateCardVariations';
 
-export async function exportCardImage(wish: string, name: string, templateId: TemplateId) {
+export async function exportCardImage(
+  wish: string,
+  name: string,
+  templateId: TemplateId,
+  themeId: CardTheme = 'luxury',
+  variationIndex: number = 0
+) {
   const template = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
+  const theme = getThemeConfig(themeId);
+  const variation = getVariationParams(variationIndex);
   
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  // Set canvas size (mobile-friendly)
+  // Set canvas size (square format)
   canvas.width = 1080;
   canvas.height = 1080;
 
-  // Try to load and draw background image, fallback to gradient
+  // Format and sanitize card text
+  const shortWish = convertToShortWish(wish);
+  const cardText = formatCardTextContent(name, shortWish);
+
+  // Try to load and draw background image
   let backgroundDrawn = false;
-  if (template.backgroundImage) {
-    try {
-      const bgImage = await loadCardBackgroundImage(template.backgroundImage);
-      ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-      backgroundDrawn = true;
-    } catch (error) {
-      console.warn('Failed to load background image, using gradient fallback:', error);
+  try {
+    const bgImage = await loadCardBackgroundImage(theme.backgroundAsset);
+    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+    backgroundDrawn = true;
+  } catch (error) {
+    console.warn('Failed to load theme background, using template fallback:', error);
+    
+    // Fallback to template gradient
+    if (template.backgroundImage) {
+      try {
+        const bgImage = await loadCardBackgroundImage(template.backgroundImage);
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+        backgroundDrawn = true;
+      } catch (fallbackError) {
+        console.warn('Template background also failed, using gradient:', fallbackError);
+      }
     }
   }
 
-  // Fallback to gradient background if image failed
+  // Final fallback to gradient
   if (!backgroundDrawn) {
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, template.canvasBg1);
     gradient.addColorStop(1, template.canvasBg2);
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Add decorative elements for gradient backgrounds
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
-    ctx.beginPath();
-    ctx.arc(200, 200, 300, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(880, 880, 250, 0, Math.PI * 2);
-    ctx.fill();
   }
 
-  // Add semi-transparent overlay for better text readability on images
-  if (backgroundDrawn) {
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Apply readability overlay (vignette)
+  drawVignetteOverlay(ctx, canvas.width, canvas.height, variation.vignetteIntensity);
+
+  // Calculate safe regions
+  const safeRegion = calculateSafeTextRegion(canvas.width, canvas.height, 8);
+  
+  // Title region (top)
+  const titleY = safeRegion.y + 120;
+  
+  // Message region (center)
+  const messageRegionY = titleY + 150;
+  const messageRegionHeight = canvas.height - messageRegionY - 200;
+  
+  // Footer region (bottom)
+  const footerY = canvas.height - safeRegion.y - 60;
+
+  // Draw decorations (edges only)
+  if (theme.decorationStyle === 'sparkles') {
+    drawEdgeSparkles(ctx, canvas.width, canvas.height, theme.decorationColor, variation.decorationCount);
+  } else if (theme.decorationStyle === 'confetti') {
+    drawEdgeConfetti(ctx, canvas.width, canvas.height, theme.decorationColor, variation.decorationCount);
+  } else if (theme.decorationStyle === 'minimal') {
+    drawMinimalCorners(ctx, canvas.width, canvas.height, theme.decorationColor);
   }
 
-  // Add branding
-  ctx.fillStyle = template.canvasText;
-  ctx.font = 'bold 48px Inter, sans-serif';
+  // Draw Title with glow
+  ctx.fillStyle = theme.titleColor;
+  ctx.font = `bold 72px ${theme.titleFont}`;
   ctx.textAlign = 'center';
-  ctx.fillText('WishMint AI', canvas.width / 2, 100);
+  ctx.textBaseline = 'top';
+  
+  drawTextWithGlow(
+    ctx,
+    cardText.title,
+    canvas.width / 2,
+    titleY,
+    theme.titleGlow,
+    20 * variation.glowIntensity
+  );
 
-  // Add recipient name
-  ctx.font = 'bold 56px Inter, sans-serif';
-  ctx.fillText(`Happy Birthday ${name}!`, canvas.width / 2, 200);
-
-  // Add wish text with wrapping
-  ctx.font = '36px Inter, sans-serif';
+  // Draw Message with dynamic fitting
+  ctx.fillStyle = theme.messageColor;
   ctx.textAlign = 'center';
-  const lines = wrapText(ctx, wish, canvas.width - 160);
-  const lineHeight = 50;
-  const startY = 320;
-
-  lines.forEach((line, index) => {
-    ctx.fillText(line, canvas.width / 2, startY + index * lineHeight);
+  ctx.textBaseline = 'top';
+  
+  const fittedMessage = fitTextInBounds(ctx, cardText.message, theme.messageFont, {
+    maxWidth: safeRegion.width - 100,
+    maxHeight: messageRegionHeight,
+    initialFontSize: 42,
+    minFontSize: 28,
+    lineHeightMultiplier: 1.5,
+    minLineHeightMultiplier: 1.3,
+  });
+  
+  ctx.font = `${fittedMessage.fontSize}px ${theme.messageFont}`;
+  
+  const messageStartY = messageRegionY + (messageRegionHeight - fittedMessage.totalHeight) / 2;
+  
+  fittedMessage.lines.forEach((line, index) => {
+    const lineY = messageStartY + index * fittedMessage.lineHeight;
+    drawTextWithShadow(ctx, line, canvas.width / 2, lineY);
   });
 
-  // Add footer
-  ctx.font = '28px Inter, sans-serif';
-  ctx.fillStyle = backgroundDrawn ? 'rgba(255, 255, 255, 0.9)' : 'rgba(255, 255, 255, 0.7)';
-  ctx.fillText('Made with ❤️ by WishMint AI', canvas.width / 2, canvas.height - 60);
+  // Draw Footer
+  ctx.fillStyle = theme.footerColor;
+  ctx.font = `32px ${theme.footerFont}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.globalAlpha = 0.85;
+  ctx.fillText(cardText.footer, canvas.width / 2, footerY);
+  ctx.globalAlpha = 1;
+
+  // Apply enhancement pass
+  enhanceCanvasRender(canvas);
 
   // Download
   canvas.toBlob((blob) => {
@@ -84,7 +153,7 @@ export async function exportCardImage(wish: string, name: string, templateId: Te
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `birthday-wish-${name.toLowerCase().replace(/\s+/g, '-')}.png`;
+    a.download = `birthday-card-${name.toLowerCase().replace(/\s+/g, '-')}-v${variationIndex + 1}.png`;
     a.click();
     URL.revokeObjectURL(url);
   });
@@ -112,6 +181,10 @@ export async function exportPremiumCard(
     canvas.height = 1080;
   }
 
+  // Format and sanitize card text
+  const shortWish = convertToShortWish(wish);
+  const cardText = formatCardTextContent(name, shortWish);
+
   // Draw background
   if (designerState.backgroundStyle === 'gradient') {
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -128,12 +201,26 @@ export async function exportPremiumCard(
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Draw decorative emojis
+  // Apply readability overlay
+  drawVignetteOverlay(ctx, canvas.width, canvas.height, 0.3);
+
+  // Draw decorative emojis at edges
   if (designerState.emojiDecorationsEnabled) {
     ctx.font = '64px Arial';
     theme.decorativeEmojis.forEach((emoji, index) => {
-      const x = ((index * 23 + 10) % 90) * canvas.width / 100;
-      const y = ((index * 17 + 5) % 90) * canvas.height / 100;
+      // Position at edges only
+      const edgeMargin = 80;
+      const isTopBottom = index % 2 === 0;
+      let x: number, y: number;
+      
+      if (isTopBottom) {
+        x = (index / theme.decorativeEmojis.length) * canvas.width;
+        y = index % 4 === 0 ? edgeMargin : canvas.height - edgeMargin;
+      } else {
+        x = index % 4 === 1 ? edgeMargin : canvas.width - edgeMargin;
+        y = (index / theme.decorativeEmojis.length) * canvas.height;
+      }
+      
       ctx.globalAlpha = 0.6;
       ctx.fillText(emoji, x, y);
       ctx.globalAlpha = 1;
@@ -210,45 +297,59 @@ export async function exportPremiumCard(
       break;
   }
 
-  // Draw title
+  // Calculate safe regions
+  const safeRegion = calculateSafeTextRegion(canvas.width, canvas.height, 10);
+  const titleY = format === 'story' ? 300 : 200;
+  const messageRegionY = titleY + 150;
+  const messageRegionHeight = canvas.height - messageRegionY - 200;
+
+  // Draw title with glow
   ctx.fillStyle = designerState.fontColor;
   ctx.font = `bold 72px ${fontFamily}`;
   ctx.textAlign = designerState.textAlignment;
-  ctx.shadowColor = 'rgba(0, 0, 0, 0.5)';
-  ctx.shadowBlur = 10;
-  ctx.shadowOffsetX = 2;
-  ctx.shadowOffsetY = 2;
+  ctx.textBaseline = 'top';
 
   const titleX = designerState.textAlignment === 'left' ? 100 : 
                  designerState.textAlignment === 'right' ? canvas.width - 100 : 
                  canvas.width / 2;
-  const titleY = format === 'story' ? 300 : 200;
   
-  ctx.fillText(`Happy Birthday ${name}!`, titleX, titleY);
+  drawTextWithGlow(ctx, cardText.title, titleX, titleY, theme.glowColor, 20);
 
-  // Draw wish text with wrapping
-  ctx.font = `48px ${fontFamily}`;
-  const maxWidth = canvas.width - 200;
-  const lines = wrapText(ctx, wish, maxWidth);
-  const lineHeight = 70;
-  const startY = format === 'story' ? 450 : 350;
-
-  lines.forEach((line, index) => {
+  // Draw message with dynamic fitting
+  ctx.fillStyle = designerState.fontColor;
+  ctx.textAlign = designerState.textAlignment;
+  
+  const fittedMessage = fitTextInBounds(ctx, cardText.message, fontFamily, {
+    maxWidth: safeRegion.width - 100,
+    maxHeight: messageRegionHeight,
+    initialFontSize: 48,
+    minFontSize: 32,
+    lineHeightMultiplier: 1.5,
+    minLineHeightMultiplier: 1.3,
+  });
+  
+  ctx.font = `${fittedMessage.fontSize}px ${fontFamily}`;
+  
+  const messageStartY = messageRegionY + (messageRegionHeight - fittedMessage.totalHeight) / 2;
+  
+  fittedMessage.lines.forEach((line, index) => {
     const lineX = designerState.textAlignment === 'left' ? 100 : 
                   designerState.textAlignment === 'right' ? canvas.width - 100 : 
                   canvas.width / 2;
-    ctx.fillText(line, lineX, startY + index * lineHeight);
+    const lineY = messageStartY + index * fittedMessage.lineHeight;
+    drawTextWithShadow(ctx, line, lineX, lineY);
   });
 
   // Draw footer
-  ctx.shadowBlur = 0;
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
   ctx.font = `36px ${fontFamily}`;
   ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
   ctx.globalAlpha = 0.8;
-  ctx.fillText('Made with ❤️ by WishMint AI', canvas.width / 2, canvas.height - 80);
+  ctx.fillText(cardText.footer, canvas.width / 2, canvas.height - 80);
   ctx.globalAlpha = 1;
+
+  // Apply enhancement pass
+  enhanceCanvasRender(canvas);
 
   // Return blob or download
   return new Promise((resolve) => {
@@ -270,5 +371,115 @@ export async function exportPremiumCard(
         resolve();
       }
     });
+  });
+}
+
+/**
+ * Generates a card variation as a Blob for preview
+ */
+export async function generateCardVariationBlob(
+  wish: string,
+  name: string,
+  templateId: TemplateId,
+  themeId: CardTheme,
+  variationIndex: number
+): Promise<Blob | null> {
+  const template = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
+  const theme = getThemeConfig(themeId);
+  const variation = getVariationParams(variationIndex);
+  
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return null;
+
+  canvas.width = 1080;
+  canvas.height = 1080;
+
+  const shortWish = convertToShortWish(wish);
+  const cardText = formatCardTextContent(name, shortWish);
+
+  // Load background
+  let backgroundDrawn = false;
+  try {
+    const bgImage = await loadCardBackgroundImage(theme.backgroundAsset);
+    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+    backgroundDrawn = true;
+  } catch (error) {
+    if (template.backgroundImage) {
+      try {
+        const bgImage = await loadCardBackgroundImage(template.backgroundImage);
+        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+        backgroundDrawn = true;
+      } catch {}
+    }
+  }
+
+  if (!backgroundDrawn) {
+    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, template.canvasBg1);
+    gradient.addColorStop(1, template.canvasBg2);
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  }
+
+  drawVignetteOverlay(ctx, canvas.width, canvas.height, variation.vignetteIntensity);
+
+  const safeRegion = calculateSafeTextRegion(canvas.width, canvas.height, 8);
+  const titleY = safeRegion.y + 120;
+  const messageRegionY = titleY + 150;
+  const messageRegionHeight = canvas.height - messageRegionY - 200;
+  const footerY = canvas.height - safeRegion.y - 60;
+
+  // Decorations
+  if (theme.decorationStyle === 'sparkles') {
+    drawEdgeSparkles(ctx, canvas.width, canvas.height, theme.decorationColor, variation.decorationCount);
+  } else if (theme.decorationStyle === 'confetti') {
+    drawEdgeConfetti(ctx, canvas.width, canvas.height, theme.decorationColor, variation.decorationCount);
+  } else if (theme.decorationStyle === 'minimal') {
+    drawMinimalCorners(ctx, canvas.width, canvas.height, theme.decorationColor);
+  }
+
+  // Title
+  ctx.fillStyle = theme.titleColor;
+  ctx.font = `bold 72px ${theme.titleFont}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  drawTextWithGlow(ctx, cardText.title, canvas.width / 2, titleY, theme.titleGlow, 20 * variation.glowIntensity);
+
+  // Message
+  ctx.fillStyle = theme.messageColor;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'top';
+  
+  const fittedMessage = fitTextInBounds(ctx, cardText.message, theme.messageFont, {
+    maxWidth: safeRegion.width - 100,
+    maxHeight: messageRegionHeight,
+    initialFontSize: 42,
+    minFontSize: 28,
+    lineHeightMultiplier: 1.5,
+    minLineHeightMultiplier: 1.3,
+  });
+  
+  ctx.font = `${fittedMessage.fontSize}px ${theme.messageFont}`;
+  const messageStartY = messageRegionY + (messageRegionHeight - fittedMessage.totalHeight) / 2;
+  
+  fittedMessage.lines.forEach((line, index) => {
+    const lineY = messageStartY + index * fittedMessage.lineHeight;
+    drawTextWithShadow(ctx, line, canvas.width / 2, lineY);
+  });
+
+  // Footer
+  ctx.fillStyle = theme.footerColor;
+  ctx.font = `32px ${theme.footerFont}`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'bottom';
+  ctx.globalAlpha = 0.85;
+  ctx.fillText(cardText.footer, canvas.width / 2, footerY);
+  ctx.globalAlpha = 1;
+
+  enhanceCanvasRender(canvas);
+
+  return new Promise((resolve) => {
+    canvas.toBlob((blob) => resolve(blob));
   });
 }

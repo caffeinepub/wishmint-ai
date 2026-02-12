@@ -34,7 +34,7 @@ export function HeroSection({
 
   return (
     <>
-      <section className="relative w-full min-h-screen flex flex-col px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
+      <section id="home" className="scroll-mt-16 relative w-full min-h-screen flex flex-col px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
         {/* Animated background gradient - non-interactive */}
         <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/15 via-background to-neon-green/15 animate-gradient pointer-events-none" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.08),transparent_50%)] pointer-events-none" />

@@ -2,10 +2,13 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-change-all-upgrade-entry-points-e-g-upgrade-to-pro-upgrade-to-creator-unlock-premium-and-any-upgrade-plan-button-so-that-clicking-them-only-opens-the-in-app-pricingcomparisonmodal-and-does-not-immediately-open-or-navigate-to-an-external-full-payment-page",
-      "featureTitle": "Change all upgrade entry points (e.g., “Upgrade to Pro”, “Upgrade to Creator”, “Unlock Premium”, and any “Upgrade Plan” button) so that clicking them only opens the in-app PricingComparisonModal and does not immediately open or navigate to an external/full payment page.",
+      "featureId": "feature-add-a-sticky-top-navigation-bar-that-remains-fixed-while-scrolling-and-matches-the-existing-wishmint-premium-dark-neon-purple-green-gradient-branding-the-navbar-must-include-menu-items-home-create-wish-templates-marketplace-pricing-dashboard-faq-clicking-a-menu-item-must-smoothly-scroll-to-the-corresponding-section",
+      "featureTitle": "Add a sticky top navigation bar that remains fixed while scrolling and matches the existing WishMint premium dark + neon (purple/green) gradient branding. The navbar must include menu items: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ. Clicking a menu item must smoothly scroll to the corresponding section.",
       "files": [
-        "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md"
+        "frontend/src/App.tsx",
+        "frontend/src/components/navigation/StickyNavbar.tsx",
+        "frontend/src/index.css",
+        "frontend/src/lib/scroll.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -13,18 +16,26 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-94"
+        "REQ-133"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-pricingcomparisonmodal-so-plan-upgrade-buttons-do-not-immediately-initiate-razorpay-checkout-instead-the-modal-must-present-an-in-modal-confirmation-step-or-secondary-button-that-the-user-explicitly-clicks-to-proceed-to-payment-keeping-the-user-in-the-app-modal-flow-until-they-confirm",
-      "featureTitle": "Update PricingComparisonModal so plan upgrade buttons do not immediately initiate Razorpay checkout. Instead, the modal must present an in-modal confirmation step (or secondary button) that the user explicitly clicks to proceed to payment, keeping the user in the app modal flow until they confirm.",
+      "featureId": "feature-assign-anchor-ids-to-the-major-website-sections-using-the-exact-ids-specified-home-id-home-wish-generator-id-create-wish-templates-id-templates-marketplace-id-marketplace-pricing-id-pricing-dashboard-id-dashboard-faq-id-faq-ensure-existing-scroll-ref-behaviors-continue-to-work-and-scrolling-accounts-for-the-sticky-header-so-section-titles-are-not-hidden-under-the-navbar",
+      "featureTitle": "Assign anchor IDs to the major website sections using the exact IDs specified: Home id=\"home\"; Wish Generator id=\"create-wish\"; Templates id=\"templates\"; Marketplace id=\"marketplace\"; Pricing id=\"pricing\"; Dashboard id=\"dashboard\"; FAQ id=\"faq\". Ensure existing scroll/ref behaviors continue to work and scrolling accounts for the sticky header so section titles are not hidden under the navbar.",
       "files": [
-        "frontend/src/features/subscription/PricingComparisonModal.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/index.css",
+        "frontend/src/sections/DashboardSection.tsx",
+        "frontend/src/sections/FaqSection.tsx",
+        "frontend/src/sections/GeneratorSection.tsx",
+        "frontend/src/sections/HeroSection.tsx",
+        "frontend/src/sections/PricingSection.tsx",
+        "frontend/src/sections/TemplatesSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -32,19 +43,21 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-95"
+        "REQ-134"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-the-razorpay-upgrade-initiation-userazorpayupgrade-never-performs-a-full-page-navigation-redirect-as-part-of-the-client-flow-if-checkout-cannot-be-opened-as-an-in-context-experience-show-a-clear-english-error-toast-explaining-that-payment-could-not-be-started-and-to-try-again-later-without-leaving-the-app",
-      "featureTitle": "Ensure the Razorpay upgrade initiation (useRazorpayUpgrade) never performs a full-page navigation/redirect as part of the client flow; if checkout cannot be opened as an in-context experience, show a clear English error toast explaining that payment could not be started and to try again later, without leaving the app.",
+      "featureId": "feature-implement-active-section-highlighting-in-the-sticky-navigation-bar-as-the-user-scrolls-the-currently-viewed-section-s-corresponding-nav-item-must-be-visibly-highlighted-the-highlight-must-update-smoothly-and-be-stable-no-rapid-flicker",
+      "featureTitle": "Implement active-section highlighting in the sticky navigation bar: as the user scrolls, the currently viewed section’s corresponding nav item must be visibly highlighted. The highlight must update smoothly and be stable (no rapid flicker).",
       "files": [
-        "frontend/src/features/payments/razorpay.ts",
-        "frontend/src/features/subscription/PricingComparisonModal.tsx"
+        "frontend/src/components/navigation/StickyNavbar.tsx",
+        "frontend/src/hooks/useActiveSection.ts",
+        "frontend/src/index.css"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -52,10 +65,123 @@
         "build-template-react@1.0.0",
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-96"
+        "REQ-135"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-thin-scroll-progress-indicator-bar-at-the-very-top-of-the-page-that-shows-the-user-s-scroll-percentage-through-the-main-page-content-the-bar-must-use-a-gradient-progress-color-consistent-with-wishmint-branding-and-animate-smoothly-as-the-user-scrolls",
+      "featureTitle": "Add a thin scroll progress indicator bar at the very top of the page that shows the user’s scroll percentage through the main page content. The bar must use a gradient progress color consistent with WishMint branding and animate smoothly as the user scrolls.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/navigation/ScrollProgressBar.tsx",
+        "frontend/src/hooks/useScrollProgress.ts",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-136"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-floating-back-to-top-button-positioned-at-the-bottom-right-of-the-viewport-it-must-appear-only-after-the-user-scrolls-at-least-30-down-the-page-and-must-smoothly-scroll-the-user-back-to-the-top-home-style-it-as-a-glowing-wishmint-button-and-ensure-it-does-not-block-important-ui-on-mobile",
+      "featureTitle": "Add a floating “Back to Top” button positioned at the bottom-right of the viewport. It must appear only after the user scrolls at least 30% down the page and must smoothly scroll the user back to the top (Home). Style it as a glowing WishMint button and ensure it does not block important UI on mobile.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-137"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-floating-quick-action-button-labeled-exactly-create-wish-that-scrolls-the-user-directly-to-the-wish-generator-section-id-create-wish-this-button-must-be-mobile-safe-not-blocking-content-and-visually-consistent-with-wishmint-glowing-neon-styling",
+      "featureTitle": "Add a floating quick action button labeled exactly \"🎂 Create Wish\" that scrolls the user directly to the Wish Generator section (id=\"create-wish\"). This button must be mobile-safe (not blocking content) and visually consistent with WishMint glowing/neon styling.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-138"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-mobile-optimization-for-the-new-navigation-system-on-mobile-breakpoints-collapse-the-sticky-navigation-items-into-a-hamburger-menu-that-can-be-opened-closed-the-menu-must-retain-smooth-scrolling-to-section-anchors-and-must-not-introduce-overlay-pointer-events-issues-that-block-page-interaction",
+      "featureTitle": "Implement mobile optimization for the new navigation system: on mobile breakpoints, collapse the sticky navigation items into a hamburger menu that can be opened/closed. The menu must retain smooth scrolling to section anchors and must not introduce overlay/pointer-events issues that block page interaction.",
+      "files": [
+        "frontend/src/components/navigation/StickyNavbar.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-139"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-any-user-facing-text-introduced-by-the-new-navigation-scroller-features-is-in-english-and-the-new-ui-elements-sticky-navbar-progress-bar-floating-buttons-hamburger-menu-preserve-the-existing-premium-dark-gradient-look-and-do-not-regress-current-section-layouts",
+      "featureTitle": "Ensure any user-facing text introduced by the new navigation/scroller features is in English, and the new UI elements (sticky navbar, progress bar, floating buttons, hamburger menu) preserve the existing premium dark gradient look and do not regress current section layouts.",
+      "files": [
+        "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
+        "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
+        "frontend/src/components/navigation/ScrollProgressBar.tsx",
+        "frontend/src/components/navigation/StickyNavbar.tsx",
+        "frontend/src/index.css"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-140"
       ],
       "confidence": "high"
     }
