@@ -2,14 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-ensure-the-landing-page-contains-a-single-set-of-in-page-sections-with-the-exact-ids-used-by-sidebar-navigation-home-create-wish-templates-marketplace-pricing-dashboard-faq",
-      "featureTitle": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
+      "featureId": "feature-make-authentication-the-first-screen-flow-for-unauthenticated-users-on-initial-app-load-automatically-open-the-existing-authentrydialog-sign-in-sign-up-before-showing-the-main-app-content-sections",
+      "featureTitle": "Make authentication the first screen/flow for unauthenticated users: on initial app load, automatically open the existing AuthEntryDialog (Sign In / Sign Up) before showing the main app content/sections.",
       "files": [
-        "frontend/src/sections/DashboardSection.tsx",
-        "frontend/src/sections/FaqSection.tsx",
-        "frontend/src/sections/MarketplaceSection.tsx",
-        "frontend/src/sections/PricingSection.tsx",
-        "frontend/src/sections/TemplatesSection.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/AuthControls.tsx",
+        "frontend/src/sections/HeroSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -27,10 +25,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-update-the-sidebar-mobile-navigation-click-handling-so-clicking-any-menu-item-performs-in-page-smooth-scrolling-to-the-target-section-and-does-not-trigger-route-navigation-full-page-reload-or-redirect-to-home",
-      "featureTitle": "Update the sidebar/mobile navigation click handling so clicking any menu item performs in-page smooth scrolling to the target section and does not trigger route navigation, full page reload, or redirect to Home.",
+      "featureId": "feature-ensure-the-initial-auth-first-flow-resolves-cleanly-after-login-after-a-successful-internet-identity-login-from-the-initial-authentrydialog-close-the-dialog-and-continue-into-the-app-preserving-existing-post-auth-behavior-such-as-scrolling-to-the-generator-when-appropriate",
+      "featureTitle": "Ensure the initial auth-first flow resolves cleanly after login: after a successful Internet Identity login from the initial AuthEntryDialog, close the dialog and continue into the app (preserving existing post-auth behavior such as scrolling to the generator when appropriate).",
       "files": [
-        "frontend/src/components/navigation/StickyNavbar.tsx"
+        "frontend/src/App.tsx",
+        "frontend/src/components/auth/AuthEntryDialog.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -44,55 +43,6 @@
       ],
       "testIds": [
         "REQ-2"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-standardize-smooth-scrolling-for-sidebar-navigation-using-the-existing-smoothscrolltoanchor-utility-and-ensure-it-is-the-single-mechanism-used-by-sidebar-navigation-for-section-scrolling",
-      "featureTitle": "Implement/standardize smooth scrolling for sidebar navigation using the existing smoothScrollToAnchor utility and ensure it is the single mechanism used by sidebar navigation for section scrolling.",
-      "files": [
-        "frontend/src/components/navigation/StickyNavbar.tsx",
-        "frontend/src/lib/scroll.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-fix-sticky-header-offset-so-scrolled-to-sections-are-not-hidden-behind-the-sticky-header-by-applying-a-consistent-safe-scroll-margin-to-all-main-sections-and-ensuring-the-scroll-utility-offsets-by-the-sticky-header-height",
-      "featureTitle": "Fix sticky-header offset so scrolled-to sections are not hidden behind the sticky header by applying a consistent safe scroll margin to all main sections and ensuring the scroll utility offsets by the sticky header height.",
-      "files": [
-        "frontend/src/components/navigation/StickyNavbar.tsx",
-        "frontend/src/lib/scroll.ts",
-        "frontend/src/sections/DashboardSection.tsx",
-        "frontend/src/sections/FaqSection.tsx",
-        "frontend/src/sections/MarketplaceSection.tsx",
-        "frontend/src/sections/PricingSection.tsx",
-        "frontend/src/sections/TemplatesSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
       ],
       "confidence": "high"
     }

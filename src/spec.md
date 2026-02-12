@@ -1,12 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Fix sidebar/mobile navigation so it smoothly scrolls to the correct in-page sections without redirecting or reloading, and ensures sections aren’t hidden under the sticky header.
+**Goal:** Make Sign In / Sign Up the first experience for unauthenticated users by automatically opening the existing authentication dialog before showing the main app content.
 
 **Planned changes:**
-- Ensure the landing page contains exactly one element for each required section ID: home, create-wish, templates, marketplace, pricing, dashboard, faq.
-- Update sidebar/mobile menu item click handling to use in-page smooth scrolling (no router navigation, no `href="/"`, no `href="#"`), and close the sidebar/sheet after selection.
-- Standardize sidebar scrolling behavior to exclusively use the existing `smoothScrollToAnchor(anchorId)` utility, respecting `prefers-reduced-motion`.
-- Apply a consistent sticky-header offset by adding a safe scroll margin to all target sections and ensuring the scroll utility accounts for the header height.
+- On initial app load, detect unauthenticated state and automatically open the existing AuthEntryDialog (Sign In / Sign Up) without user interaction.
+- De-emphasize or block primary interaction with main sections (Hero/Generator/other content) until the auth dialog is dismissed or authentication completes.
+- After successful Internet Identity authentication from the initial dialog, close the dialog automatically and proceed into the app, preserving current post-auth behavior (e.g., existing navigation/scroll behavior where applicable).
+- If authentication fails, keep the user in the dialog and display the existing error UI.
 
-**User-visible outcome:** Clicking any sidebar/mobile navigation item smoothly scrolls to the matching section on the current page (and closes the menu), with the section content correctly visible below the sticky header.
+**User-visible outcome:** Unauthenticated visitors immediately see the Sign In / Sign Up dialog on arrival; after signing in successfully the dialog closes and the full app is accessible without needing a refresh.

@@ -3,19 +3,23 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Store, Search, Plus } from 'lucide-react';
+import { Store, Search, Plus, Lock, Crown } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Reveal } from '../components/Reveal';
 import { useGetAllMarketplaceListings } from '../features/marketplace/hooks/useMarketplaceListings';
 import { MarketplaceListingCard } from '../features/marketplace/components/MarketplaceListingCard';
 import { CreateListingDialog } from '../features/marketplace/components/CreateListingDialog';
 import { useAppContext } from '../App';
+import { useEntitlements } from '../features/subscription/useEntitlements';
+import { PlanType } from '../backend';
 
 export function MarketplaceSection() {
   const { data: listings, isLoading } = useGetAllMarketplaceListings();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<'all' | 'template' | 'sticker'>('all');
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const { openPricingModal } = useAppContext();
+  const { openPricingModal, isAuthenticated } = useAppContext();
+  const { entitlements, effectivePlan, isLoading: entitlementsLoading } = useEntitlements();
 
   const filteredListings = listings?.filter((listing) => {
     const matchesSearch = listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -23,6 +27,28 @@ export function MarketplaceSection() {
     const matchesType = filterType === 'all' || listing.contentType.__kind__ === filterType;
     return matchesSearch && matchesType;
   }) || [];
+
+  // Determine if user can purchase (Pro or Creator)
+  const canPurchase = effectivePlan === PlanType.pro || effectivePlan === PlanType.creator;
+  
+  // Determine if user can create listings (Creator only)
+  const canCreateListings = entitlements.creatorMarketplace;
+
+  const handleUpgradeForPurchase = () => {
+    openPricingModal({ highlightPlan: 'pro' });
+  };
+
+  const handleUpgradeForCreation = () => {
+    openPricingModal({ highlightPlan: 'creator' });
+  };
+
+  const handleCreateListingClick = () => {
+    if (canCreateListings) {
+      setCreateDialogOpen(true);
+    } else {
+      handleUpgradeForCreation();
+    }
+  };
 
   return (
     <section id="marketplace" className="scroll-mt-16 w-full py-16 px-4 sm:px-6 lg:px-8 section-transition" style={{ backgroundColor: 'oklch(var(--background-secondary))' }}>
@@ -37,6 +63,30 @@ export function MarketplaceSection() {
             Discover and purchase exclusive templates from talented creators
           </p>
         </div>
+
+        {/* Upgrade Prompt for Free Users */}
+        {!entitlementsLoading && !canPurchase && (
+          <Alert className="mb-8 glass-card border-neon-purple/30 bg-gradient-to-r from-neon-purple/5 to-neon-green/5">
+            <Lock className="h-5 w-5 text-neon-purple" />
+            <AlertDescription className="ml-2">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div>
+                  <p className="font-semibold text-foreground mb-1">Unlock Marketplace Purchases</p>
+                  <p className="text-sm text-muted-foreground">
+                    Upgrade to Pro or Creator plan to purchase premium templates from our marketplace
+                  </p>
+                </div>
+                <Button
+                  onClick={handleUpgradeForPurchase}
+                  className="shrink-0 bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90"
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  Upgrade Now
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
+        )}
 
         {/* Search and Filter Bar */}
         <div className="flex flex-col sm:flex-row gap-4 mb-8">
@@ -60,11 +110,20 @@ export function MarketplaceSection() {
             </SelectContent>
           </Select>
           <Button
-            onClick={() => setCreateDialogOpen(true)}
-            className="premium-button"
+            onClick={handleCreateListingClick}
+            className={canCreateListings ? "premium-button" : "bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90"}
           >
-            <Plus className="w-4 h-4 mr-2" />
-            Create Listing
+            {canCreateListings ? (
+              <>
+                <Plus className="w-4 h-4 mr-2" />
+                Create Listing
+              </>
+            ) : (
+              <>
+                <Lock className="w-4 h-4 mr-2" />
+                Upgrade to Create
+              </>
+            )}
           </Button>
         </div>
 
@@ -87,7 +146,12 @@ export function MarketplaceSection() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredListings.map((listing) => (
-              <MarketplaceListingCard key={listing.id.toString()} listing={listing} />
+              <MarketplaceListingCard 
+                key={listing.id.toString()} 
+                listing={listing}
+                isLocked={!canPurchase}
+                onUpgrade={handleUpgradeForPurchase}
+              />
             ))}
           </div>
         )}

@@ -21,6 +21,7 @@ import { FloatingCreateWishButton } from './components/navigation/FloatingCreate
 import { SparkleOverlay } from './components/decor/SparkleOverlay';
 import { PremiumCardDesignerModule } from './features/premiumCardDesigner/PremiumCardDesignerModule';
 import { PricingComparisonModal } from './features/subscription/PricingComparisonModal';
+import { AuthEntryDialog } from './components/auth/AuthEntryDialog';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { smoothScrollToAnchor } from './lib/scroll';
 import type { BirthdayPack, GeneratorFormData, TemplateId } from './features/generator/types';
@@ -44,12 +45,13 @@ interface AppContextType {
   setSelectedTemplate: React.Dispatch<React.SetStateAction<TemplateId>>;
   openPremiumDesigner: () => void;
   closePremiumDesigner: () => void;
-  openPricingModal: () => void;
+  openPricingModal: (options?: { highlightPlan?: 'pro' | 'creator' }) => void;
   creationMode: 'quick-form' | 'prompt-studio';
   setCreationMode: React.Dispatch<React.SetStateAction<'quick-form' | 'prompt-studio'>>;
   promptStudioState: PromptStudioState;
   setPromptStudioState: React.Dispatch<React.SetStateAction<PromptStudioState>>;
   isAuthenticated: boolean;
+  openAuthDialog: () => void;
 }
 
 const AppContext = React.createContext<AppContextType | null>(null);
@@ -79,6 +81,7 @@ function AppContent() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('minimal');
   const [showPremiumDesigner, setShowPremiumDesigner] = useState(false);
   const [showPricingModal, setShowPricingModal] = useState(false);
+  const [pricingModalHighlight, setPricingModalHighlight] = useState<'pro' | 'creator' | undefined>(undefined);
   const [creationMode, setCreationMode] = useState<'quick-form' | 'prompt-studio'>('quick-form');
   const [promptStudioState, setPromptStudioState] = useState<PromptStudioState>({
     prompt: '',
@@ -90,11 +93,25 @@ function AppContent() {
     selectedVariationIndex: 0,
   });
 
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
+  const [hasShownInitialAuthDialog, setHasShownInitialAuthDialog] = useState(false);
+
   const nameInputRef = useRef<HTMLInputElement>(null);
   const authControlsRef = useRef<HTMLButtonElement>(null);
-  const { identity, loginStatus } = useInternetIdentity();
+  const { identity, loginStatus, isInitializing } = useInternetIdentity();
 
-  const isAuthenticated = !!identity && loginStatus === 'success';
+  // isAuthenticated based on non-anonymous identity
+  const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
+
+  // Auto-open auth dialog on initial load for unauthenticated users
+  useEffect(() => {
+    if (!isInitializing && !hasShownInitialAuthDialog) {
+      setHasShownInitialAuthDialog(true);
+      if (!isAuthenticated) {
+        setAuthDialogOpen(true);
+      }
+    }
+  }, [isInitializing, isAuthenticated, hasShownInitialAuthDialog]);
 
   const openPremiumDesigner = () => {
     setShowPremiumDesigner(true);
@@ -104,17 +121,26 @@ function AppContent() {
     setShowPremiumDesigner(false);
   };
 
-  const openPricingModal = () => {
+  const openPricingModal = (options?: { highlightPlan?: 'pro' | 'creator' }) => {
+    setPricingModalHighlight(options?.highlightPlan);
     setShowPricingModal(true);
   };
 
+  const openAuthDialog = () => {
+    setAuthDialogOpen(true);
+  };
+
+  const handlePricingModalClose = () => {
+    setShowPricingModal(false);
+    setPricingModalHighlight(undefined);
+    // Invalidate subscription status to refresh entitlements
+    queryClient.invalidateQueries({ queryKey: ['subscriptionStatus'] });
+  };
+
   const handleGenerateClick = () => {
-    smoothScrollToAnchor('create-wish');
-    if (nameInputRef.current) {
-      setTimeout(() => {
-        nameInputRef.current?.focus();
-      }, 500);
-    }
+    smoothScrollToAnchor('create-wish', () => {
+      nameInputRef.current?.focus();
+    });
   };
 
   const handleTryDemo = () => {
@@ -123,6 +149,17 @@ function AppContent() {
 
   const handleExamplesClick = () => {
     smoothScrollToAnchor('examples');
+  };
+
+  const handleAuthSuccess = () => {
+    // Close the auth dialog
+    setAuthDialogOpen(false);
+    // Scroll to generator and focus input after a short delay
+    setTimeout(() => {
+      smoothScrollToAnchor('create-wish', () => {
+        nameInputRef.current?.focus();
+      });
+    }, 300);
   };
 
   const contextValue: AppContextType = {
@@ -140,6 +177,7 @@ function AppContent() {
     promptStudioState,
     setPromptStudioState,
     isAuthenticated,
+    openAuthDialog,
   };
 
   if (showPremiumDesigner) {
@@ -184,7 +222,14 @@ function AppContent() {
 
         <PricingComparisonModal
           open={showPricingModal}
-          onClose={() => setShowPricingModal(false)}
+          onClose={handlePricingModalClose}
+          highlightPlan={pricingModalHighlight}
+        />
+
+        <AuthEntryDialog
+          open={authDialogOpen}
+          onOpenChange={setAuthDialogOpen}
+          onAuthSuccess={handleAuthSuccess}
         />
       </div>
     </AppContext.Provider>

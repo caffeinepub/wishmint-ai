@@ -43,6 +43,7 @@ export function FloatingBackToTopButton() {
       className={`fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-40 btn-primary-gradient text-white shadow-glow-brand rounded-full w-12 h-12 ${
         prefersReducedMotion ? '' : 'hover:scale-105'
       } transition-all`}
+      style={{ transitionProperty: 'transform, box-shadow' }}
       aria-label="Back to top"
     >
       <ArrowUp className="h-5 w-5" />

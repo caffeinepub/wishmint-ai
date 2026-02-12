@@ -9,6 +9,7 @@ const NAV_ITEMS: { id: SectionId; label: string }[] = [
   { id: 'home', label: 'Home' },
   { id: 'create-wish', label: 'Create Wish' },
   { id: 'templates', label: 'Templates' },
+  { id: 'examples', label: 'Examples' },
   { id: 'marketplace', label: 'Marketplace' },
   { id: 'pricing', label: 'Pricing' },
   { id: 'dashboard', label: 'Dashboard' },

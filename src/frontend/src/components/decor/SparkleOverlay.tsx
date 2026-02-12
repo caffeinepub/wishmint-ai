@@ -27,6 +27,7 @@ export function SparkleOverlay() {
           backgroundSize: '512px 512px',
           backgroundRepeat: 'repeat',
           mixBlendMode: 'screen',
+          willChange: prefersReducedMotion ? 'auto' : 'opacity, transform',
         }}
       />
     </div>

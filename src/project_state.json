@@ -1,45 +1,26 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "WishMint AI website: fix sidebar navigation so menu items smoothly scroll to in-page sections (with header offset) instead of redirecting to Home.",
-  "architectural_notes": [
-    "Use in-page section IDs (home, create-wish, templates, marketplace, pricing, dashboard, faq) and scroll-to-section behavior instead of router navigation/href='/' or href='#'.",
-    "Apply smooth scrolling and account for sticky header via scroll margin/offset so target sections are not hidden."
-  ],
+  "summary": "New project",
+  "architectural_notes": [],
   "known_issues": [
-    "Sidebar menu item clicks redirect/reload to Home instead of scrolling to the selected section."
+    "App is not showing Sign In / Sign Up first; user requests this be fixed."
   ],
   "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-ensure-the-landing-page-contains-a-single-set-of-in-page-sections-with-the-exact-ids-used-by-sidebar-navigation-home-create-wish-templates-marketplace-pricing-dashboard-faq",
-      "title": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
+      "id": "feature-make-authentication-the-first-screen-flow-for-unauthenticated-users-on-initial-app-load-automatically-open-the-existing-authentrydialog-sign-in-sign-up-before-showing-the-main-app-content-sections",
+      "title": "Make authentication the first screen/flow for unauthenticated users: on initial app load, automatically open the existing AuthEntryDialog (Sign In / Sign Up) before showing the main app content/sections.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-the-sidebar-mobile-navigation-click-handling-so-clicking-any-menu-item-performs-in-page-smooth-scrolling-to-the-target-section-and-does-not-trigger-route-navigation-full-page-reload-or-redirect-to-home",
-      "title": "Update the sidebar/mobile navigation click handling so clicking any menu item performs in-page smooth scrolling to the target section and does not trigger route navigation, full page reload, or redirect to Home.",
+      "id": "feature-ensure-the-initial-auth-first-flow-resolves-cleanly-after-login-after-a-successful-internet-identity-login-from-the-initial-authentrydialog-close-the-dialog-and-continue-into-the-app-preserving-existing-post-auth-behavior-such-as-scrolling-to-the-generator-when-appropriate",
+      "title": "Ensure the initial auth-first flow resolves cleanly after login: after a successful Internet Identity login from the initial AuthEntryDialog, close the dialog and continue into the app (preserving existing post-auth behavior such as scrolling to the generator when appropriate).",
       "reqIds": [
         "REQ-2"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-standardize-smooth-scrolling-for-sidebar-navigation-using-the-existing-smoothscrolltoanchor-utility-and-ensure-it-is-the-single-mechanism-used-by-sidebar-navigation-for-section-scrolling",
-      "title": "Implement/standardize smooth scrolling for sidebar navigation using the existing smoothScrollToAnchor utility and ensure it is the single mechanism used by sidebar navigation for section scrolling.",
-      "reqIds": [
-        "REQ-3"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-sticky-header-offset-so-scrolled-to-sections-are-not-hidden-behind-the-sticky-header-by-applying-a-consistent-safe-scroll-margin-to-all-main-sections-and-ensuring-the-scroll-utility-offsets-by-the-sticky-header-height",
-      "title": "Fix sticky-header offset so scrolled-to sections are not hidden behind the sticky header by applying a consistent safe scroll margin to all main sections and ensuring the scroll utility offsets by the sticky header height.",
-      "reqIds": [
-        "REQ-4"
       ],
       "version": 1
     }
@@ -47,12 +28,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Fix sidebar navigation to close menu and smoothly scroll to correct in-page sections (no reload/redirect), with correct section IDs and sticky-header offset.",
+      "summary": "Show Sign In / Sign Up first (authentication should be the initial screen/flow).",
       "reqIds": [],
-      "status": "in_progress"
+      "status": "pending"
     }
   ],
-  "projectName": "WishMint AI Website",
+  "projectName": "Show Sign In / Sign Up as the initial screen for unauthenticated users",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

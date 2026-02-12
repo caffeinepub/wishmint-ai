@@ -1,84 +1,41 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T21:41:54.772Z",
+  "generatedAt": "2026-02-12T22:37:21.604Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 4,
-    "implemented": 4,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
+        "summary": "Make authentication the first screen/flow for unauthenticated users: on initial app load, automatically open the existing AuthEntryDialog (Sign In / Sign Up) before showing the main app content/sections.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/App.tsx",
           "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/sections/TemplatesSection.tsx",
-          "frontend/src/sections/MarketplaceSection.tsx",
-          "frontend/src/sections/PricingSection.tsx",
-          "frontend/src/sections/DashboardSection.tsx",
-          "frontend/src/sections/FaqSection.tsx"
+          "frontend/src/components/AuthControls.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/sections/TemplatesSection.tsx",
-          "frontend/src/sections/MarketplaceSection.tsx",
-          "frontend/src/sections/PricingSection.tsx",
-          "frontend/src/sections/DashboardSection.tsx",
-          "frontend/src/sections/FaqSection.tsx"
+          "frontend/src/App.tsx",
+          "frontend/src/sections/HeroSection.tsx",
+          "frontend/src/components/AuthControls.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Update the sidebar/mobile navigation click handling so clicking any menu item performs in-page smooth scrolling to the target section and does not trigger route navigation, full page reload, or redirect to Home.",
+        "summary": "Ensure the initial auth-first flow resolves cleanly after login: after a successful Internet Identity login from the initial AuthEntryDialog, close the dialog and continue into the app (preserving existing post-auth behavior such as scrolling to the generator when appropriate).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/navigation/StickyNavbar.tsx"
+          "frontend/src/components/auth/AuthEntryDialog.tsx",
+          "frontend/src/App.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/navigation/StickyNavbar.tsx"
-        ]
-      },
-      {
-        "id": "REQ-3",
-        "summary": "Implement/standardize smooth scrolling for sidebar navigation using the existing smoothScrollToAnchor utility and ensure it is the single mechanism used by sidebar navigation for section scrolling.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/navigation/StickyNavbar.tsx",
-          "frontend/src/lib/scroll.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/navigation/StickyNavbar.tsx",
-          "frontend/src/lib/scroll.ts"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Fix sticky-header offset so scrolled-to sections are not hidden behind the sticky header by applying a consistent safe scroll margin to all main sections and ensuring the scroll utility offsets by the sticky header height.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/lib/scroll.ts",
-          "frontend/src/components/navigation/StickyNavbar.tsx",
-          "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/sections/TemplatesSection.tsx",
-          "frontend/src/sections/MarketplaceSection.tsx",
-          "frontend/src/sections/PricingSection.tsx",
-          "frontend/src/sections/DashboardSection.tsx",
-          "frontend/src/sections/FaqSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/lib/scroll.ts",
-          "frontend/src/components/navigation/StickyNavbar.tsx",
-          "frontend/src/sections/TemplatesSection.tsx",
-          "frontend/src/sections/MarketplaceSection.tsx",
-          "frontend/src/sections/PricingSection.tsx",
-          "frontend/src/sections/DashboardSection.tsx",
-          "frontend/src/sections/FaqSection.tsx"
+          "frontend/src/components/auth/AuthEntryDialog.tsx",
+          "frontend/src/App.tsx"
         ]
       }
     ]
@@ -88,14 +45,10 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/navigation/StickyNavbar.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/lib/scroll.ts",
-    "frontend/src/sections/DashboardSection.tsx",
-    "frontend/src/sections/FaqSection.tsx",
-    "frontend/src/sections/MarketplaceSection.tsx",
-    "frontend/src/sections/PricingSection.tsx",
-    "frontend/src/sections/TemplatesSection.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AuthControls.tsx",
+    "frontend/src/components/auth/AuthEntryDialog.tsx",
+    "frontend/src/sections/HeroSection.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

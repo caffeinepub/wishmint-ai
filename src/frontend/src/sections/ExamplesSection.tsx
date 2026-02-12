@@ -4,6 +4,7 @@ import { Reveal } from '../components/Reveal';
 import { SAMPLE_WISHES } from '../features/examples/sampleWishes';
 import { ExampleWishCard } from '../features/examples/components/ExampleWishCard';
 import { useAppContext } from '../App';
+import { smoothScrollToAnchor } from '../lib/scroll';
 import type { SampleWish } from '../features/examples/sampleWishes';
 import type { Relationship, Tone } from '../features/generator/types';
 
@@ -25,21 +26,20 @@ export const ExamplesSection = forwardRef<HTMLDivElement>((_, ref) => {
       tone: wish.tone as Tone,
     }));
 
-    // Scroll to generator section
-    const generatorSection = document.querySelector('[data-section="generator"]');
-    if (generatorSection) {
-      generatorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      
-      // Focus name input after scroll
-      setTimeout(() => {
-        const nameInput = document.querySelector<HTMLInputElement>('input[name="name"]');
-        nameInput?.focus();
-      }, 500);
-    }
+    // Scroll to generator section using shared scroll utility
+    smoothScrollToAnchor('create-wish', () => {
+      // Focus name input after scroll completes
+      const nameInput = document.querySelector<HTMLInputElement>('input[name="name"]');
+      nameInput?.focus();
+    });
   };
 
   return (
-    <section ref={ref} className="section-padding px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-neon-green/5 to-background">
+    <section 
+      id="examples" 
+      ref={ref} 
+      className="scroll-mt-16 section-padding px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-neon-green/5 to-background"
+    >
       <div className="section-container max-w-7xl">
         <Reveal>
           <div className="text-center mb-12 space-y-4">

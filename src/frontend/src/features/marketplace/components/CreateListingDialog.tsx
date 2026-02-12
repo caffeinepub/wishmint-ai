@@ -15,8 +15,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCreateMarketplaceListing } from '../hooks/useCreateMarketplaceListing';
 import { useInternetIdentity } from '../../../hooks/useInternetIdentity';
 import { useAppContext } from '../../../App';
+import { useEntitlements } from '../../subscription/useEntitlements';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, Crown } from 'lucide-react';
 
 interface CreateListingDialogProps {
   open: boolean;
@@ -35,13 +36,19 @@ export function CreateListingDialog({ open, onOpenChange }: CreateListingDialogP
   const { mutate: createListing, isPending } = useCreateMarketplaceListing();
   const { identity } = useInternetIdentity();
   const { openPricingModal } = useAppContext();
+  const { entitlements, isLoading: entitlementsLoading } = useEntitlements();
 
   const isAuthenticated = !!identity;
+  const canCreateListings = entitlements.creatorMarketplace;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!isAuthenticated) {
+      return;
+    }
+
+    if (!canCreateListings) {
       return;
     }
 
@@ -76,6 +83,11 @@ export function CreateListingDialog({ open, onOpenChange }: CreateListingDialogP
     );
   };
 
+  const handleUpgrade = () => {
+    openPricingModal({ highlightPlan: 'creator' });
+    onOpenChange(false);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[500px]">
@@ -93,6 +105,27 @@ export function CreateListingDialog({ open, onOpenChange }: CreateListingDialogP
               Please sign in to create marketplace listings
             </AlertDescription>
           </Alert>
+        ) : !canCreateListings && !entitlementsLoading ? (
+          <Alert className="border-neon-purple/30 bg-gradient-to-r from-neon-purple/5 to-neon-green/5">
+            <Crown className="h-5 w-5 text-neon-purple" />
+            <AlertDescription>
+              <div className="space-y-3">
+                <div>
+                  <p className="font-semibold text-foreground mb-1">Creator Plan Required</p>
+                  <p className="text-sm text-muted-foreground">
+                    Upgrade to the Creator plan to sell your templates and stickers in the marketplace
+                  </p>
+                </div>
+                <Button
+                  onClick={handleUpgrade}
+                  className="w-full bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90"
+                >
+                  <Crown className="w-4 h-4 mr-2" />
+                  Upgrade to Creator
+                </Button>
+              </div>
+            </AlertDescription>
+          </Alert>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -103,12 +136,13 @@ export function CreateListingDialog({ open, onOpenChange }: CreateListingDialogP
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Elegant Birthday Template"
                 required
+                disabled={isPending}
               />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="listing-type">Content Type</Label>
-              <Select value={contentType} onValueChange={(value) => setContentType(value as ContentType)}>
+              <Select value={contentType} onValueChange={(value) => setContentType(value as ContentType)} disabled={isPending}>
                 <SelectTrigger id="listing-type">
                   <SelectValue />
                 </SelectTrigger>
@@ -120,15 +154,16 @@ export function CreateListingDialog({ open, onOpenChange }: CreateListingDialogP
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="listing-price">Price (₹)</Label>
+              <Label htmlFor="listing-price">Price ($)</Label>
               <Input
                 id="listing-price"
                 type="number"
+                min="0"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
-                placeholder="49"
-                min="0"
+                placeholder="e.g., 5"
                 required
+                disabled={isPending}
               />
             </div>
 
@@ -141,27 +176,29 @@ export function CreateListingDialog({ open, onOpenChange }: CreateListingDialogP
                 placeholder="Describe your template or sticker..."
                 rows={4}
                 required
+                disabled={isPending}
               />
             </div>
 
-            <Alert className="bg-brand-purple/10 border-brand-purple/30">
-              <AlertDescription className="text-sm">
-                Creating marketplace listings requires a Creator plan.{' '}
-                <button
-                  type="button"
-                  onClick={() => openPricingModal()}
-                  className="underline font-semibold hover:text-brand-purple"
-                >
-                  Upgrade now
-                </button>
-              </AlertDescription>
-            </Alert>
+            <div className="space-y-2">
+              <Label htmlFor="content-id">Content ID</Label>
+              <Input
+                id="content-id"
+                type="number"
+                min="1"
+                value={contentId}
+                onChange={(e) => setContentId(e.target.value)}
+                placeholder="1"
+                required
+                disabled={isPending}
+              />
+            </div>
 
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isPending}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isPending}>
+              <Button type="submit" disabled={isPending} className="premium-button">
                 {isPending ? 'Creating...' : 'Create Listing'}
               </Button>
             </DialogFooter>

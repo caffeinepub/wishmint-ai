@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
  * with stability controls to prevent boundary flicker
  */
 
-const SECTION_IDS = ['home', 'create-wish', 'templates', 'marketplace', 'pricing', 'dashboard', 'faq'] as const;
+const SECTION_IDS = ['home', 'create-wish', 'templates', 'examples', 'marketplace', 'pricing', 'dashboard', 'faq'] as const;
 export type SectionId = typeof SECTION_IDS[number];
 
 export function useActiveSection(): SectionId {

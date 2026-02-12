@@ -1,70 +1,46 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T21:41:54.768Z",
-  "summary": "Sidebar/mobile navigation was updated to use button click handlers that call smoothScrollToAnchor (with reduced-motion support) and close the mobile sheet, and the scroll utility was updated to account for sticky-header height. However, the diff evidence does not confirm that the required in-page section ID \"create-wish\" exists exactly once on the landing page, nor that all required sections have the consistent scroll margin.",
-  "missing_requirements": [
-    {
-      "id": "REQ-1",
-      "requirement": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
-      "reason": "The diff shows sections with ids home (via summary), templates, marketplace, pricing, dashboard, and faq, but provides no evidence of any section element with id=\"create-wish\", nor evidence that there is exactly one element per required ID across the document.",
-      "evidence": [
-        "frontend-file-summaries.txt (HeroSection.tsx mentions id=\"home\"; no mention of create-wish)",
-        "frontend/src/sections/TemplatesSection.tsx (id=\"templates\")",
-        "frontend/src/sections/MarketplaceSection.tsx (id=\"marketplace\")",
-        "frontend/src/sections/PricingSection.tsx (id=\"pricing\")",
-        "frontend/src/sections/DashboardSection.tsx (id=\"dashboard\")",
-        "frontend/src/sections/FaqSection.tsx (id=\"faq\")"
-      ]
-    },
-    {
-      "id": "REQ-4",
-      "requirement": "Apply a consistent safe scroll margin to all main sections targeted by sidebar navigation so headings/content are visible below the sticky header after navigation.",
-      "reason": "Several sections shown include className=\"scroll-mt-16\", but the diff does not provide evidence for the \"create-wish\" target section having the same scroll margin (and the create-wish section itself is not evidenced).",
-      "evidence": [
-        "frontend/src/sections/TemplatesSection.tsx",
-        "frontend/src/sections/MarketplaceSection.tsx",
-        "frontend/src/sections/PricingSection.tsx",
-        "frontend/src/sections/DashboardSection.tsx",
-        "frontend/src/sections/FaqSection.tsx",
-        "frontend-file-summaries.txt (HeroSection.tsx mentions scroll-mt-16; no evidence for create-wish)"
-      ]
-    }
-  ],
+  "generatedAt": "2026-02-12T22:37:21.601Z",
+  "summary": "REQ-1 and REQ-2 appear implemented via an app-level AuthEntryDialog that auto-opens for unauthenticated users and an AuthEntryDialog effect that auto-closes on successful authentication while keeping error UI in the dialog. The diff also includes several unrelated UI/feature changes not requested in the BuildRequest.",
+  "missing_requirements": [],
   "hallucinated_features": [
     {
-      "description": "Added React Query-based data fetching/mutations hooks (download history, saved templates, creator earnings, record download, save template).",
-      "reason": "Not requested by the BuildRequest (request is strictly about in-page sidebar smooth scrolling and header offset).",
+      "description": "Added/expanded a new generator mode ('prompt-studio' / 'Create Card With AI Prompt') with mode-specific UI and generation logic.",
+      "reason": "The BuildRequest only asks to make the existing auth dialog appear first and to close it cleanly after login; it does not request new generator modes or generation logic changes.",
       "evidence": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Dashboard section behavior expanded to include authenticated/unauthenticated UI and queries for downloads/saved templates/earnings, plus admin panel hooks and an auth entry dialog.",
-      "reason": "Not requested by the BuildRequest; exceeds the scope of a navigation/scroll fix.",
+      "description": "Output UI expanded to support 'Prompt Studio Mode' with card variations carousel, copy/share actions, and related prop corrections.",
+      "reason": "Not part of the auth-first flow requirements.",
       "evidence": [
-        "frontend/src/sections/DashboardSection.tsx"
+        "frontend-file-summaries.txt"
       ]
     },
     {
-      "description": "Marketplace section includes search/filter UI and a create listing dialog flow.",
-      "reason": "Not requested by the BuildRequest; unrelated to sidebar smooth-scroll behavior.",
+      "description": "Multiple navigation/section anchor and styling changes across Templates/Examples/Pricing/FAQ/Footer/Legal sections (ids, scroll-mt-16, layout/styling, new links, UTM attribution, etc.).",
+      "reason": "The BuildRequest does not request content/section/navigation redesign; only authentication-first behavior.",
       "evidence": [
-        "frontend/src/sections/MarketplaceSection.tsx"
+        "frontend-file-summaries.txt"
+      ]
+    },
+    {
+      "description": "Animation and viewport utility work (Reveal optimization, new/changed useInView and usePrefersReducedMotion hooks).",
+      "reason": "Not requested by the auth-first flow change.",
+      "evidence": [
+        "frontend-file-summaries.txt"
       ]
     }
   ],
-  "confidence": 0.74,
+  "confidence": 0.68,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/navigation/StickyNavbar.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/lib/scroll.ts",
-    "frontend/src/sections/DashboardSection.tsx",
-    "frontend/src/sections/FaqSection.tsx",
-    "frontend/src/sections/MarketplaceSection.tsx",
-    "frontend/src/sections/PricingSection.tsx",
-    "frontend/src/sections/TemplatesSection.tsx",
+    "frontend/src/App.tsx",
+    "frontend/src/components/AuthControls.tsx",
+    "frontend/src/components/auth/AuthEntryDialog.tsx",
+    "frontend/src/sections/HeroSection.tsx",
     "project_state.json"
   ]
 }

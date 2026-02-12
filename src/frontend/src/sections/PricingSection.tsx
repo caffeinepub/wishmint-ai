@@ -97,7 +97,7 @@ export function PricingSection() {
                   ))}
                 </ul>
                 <Button
-                  onClick={openPricingModal}
+                  onClick={() => openPricingModal()}
                   className={`w-full ${plan.highlighted ? 'premium-button' : ''}`}
                   variant={plan.highlighted ? 'default' : 'outline'}
                 >

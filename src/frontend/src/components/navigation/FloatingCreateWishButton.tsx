@@ -19,6 +19,7 @@ export function FloatingCreateWishButton() {
       className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 btn-primary-gradient text-white font-semibold px-6 py-6 rounded-full ${
         prefersReducedMotion ? '' : 'hover:scale-105'
       } transition-all`}
+      style={{ transitionProperty: 'transform, box-shadow' }}
     >
       🎂 Create Wish
     </Button>

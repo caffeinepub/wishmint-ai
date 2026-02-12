@@ -35,6 +35,7 @@ export function Reveal({ children, delay = 0, className = '' }: RevealProps) {
           ? 'animate-fade-in-up'
           : 'opacity-0'
       }`}
+      style={shouldAnimate && !prefersReducedMotion ? { willChange: 'transform, opacity' } : undefined}
     >
       {children}
     </div>
