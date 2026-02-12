@@ -4,58 +4,61 @@
 
 @layer base {
   :root {
-    /* OKLCH Color System - Light Mode */
-    --background: 0.98 0.01 264;
-    --foreground: 0.15 0.02 264;
-    --card: 1 0 0;
-    --card-foreground: 0.15 0.02 264;
-    --popover: 1 0 0;
-    --popover-foreground: 0.15 0.02 264;
-    --primary: 0.55 0.25 264;
-    --primary-foreground: 0.98 0.01 264;
-    --secondary: 0.92 0.02 264;
-    --secondary-foreground: 0.15 0.02 264;
-    --muted: 0.94 0.02 264;
-    --muted-foreground: 0.45 0.03 264;
-    --accent: 0.92 0.02 264;
-    --accent-foreground: 0.15 0.02 264;
-    --destructive: 0.55 0.22 25;
-    --destructive-foreground: 0.98 0.01 264;
-    --border: 0.88 0.02 264;
-    --input: 0.88 0.02 264;
-    --ring: 0.55 0.25 264;
-    --radius: 0.5rem;
-    
-    /* Neon accent colors */
-    --neon-purple: 0.60 0.28 290;
-    --neon-green: 0.75 0.20 150;
+    /* Force dark mode - no light theme */
+    color-scheme: dark;
   }
 
   .dark {
-    /* OKLCH Color System - Dark Mode */
-    --background: 0.12 0.02 264;
-    --foreground: 0.95 0.01 264;
-    --card: 0.15 0.02 264;
+    /* Premium Dark Theme - Deep Navy Gradient Background */
+    --background: 0.08 0.03 240; /* #0B0F1A equivalent in OKLCH */
+    --background-secondary: 0.10 0.03 240; /* #0F172A */
+    --foreground: 1.00 0.00 0; /* Pure white #FFFFFF */
+    
+    /* Card surfaces - glassmorphism dark */
+    --card: 0.12 0.02 240;
     --card-foreground: 0.95 0.01 264;
-    --popover: 0.15 0.02 264;
+    
+    /* Popover surfaces */
+    --popover: 0.12 0.02 240;
     --popover-foreground: 0.95 0.01 264;
-    --primary: 0.65 0.25 290;
-    --primary-foreground: 0.12 0.02 264;
-    --secondary: 0.20 0.02 264;
+    
+    /* WishMint Brand Gradient Colors */
+    --brand-purple: 0.58 0.24 285; /* #7C3AED */
+    --brand-blue: 0.60 0.19 245; /* #3B82F6 */
+    --brand-green: 0.70 0.18 145; /* #22C55E */
+    
+    /* Primary uses brand purple */
+    --primary: 0.58 0.24 285;
+    --primary-foreground: 1.00 0.00 0;
+    
+    /* Secondary surfaces */
+    --secondary: 0.15 0.02 240;
     --secondary-foreground: 0.95 0.01 264;
-    --muted: 0.18 0.02 264;
-    --muted-foreground: 0.60 0.03 264;
-    --accent: 0.22 0.03 264;
+    
+    /* Muted elements */
+    --muted: 0.14 0.02 240;
+    --muted-foreground: 0.62 0.02 240; /* #9CA3AF */
+    
+    /* Accent elements */
+    --accent: 0.16 0.03 240;
     --accent-foreground: 0.95 0.01 264;
+    
+    /* Destructive */
     --destructive: 0.50 0.22 25;
     --destructive-foreground: 0.95 0.01 264;
-    --border: 0.25 0.02 264;
-    --input: 0.25 0.02 264;
-    --ring: 0.65 0.25 290;
     
-    /* Neon accent colors - brighter in dark mode */
-    --neon-purple: 0.65 0.30 290;
-    --neon-green: 0.80 0.22 150;
+    /* Borders and inputs */
+    --border: 0.20 0.03 240;
+    --input: 0.20 0.03 240;
+    --ring: 0.58 0.24 285;
+    
+    /* Border radius */
+    --radius: 1rem;
+    
+    /* Text colors */
+    --text-heading: 1.00 0.00 0; /* Pure white #FFFFFF */
+    --text-subheading: 0.92 0.01 240; /* Soft white #E5E7EB */
+    --text-body: 0.62 0.02 240; /* Muted grey #9CA3AF */
   }
 }
 
@@ -63,9 +66,22 @@
   * {
     @apply border-border;
   }
+  
+  html {
+    color-scheme: dark;
+  }
+  
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
+    background: linear-gradient(to bottom right, #0B0F1A 0%, #111827 50%, #0F172A 100%);
+    background-attachment: fixed;
     font-feature-settings: "rlig" 1, "calt" 1;
+    min-height: 100vh;
+  }
+  
+  /* Ensure headings use pure white */
+  h1, h2, h3, h4, h5, h6 {
+    color: oklch(var(--text-heading));
   }
 }
 
@@ -83,7 +99,8 @@
 
   /* Creator credit styling */
   .creator-credit {
-    @apply text-sm text-muted-foreground;
+    @apply text-sm;
+    color: oklch(var(--text-body));
   }
 
   /* Masonry-like gallery layout */
@@ -131,20 +148,91 @@
       overflow-x: hidden;
     }
   }
+  
+  /* Premium glassmorphism card surface */
+  .glass-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+  }
+  
+  /* Brand gradient utilities */
+  .brand-gradient {
+    background: linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #22C55E 100%);
+  }
+  
+  .brand-gradient-text {
+    background: linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #22C55E 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  
+  /* Premium button styles */
+  .btn-primary-gradient {
+    background: linear-gradient(135deg, #7C3AED 0%, #22C55E 100%);
+    box-shadow: 0 0 20px rgba(124, 58, 237, 0.4), 0 0 40px rgba(34, 197, 94, 0.2);
+    transition: all 0.3s ease;
+  }
+  
+  .btn-primary-gradient:hover {
+    box-shadow: 0 0 30px rgba(124, 58, 237, 0.6), 0 0 60px rgba(34, 197, 94, 0.3);
+  }
+  
+  @media (prefers-reduced-motion: no-preference) {
+    .btn-primary-gradient:hover {
+      transform: scale(1.05);
+    }
+  }
+  
+  .btn-secondary-gradient {
+    background: transparent;
+    border: 2px solid transparent;
+    background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.8)), 
+                      linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #22C55E 100%);
+    background-origin: border-box;
+    background-clip: padding-box, border-box;
+    transition: all 0.3s ease;
+  }
+  
+  .btn-secondary-gradient:hover {
+    background-image: linear-gradient(rgba(15, 23, 42, 0.6), rgba(15, 23, 42, 0.6)), 
+                      linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #22C55E 100%);
+  }
+  
+  /* Subtle glow effects */
+  .glow-subtle {
+    box-shadow: 0 0 15px rgba(124, 58, 237, 0.2);
+  }
+  
+  /* Smooth section transitions */
+  .section-transition {
+    transition: background-color 0.5s ease;
+  }
 }
 
-/* Gradient animation for backgrounds */
-@keyframes gradient {
+/* Sparkle animation for decorative overlays */
+@keyframes sparkle {
   0%, 100% {
-    background-size: 200% 200%;
-    background-position: 0% 50%;
+    opacity: 0.3;
+    transform: scale(1);
   }
   50% {
-    background-size: 200% 200%;
-    background-position: 100% 50%;
+    opacity: 0.6;
+    transform: scale(1.05);
   }
 }
 
-.animate-gradient {
-  animation: gradient 15s ease infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .animate-sparkle {
+    animation: sparkle 3s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-sparkle {
+    animation: none;
+  }
 }

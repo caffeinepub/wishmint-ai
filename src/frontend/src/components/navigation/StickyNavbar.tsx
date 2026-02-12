@@ -25,13 +25,13 @@ export function StickyNavbar() {
   };
 
   return (
-    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/80 backdrop-blur-lg">
+    <nav className="sticky top-0 z-50 w-full border-b border-border/40 bg-background-secondary/80 backdrop-blur-lg">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          {/* Logo/Brand */}
+          {/* Logo/Brand with brand gradient */}
           <button
             onClick={() => handleNavClick('home')}
-            className="text-lg font-bold bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent hover:opacity-80 transition-opacity"
+            className="text-lg font-bold brand-gradient-text hover:opacity-80 transition-opacity"
           >
             WishMint AI
           </button>
@@ -46,13 +46,13 @@ export function StickyNavbar() {
                 onClick={() => handleNavClick(item.id)}
                 className={`relative px-3 py-2 text-sm font-medium transition-colors ${
                   activeSection === item.id
-                    ? 'text-neon-purple'
+                    ? 'text-brand-purple'
                     : 'text-muted-foreground hover:text-foreground'
                 }`}
               >
                 {item.label}
                 {activeSection === item.id && (
-                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-gradient-to-r from-neon-purple to-neon-green rounded-full" />
+                  <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-0.5 brand-gradient rounded-full" />
                 )}
               </Button>
             ))}
@@ -66,7 +66,7 @@ export function StickyNavbar() {
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-64 pt-12">
+            <SheetContent side="right" className="w-64 pt-12 bg-background-secondary/95 backdrop-blur-lg">
               <nav className="flex flex-col gap-2">
                 {NAV_ITEMS.map((item) => (
                   <Button
@@ -75,7 +75,7 @@ export function StickyNavbar() {
                     onClick={() => handleNavClick(item.id)}
                     className={`justify-start text-base ${
                       activeSection === item.id
-                        ? 'bg-neon-purple/10 text-neon-purple font-semibold'
+                        ? 'bg-brand-purple/10 text-brand-purple font-semibold'
                         : 'text-muted-foreground hover:text-foreground'
                     }`}
                   >

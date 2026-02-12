@@ -1,35 +1,51 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowUp } from 'lucide-react';
-import { smoothScrollToAnchor } from '../../lib/scroll';
-import { useScrollProgress } from '../../hooks/useScrollProgress';
+import { usePrefersReducedMotion } from '../../hooks/usePrefersReducedMotion';
 
 /**
  * Floating Back to Top button that appears after scrolling 30% down the page
  * Positioned bottom-right with mobile-safe spacing
  */
 export function FloatingBackToTopButton() {
-  const scrollProgress = useScrollProgress();
   const [isVisible, setIsVisible] = useState(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
 
   useEffect(() => {
-    setIsVisible(scrollProgress >= 0.3);
-  }, [scrollProgress]);
+    const toggleVisibility = () => {
+      const scrolled = window.scrollY;
+      const windowHeight = window.innerHeight;
+      const documentHeight = document.documentElement.scrollHeight;
+      const scrollPercentage = scrolled / (documentHeight - windowHeight);
+      
+      setIsVisible(scrollPercentage > 0.3);
+    };
 
-  const handleClick = () => {
-    smoothScrollToAnchor('home');
+    window.addEventListener('scroll', toggleVisibility);
+    toggleVisibility();
+
+    return () => window.removeEventListener('scroll', toggleVisibility);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: prefersReducedMotion ? 'auto' : 'smooth',
+    });
   };
 
   if (!isVisible) return null;
 
   return (
     <Button
-      onClick={handleClick}
+      onClick={scrollToTop}
       size="icon"
-      className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 h-12 w-12 rounded-full bg-gradient-to-r from-neon-purple to-neon-green shadow-neon hover:opacity-90 transition-all hover:scale-110"
+      className={`fixed bottom-20 right-4 sm:bottom-24 sm:right-6 z-40 btn-primary-gradient text-white shadow-glow-brand rounded-full w-12 h-12 ${
+        prefersReducedMotion ? '' : 'hover:scale-105'
+      } transition-all`}
       aria-label="Back to top"
     >
-      <ArrowUp className="h-5 w-5 text-white" />
+      <ArrowUp className="h-5 w-5" />
     </Button>
   );
 }

@@ -1,72 +1,63 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T19:06:11.094Z",
-  "summary": "The diff implements the new navigation UX components (sticky navbar with hamburger menu, scroll progress bar, floating Back to Top and “🎂 Create Wish” buttons) plus smooth-scroll utilities and scroll-spy highlighting. Anchor IDs and sticky-header offsets are added for several sections, but the diff evidence does not confirm all required section IDs (/marketplace in particular) nor that the special /pricing pseudo-route behavior in App.tsx is preserved. Additionally, multiple non-requested section redesign/feature changes appear in the modified-file summaries.",
+  "generatedAt": "2026-02-12T20:43:04.625Z",
+  "summary": "Diff implements a new Prompt Studio mode with prompt input + examples, deterministic prompt analysis, local/rule-based content generation (title/message/footer with WishMint branding), a detected-style UI summary, an editor panel (edit text + tone + regenerate), event→theme auto-recommendation, and 3 generated variation params. Some acceptance criteria appear only partially covered or not evidenced (notably premium export gating/watermark+resolution, premium-only Coming Soon gating, and ensuring variations differ in typography/color).",
   "missing_requirements": [
     {
-      "id": "REQ-134",
-      "requirement": "Assign anchor IDs to all major sections using the exact IDs specified, including Marketplace id=\"marketplace\", and ensure existing /pricing pseudo-route behavior (scroll to Pricing + open PricingComparisonModal) continues to work.",
-      "reason": "The diff shows IDs added for home/create-wish/templates/pricing/dashboard/faq, but no diff evidence shows an element with id=\"marketplace\". Also, App.tsx is truncated and does not show the /pricing pseudo-route scroll+modal behavior being preserved.",
+      "id": "REQ-6",
+      "requirement": "Prompt Mode renders 3 unique card design variations with different layout compositions and different typography/color treatments (not just minor offsets), maintaining strict hierarchy and preventing overlap.",
+      "reason": "While 3 variation parameter sets are generated, the diff evidence only shows changes in decorationOffset/vignetteIntensity/glowIntensity/layoutVariant. No evidence that typography pairings or color treatments change per variation (as required), nor evidence that layoutVariant is actually applied in rendering logic.",
       "evidence": [
-        "frontend/src/sections/HeroSection.tsx",
-        "frontend/src/sections/GeneratorSection.tsx",
-        "frontend/src/sections/TemplatesSection.tsx",
-        "frontend/src/sections/PricingSection.tsx",
-        "frontend/src/sections/DashboardSection.tsx",
-        "frontend/src/sections/FaqSection.tsx",
-        "frontend/src/App.tsx (truncated)"
+        "frontend/src/features/cardExport/generateCardVariations.ts",
+        "frontend/src/features/cardExport/canvasExport.ts (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Apply premium export rules to Prompt Mode downloads: free users get limited-resolution export and/or watermark; premium users get HD export and watermark removal; anonymous/demo download still requires sign-in; reuse existing entitlements.",
+      "reason": "Although canvas export supports options for resolution and watermark and OutputSection imports/useEntitlements, the diff summary does not show download/export logic that conditionally sets resolution/watermark based on entitlements for Prompt Mode, or preserves the sign-in gating for anonymous users.",
+      "evidence": [
+        "frontend/src/features/cardExport/canvasExport.ts (truncated)",
+        "frontend/src/sections/OutputSection.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "Add UI placeholders for Video invitation option and Voice message card option in the premium area as Coming Soon items gated behind premium.",
+      "reason": "The Coming Soon buttons/toast are implemented, but there is no evidence they are gated behind premium/entitlements (i.e., only shown in premium area or disabled/hidden for non-premium users).",
+      "evidence": [
+        "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
+        "frontend/src/sections/OutputSection.tsx (truncated)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Significant redesign/feature additions in OutputSection (carousel, confetti, additional export/share behaviors) beyond adding anchors/navigation affordances.",
-      "reason": "Non-goals explicitly forbid redesigning/changing content/behavior of existing sections beyond anchor IDs and navigation affordances; the diff summary indicates extensive new functionality in OutputSection.",
+      "description": "Broad UI/UX redesign and navigation/section styling changes (hero gradients, pricing cards, legal sections formatting, templates/examples section adjustments, new animation hooks/components) beyond the Prompt Studio feature requirements.",
+      "reason": "These changes are not requested by any REQ-1..REQ-11 items (which focus on Prompt Mode, variations, theming, editing, export gating, and coming-soon placeholders).",
       "evidence": [
-        "frontend-file-summaries.txt (frontend/src/sections/OutputSection.tsx)"
-      ]
-    },
-    {
-      "description": "ExamplesSection changed to a Pinterest-style responsive grid with tone filter and “Use This Style” prefill integration.",
-      "reason": "Not requested by any requirement and appears to alter section behavior/layout beyond anchors/navigation.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/sections/ExamplesSection.tsx)"
-      ]
-    },
-    {
-      "description": "Footer quick links updated (including new Community and Marketplace anchor links) and attribution/UTM tracking changes.",
-      "reason": "Footer changes were not requested as part of the navigation/scrolling UX requirements and may be considered section content changes beyond anchors/nav affordances.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/sections/FooterSection.tsx)"
-      ]
-    },
-    {
-      "description": "LegalSections redesigned with professional card layouts and refined typography hierarchy.",
-      "reason": "Not requested by the BuildRequest and appears to be a section redesign beyond adding anchor IDs/navigation affordances.",
-      "evidence": [
-        "frontend-file-summaries.txt (frontend/src/sections/LegalSections.tsx)"
+        "frontend-file-summaries.txt (HeroSection/PricingSection/FaqSection/FooterSection/LegalSections/TemplatesSection/ExamplesSection/Reveal/useInView/usePrefersReducedMotion)"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.66,
   "changed_files": [
     "frontend-file-summaries.txt",
     "frontend/src/App.tsx",
-    "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
-    "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
-    "frontend/src/components/navigation/ScrollProgressBar.tsx",
-    "frontend/src/components/navigation/StickyNavbar.tsx",
-    "frontend/src/hooks/useActiveSection.ts",
-    "frontend/src/hooks/useScrollProgress.ts",
-    "frontend/src/index.css",
-    "frontend/src/lib/scroll.ts",
-    "frontend/src/sections/DashboardSection.tsx",
-    "frontend/src/sections/FaqSection.tsx",
+    "frontend/src/features/cardExport/canvasExport.ts",
+    "frontend/src/features/cardExport/cardTextRules.ts",
+    "frontend/src/features/cardExport/generateCardVariations.ts",
+    "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
+    "frontend/src/features/promptStudio/components/PromptAnalysisSummary.tsx",
+    "frontend/src/features/promptStudio/components/PromptModeEditorPanel.tsx",
+    "frontend/src/features/promptStudio/components/PromptModeInput.tsx",
+    "frontend/src/features/promptStudio/eventThemeMapping.ts",
+    "frontend/src/features/promptStudio/promptAnalysis.ts",
+    "frontend/src/features/promptStudio/promptContentGeneration.ts",
+    "frontend/src/features/promptStudio/types.ts",
     "frontend/src/sections/GeneratorSection.tsx",
-    "frontend/src/sections/HeroSection.tsx",
-    "frontend/src/sections/PricingSection.tsx",
-    "frontend/src/sections/TemplatesSection.tsx",
+    "frontend/src/sections/OutputSection.tsx",
     "project_state.json"
   ]
 }

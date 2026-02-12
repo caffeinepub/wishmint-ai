@@ -24,7 +24,10 @@ import { useUserAuthUpsert } from './features/auth/useUserAuthUpsert';
 import { generateBirthdayPack } from './features/generator/generateBirthdayPack';
 import { smoothScrollToAnchor } from './lib/scroll';
 import type { GeneratorFormData, BirthdayPack, TemplateId } from './features/generator/types';
+import type { PromptStudioState } from './features/promptStudio/types';
 import type { PlanType } from './backend';
+
+type CreationMode = 'quick-form' | 'prompt-studio';
 
 interface AppContextValue {
   formData: GeneratorFormData;
@@ -42,6 +45,10 @@ interface AppContextValue {
   closePremiumDesigner: () => void;
   openPricingModal: (highlightPlan?: 'pro' | 'creator') => void;
   closePricingModal: () => void;
+  creationMode: CreationMode;
+  setCreationMode: (mode: CreationMode) => void;
+  promptStudioState: PromptStudioState;
+  setPromptStudioState: (state: PromptStudioState | ((prev: PromptStudioState) => PromptStudioState)) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -73,6 +80,16 @@ function App() {
   const [highlightPlan, setHighlightPlan] = useState<'pro' | 'creator' | undefined>(undefined);
   const [surpriseMode, setSurpriseMode] = useState<string | null>(null);
   const [hasTriggeredAuthUpsert, setHasTriggeredAuthUpsert] = useState(false);
+  
+  // Creation mode state
+  const [creationMode, setCreationMode] = useState<CreationMode>('quick-form');
+  const [promptStudioState, setPromptStudioState] = useState<PromptStudioState>({
+    prompt: '',
+    analysis: null,
+    content: null,
+    selectedTone: null,
+    regenerateCounter: 0,
+  });
 
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
@@ -248,6 +265,10 @@ function App() {
     closePremiumDesigner,
     openPricingModal,
     closePricingModal,
+    creationMode,
+    setCreationMode,
+    promptStudioState,
+    setPromptStudioState,
   };
 
   // Show navigation only in main app view (not in surprise or premium designer modes)
@@ -255,7 +276,7 @@ function App() {
 
   return (
     <AppContext.Provider value={contextValue}>
-      <div className="w-full min-h-screen bg-background text-foreground">
+      <div className="w-full min-h-screen">
         <DeployDiagnosticsBanner />
         {showNavigation && <ScrollProgressBar />}
         {showNavigation && <StickyNavbar />}

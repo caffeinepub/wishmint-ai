@@ -20,6 +20,7 @@ export default {
                 input: 'oklch(var(--input))',
                 ring: 'oklch(var(--ring) / <alpha-value>)',
                 background: 'oklch(var(--background))',
+                'background-secondary': 'oklch(var(--background-secondary))',
                 foreground: 'oklch(var(--foreground))',
                 primary: {
                     DEFAULT: 'oklch(var(--primary) / <alpha-value>)',
@@ -49,20 +50,29 @@ export default {
                     DEFAULT: 'oklch(var(--card))',
                     foreground: 'oklch(var(--card-foreground))'
                 },
-                'neon-purple': 'oklch(var(--neon-purple) / <alpha-value>)',
-                'neon-green': 'oklch(var(--neon-green) / <alpha-value>)'
+                // WishMint brand gradient colors
+                'brand-purple': 'oklch(var(--brand-purple) / <alpha-value>)',
+                'brand-blue': 'oklch(var(--brand-blue) / <alpha-value>)',
+                'brand-green': 'oklch(var(--brand-green) / <alpha-value>)',
+                // Legacy neon colors mapped to brand colors for compatibility
+                'neon-purple': 'oklch(var(--brand-purple) / <alpha-value>)',
+                'neon-green': 'oklch(var(--brand-green) / <alpha-value>)'
             },
             borderRadius: {
                 lg: 'var(--radius)',
                 md: 'calc(var(--radius) - 2px)',
                 sm: 'calc(var(--radius) - 4px)',
                 xl: 'calc(var(--radius) + 4px)',
-                '2xl': 'calc(var(--radius) + 8px)'
+                '2xl': 'calc(var(--radius) + 8px)',
+                '3xl': 'calc(var(--radius) + 12px)'
             },
             boxShadow: {
                 xs: '0 1px 2px 0 rgba(0,0,0,0.05)',
-                neon: '0 0 24px oklch(var(--neon-purple) / 0.4), 0 0 48px oklch(var(--neon-green) / 0.2)',
-                card: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1), 0 0 0 1px oklch(var(--neon-purple) / 0.1)'
+                'glow-brand': '0 0 20px rgba(124, 58, 237, 0.4), 0 0 40px rgba(34, 197, 94, 0.2)',
+                'glow-brand-lg': '0 0 30px rgba(124, 58, 237, 0.6), 0 0 60px rgba(34, 197, 94, 0.3)',
+                'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+                'neon': '0 0 20px rgba(124, 58, 237, 0.4), 0 0 40px rgba(34, 197, 94, 0.2)',
+                'card': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1), 0 0 0 1px rgba(124, 58, 237, 0.1)'
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
@@ -115,6 +125,10 @@ export default {
                     '25%': { transform: 'translateY(-10px) rotate(5deg)' },
                     '50%': { transform: 'translateY(-5px) rotate(-5deg)' },
                     '75%': { transform: 'translateY(-15px) rotate(3deg)' }
+                },
+                sparkle: {
+                    '0%, 100%': { opacity: '0.3', transform: 'scale(1)' },
+                    '50%': { opacity: '0.6', transform: 'scale(1.05)' }
                 }
             },
             animation: {
@@ -124,7 +138,8 @@ export default {
                 gradient: 'gradient 15s ease infinite',
                 'gradient-x': 'gradient-x 3s linear infinite',
                 'gradient-slow': 'gradient-slow 8s ease infinite',
-                'float-emoji': 'float-emoji 4s ease-in-out infinite'
+                'float-emoji': 'float-emoji 4s ease-in-out infinite',
+                sparkle: 'sparkle 3s ease-in-out infinite'
             }
         }
     },

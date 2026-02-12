@@ -1,189 +1,212 @@
-import type { TemplateId } from '../generator/types';
-import type { PremiumDesignerState } from '../premiumCardDesigner/types';
-import { TEMPLATES } from '../templates/templates';
-import { getThemeById } from '../premiumCardDesigner/themes';
-import { wrapTextEmojiAware } from './textWrap';
-import { loadCardBackgroundImage } from './loadCardBackgroundImage';
-import { formatCardTextContent } from './cardTextRules';
+/**
+ * Canvas-based card image export with strict text rules, theme support,
+ * typography hierarchy, premium visual effects, text fitting, decorations,
+ * enhancement pass, and variation generation for both standard and premium cards.
+ */
+
 import { convertToShortWish } from './shortWishConverter';
+import { sanitizeCardText } from './cardTextRules';
 import { getThemeConfig, type CardTheme } from './cardThemes';
 import { fitTextInBounds, calculateSafeTextRegion } from './fitText';
-import {
-  drawVignetteOverlay,
-  drawTextWithGlow,
-  drawTextWithShadow,
-  drawEdgeSparkles,
-  drawEdgeConfetti,
-  drawMinimalCorners,
-} from './canvasEffects';
+import { drawVignetteOverlay, drawMinimalCorners } from './canvasEffects';
 import { enhanceCanvasRender } from './enhanceCanvasRender';
-import { getVariationParams, type CardVariationParams } from './generateCardVariations';
+import { loadCardBackgroundImage } from './loadCardBackgroundImage';
+import { getThemeById } from '../premiumCardDesigner/themes';
+import type { PremiumDesignerState } from '../premiumCardDesigner/types';
 
-export async function exportCardImage(
-  wish: string,
-  name: string,
-  templateId: TemplateId,
-  themeId: CardTheme = 'luxury',
-  variationIndex: number = 0
-) {
-  const template = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
-  const theme = getThemeConfig(themeId);
-  const variation = getVariationParams(variationIndex);
-  
+export interface CardExportOptions {
+  title?: string;
+  footer?: string;
+  resolution?: number;
+  watermark?: boolean;
+}
+
+export interface CardVariationParams {
+  decorationOffset: number;
+  vignetteIntensity: number;
+  glowIntensity: number;
+  layoutVariant: 'centered' | 'top-heavy' | 'bottom-heavy';
+}
+
+/**
+ * Exports a card to canvas with all visual effects and text rendering
+ */
+export async function exportCardToCanvas(
+  wishMessage: string,
+  theme: CardTheme,
+  variationParams: CardVariationParams,
+  options: CardExportOptions = {}
+): Promise<HTMLCanvasElement> {
+  const resolution = options.resolution || 1080;
   const canvas = document.createElement('canvas');
+  canvas.width = resolution;
+  canvas.height = resolution;
   const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  // Set canvas size (square format)
-  canvas.width = 1080;
-  canvas.height = 1080;
-
-  // Format and sanitize card text
-  const shortWish = convertToShortWish(wish);
-  const cardText = formatCardTextContent(name, shortWish);
-
-  // Try to load and draw background image
-  let backgroundDrawn = false;
-  try {
-    const bgImage = await loadCardBackgroundImage(theme.backgroundAsset);
-    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-    backgroundDrawn = true;
-  } catch (error) {
-    console.warn('Failed to load theme background, using template fallback:', error);
-    
-    // Fallback to template gradient
-    if (template.backgroundImage) {
-      try {
-        const bgImage = await loadCardBackgroundImage(template.backgroundImage);
-        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-        backgroundDrawn = true;
-      } catch (fallbackError) {
-        console.warn('Template background also failed, using gradient:', fallbackError);
-      }
-    }
+  
+  if (!ctx) {
+    throw new Error('Could not get canvas context');
   }
 
-  // Final fallback to gradient
-  if (!backgroundDrawn) {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, template.canvasBg1);
-    gradient.addColorStop(1, template.canvasBg2);
+  // Get theme configuration
+  const themeConfig = getThemeConfig(theme);
+
+  // Load and draw background
+  try {
+    const bgImage = await loadCardBackgroundImage(themeConfig.backgroundAsset);
+    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
+  } catch (error) {
+    console.warn('Failed to load background, using fallback', error);
+    // Fallback gradient
+    const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
+    gradient.addColorStop(0, '#1a1a2e');
+    gradient.addColorStop(1, '#16213e');
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
-  // Apply readability overlay (vignette)
-  drawVignetteOverlay(ctx, canvas.width, canvas.height, variation.vignetteIntensity);
+  // Apply vignette
+  drawVignetteOverlay(ctx, canvas.width, canvas.height, variationParams.vignetteIntensity);
 
-  // Calculate safe regions
-  const safeRegion = calculateSafeTextRegion(canvas.width, canvas.height, 8);
-  
-  // Title region (top)
-  const titleY = safeRegion.y + 120;
-  
-  // Message region (center)
-  const messageRegionY = titleY + 150;
-  const messageRegionHeight = canvas.height - messageRegionY - 200;
-  
-  // Footer region (bottom)
-  const footerY = canvas.height - safeRegion.y - 60;
+  // Convert and sanitize text
+  const shortWish = convertToShortWish(wishMessage);
+  const sanitizedWish = sanitizeCardText(shortWish);
 
-  // Draw decorations (edges only)
-  if (theme.decorationStyle === 'sparkles') {
-    drawEdgeSparkles(ctx, canvas.width, canvas.height, theme.decorationColor, variation.decorationCount);
-  } else if (theme.decorationStyle === 'confetti') {
-    drawEdgeConfetti(ctx, canvas.width, canvas.height, theme.decorationColor, variation.decorationCount);
-  } else if (theme.decorationStyle === 'minimal') {
-    drawMinimalCorners(ctx, canvas.width, canvas.height, theme.decorationColor);
+  // Calculate safe text regions
+  const safeRegion = calculateSafeTextRegion(canvas.width, canvas.height, 12);
+
+  // Render title (if provided)
+  if (options.title) {
+    const sanitizedTitle = sanitizeCardText(options.title);
+    const titleRegion = {
+      ...safeRegion,
+      height: safeRegion.height * 0.2,
+    };
+
+    const titleFit = fitTextInBounds(ctx, sanitizedTitle, themeConfig.titleFont, {
+      maxWidth: titleRegion.width,
+      maxHeight: titleRegion.height,
+      initialFontSize: 72,
+      minFontSize: 36,
+      lineHeightMultiplier: 1.2,
+      minLineHeightMultiplier: 1.0,
+    });
+
+    ctx.fillStyle = themeConfig.titleColor;
+    ctx.font = `bold ${titleFit.fontSize}px ${themeConfig.titleFont}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'top';
+
+    if (variationParams.glowIntensity > 0) {
+      ctx.shadowColor = themeConfig.titleGlow;
+      ctx.shadowBlur = variationParams.glowIntensity * 15;
+    }
+
+    let yOffset = titleRegion.y;
+    for (const line of titleFit.lines) {
+      ctx.fillText(line, canvas.width / 2, yOffset);
+      yOffset += titleFit.lineHeight;
+    }
+    
+    // Reset shadow
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
   }
 
-  // Draw Title with glow
-  ctx.fillStyle = theme.titleColor;
-  ctx.font = `bold 72px ${theme.titleFont}`;
+  // Render main message
+  const messageYStart = options.title ? safeRegion.y + safeRegion.height * 0.25 : safeRegion.y + safeRegion.height * 0.15;
+  const messageHeight = options.footer ? safeRegion.height * 0.5 : safeRegion.height * 0.7;
+
+  const messageFit = fitTextInBounds(ctx, sanitizedWish, themeConfig.messageFont, {
+    maxWidth: safeRegion.width,
+    maxHeight: messageHeight,
+    initialFontSize: 48,
+    minFontSize: 28,
+    lineHeightMultiplier: 1.4,
+    minLineHeightMultiplier: 1.2,
+  });
+
+  ctx.fillStyle = themeConfig.messageColor;
+  ctx.font = `${messageFit.fontSize}px ${themeConfig.messageFont}`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'top';
-  
-  drawTextWithGlow(
+
+  let messageY = messageYStart;
+  if (variationParams.layoutVariant === 'centered') {
+    messageY = (canvas.height - messageFit.totalHeight) / 2;
+  } else if (variationParams.layoutVariant === 'bottom-heavy') {
+    messageY = canvas.height - safeRegion.y - messageFit.totalHeight - (options.footer ? 100 : 50);
+  }
+
+  for (const line of messageFit.lines) {
+    ctx.fillText(line, canvas.width / 2, messageY);
+    messageY += messageFit.lineHeight;
+  }
+
+  // Render footer (if provided)
+  if (options.footer) {
+    const sanitizedFooter = sanitizeCardText(options.footer);
+    const footerY = canvas.height - safeRegion.y - 60;
+
+    ctx.fillStyle = themeConfig.footerColor;
+    ctx.font = `italic 32px ${themeConfig.footerFont}`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(sanitizedFooter, canvas.width / 2, footerY);
+  }
+
+  // Apply decorations
+  drawMinimalCorners(
     ctx,
-    cardText.title,
-    canvas.width / 2,
-    titleY,
-    theme.titleGlow,
-    20 * variation.glowIntensity
+    canvas.width,
+    canvas.height,
+    themeConfig.decorationColor,
+    40 + variationParams.decorationOffset
   );
 
-  // Draw Message with dynamic fitting
-  ctx.fillStyle = theme.messageColor;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  
-  const fittedMessage = fitTextInBounds(ctx, cardText.message, theme.messageFont, {
-    maxWidth: safeRegion.width - 100,
-    maxHeight: messageRegionHeight,
-    initialFontSize: 42,
-    minFontSize: 28,
-    lineHeightMultiplier: 1.5,
-    minLineHeightMultiplier: 1.3,
-  });
-  
-  ctx.font = `${fittedMessage.fontSize}px ${theme.messageFont}`;
-  
-  const messageStartY = messageRegionY + (messageRegionHeight - fittedMessage.totalHeight) / 2;
-  
-  fittedMessage.lines.forEach((line, index) => {
-    const lineY = messageStartY + index * fittedMessage.lineHeight;
-    drawTextWithShadow(ctx, line, canvas.width / 2, lineY);
-  });
-
-  // Draw Footer
-  ctx.fillStyle = theme.footerColor;
-  ctx.font = `32px ${theme.footerFont}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'bottom';
-  ctx.globalAlpha = 0.85;
-  ctx.fillText(cardText.footer, canvas.width / 2, footerY);
-  ctx.globalAlpha = 1;
-
-  // Apply enhancement pass
-  enhanceCanvasRender(canvas);
-
-  // Download
-  canvas.toBlob((blob) => {
-    if (!blob) return;
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `birthday-card-${name.toLowerCase().replace(/\s+/g, '-')}-v${variationIndex + 1}.png`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-}
-
-export async function exportPremiumCard(
-  wish: string,
-  name: string,
-  designerState: PremiumDesignerState,
-  format: 'square' | 'story',
-  returnBlob = false
-): Promise<Blob | void> {
-  const theme = getThemeById(designerState.selectedTheme);
-  
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return;
-
-  // Set canvas size based on format
-  if (format === 'story') {
-    canvas.width = 1080;
-    canvas.height = 1920;
-  } else {
-    canvas.width = 1080;
-    canvas.height = 1080;
+  // Apply watermark if needed
+  if (options.watermark) {
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText('WishMint', canvas.width / 2, canvas.height - 20);
   }
 
-  // Format and sanitize card text
-  const shortWish = convertToShortWish(wish);
-  const cardText = formatCardTextContent(name, shortWish);
+  // Enhancement pass
+  enhanceCanvasRender(canvas);
+
+  return canvas;
+}
+
+/**
+ * Exports a premium card with custom designer state
+ * Returns a Blob for sharing or triggers download
+ */
+export async function exportPremiumCard(
+  wishText: string,
+  recipientName: string,
+  designerState: PremiumDesignerState,
+  format: 'square' | 'story',
+  returnBlob: boolean = false
+): Promise<Blob | null> {
+  const canvas = document.createElement('canvas');
+  
+  // Set dimensions based on format
+  if (format === 'square') {
+    canvas.width = 1080;
+    canvas.height = 1080;
+  } else {
+    canvas.width = 1080;
+    canvas.height = 1920;
+  }
+  
+  const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    throw new Error('Could not get canvas context');
+  }
+
+  // Get theme
+  const theme = getThemeById(designerState.selectedTheme);
 
   // Draw background
   if (designerState.backgroundStyle === 'gradient') {
@@ -193,63 +216,42 @@ export async function exportPremiumCard(
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
   } else {
-    // Glassmorphism - use semi-transparent gradient
+    // Glassmorphism
     const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, theme.backgroundColors[0] + '66');
-    gradient.addColorStop(1, theme.backgroundColors[1] + '66');
+    gradient.addColorStop(0, theme.backgroundColors[0]);
+    gradient.addColorStop(1, theme.backgroundColors[1]);
     ctx.fillStyle = gradient;
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  // Apply readability overlay
-  drawVignetteOverlay(ctx, canvas.width, canvas.height, 0.3);
-
-  // Draw decorative emojis at edges
-  if (designerState.emojiDecorationsEnabled) {
-    ctx.font = '64px Arial';
-    theme.decorativeEmojis.forEach((emoji, index) => {
-      // Position at edges only
-      const edgeMargin = 80;
-      const isTopBottom = index % 2 === 0;
-      let x: number, y: number;
-      
-      if (isTopBottom) {
-        x = (index / theme.decorativeEmojis.length) * canvas.width;
-        y = index % 4 === 0 ? edgeMargin : canvas.height - edgeMargin;
-      } else {
-        x = index % 4 === 1 ? edgeMargin : canvas.width - edgeMargin;
-        y = (index / theme.decorativeEmojis.length) * canvas.height;
-      }
-      
-      ctx.globalAlpha = 0.6;
-      ctx.fillText(emoji, x, y);
-      ctx.globalAlpha = 1;
-    });
+    
+    // Add glass effect
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.1)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
   }
 
   // Draw uploaded photo if present
   if (designerState.uploadedPhoto) {
     try {
       const img = new Image();
+      img.src = designerState.uploadedPhoto;
       await new Promise((resolve, reject) => {
         img.onload = resolve;
         img.onerror = reject;
-        img.src = designerState.uploadedPhoto!;
       });
-
-      const photoSize = 250;
-      const photoX = canvas.width / 2 - photoSize / 2;
-      let photoY: number;
+      
+      const photoSize = Math.min(canvas.width, canvas.height) * 0.3;
+      let photoY = 0;
       
       if (designerState.photoPlacement === 'top') {
-        photoY = canvas.height * 0.1;
+        photoY = 100;
       } else if (designerState.photoPlacement === 'center') {
-        photoY = canvas.height / 2 - photoSize / 2;
+        photoY = (canvas.height - photoSize) / 2;
       } else {
-        photoY = canvas.height * 0.9 - photoSize;
+        photoY = canvas.height - photoSize - 100;
       }
-
-      // Draw circular photo with border
+      
+      const photoX = (canvas.width - photoSize) / 2;
+      
+      // Draw circular photo
       ctx.save();
       ctx.beginPath();
       ctx.arc(photoX + photoSize / 2, photoY + photoSize / 2, photoSize / 2, 0, Math.PI * 2);
@@ -257,229 +259,92 @@ export async function exportPremiumCard(
       ctx.clip();
       ctx.drawImage(img, photoX, photoY, photoSize, photoSize);
       ctx.restore();
-
+      
       // Draw border
-      ctx.strokeStyle = theme.accentColor;
-      ctx.lineWidth = 8;
-      ctx.beginPath();
-      ctx.arc(photoX + photoSize / 2, photoY + photoSize / 2, photoSize / 2, 0, Math.PI * 2);
-      ctx.stroke();
+      if (designerState.borderStyle !== 'none') {
+        ctx.strokeStyle = theme.borderColor;
+        ctx.lineWidth = designerState.borderStyle === 'decorative' ? 6 : 3;
+        ctx.beginPath();
+        ctx.arc(photoX + photoSize / 2, photoY + photoSize / 2, photoSize / 2, 0, Math.PI * 2);
+        ctx.stroke();
+      }
     } catch (error) {
-      console.error('Failed to draw photo:', error);
+      console.warn('Failed to load uploaded photo', error);
     }
   }
 
-  // Draw border
-  if (designerState.borderStyle !== 'none') {
-    ctx.strokeStyle = theme.borderColor;
-    ctx.lineWidth = designerState.borderStyle === 'decorative' ? 12 : 8;
-    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
-    
-    if (designerState.borderStyle === 'decorative') {
-      ctx.strokeRect(30, 30, canvas.width - 60, canvas.height - 60);
-    }
-  }
-
-  // Set font based on style
-  let fontFamily = 'Arial, sans-serif';
-  switch (designerState.fontStyle) {
-    case 'rounded':
-      fontFamily = 'Comic Sans MS, cursive';
-      break;
-    case 'elegant':
-      fontFamily = 'Georgia, serif';
-      break;
-    case 'modern':
-      fontFamily = 'Helvetica, Arial, sans-serif';
-      break;
-    case 'handwritten':
-      fontFamily = 'Courier New, monospace';
-      break;
-  }
-
-  // Calculate safe regions
+  // Draw text
   const safeRegion = calculateSafeTextRegion(canvas.width, canvas.height, 10);
-  const titleY = format === 'story' ? 300 : 200;
-  const messageRegionY = titleY + 150;
-  const messageRegionHeight = canvas.height - messageRegionY - 200;
-
-  // Draw title with glow
-  ctx.fillStyle = designerState.fontColor;
-  ctx.font = `bold 72px ${fontFamily}`;
-  ctx.textAlign = designerState.textAlignment;
-  ctx.textBaseline = 'top';
-
-  const titleX = designerState.textAlignment === 'left' ? 100 : 
-                 designerState.textAlignment === 'right' ? canvas.width - 100 : 
-                 canvas.width / 2;
+  const textY = format === 'square' ? canvas.height / 2 : canvas.height * 0.6;
   
-  drawTextWithGlow(ctx, cardText.title, titleX, titleY, theme.glowColor, 20);
-
-  // Draw message with dynamic fitting
-  ctx.fillStyle = designerState.fontColor;
+  // Title
+  ctx.fillStyle = designerState.fontColor || theme.textColor;
+  ctx.font = `bold 64px ${theme.fontFamily}`;
   ctx.textAlign = designerState.textAlignment;
+  const textX = designerState.textAlignment === 'center' ? canvas.width / 2 : 
+                designerState.textAlignment === 'left' ? safeRegion.x : 
+                canvas.width - safeRegion.x;
   
-  const fittedMessage = fitTextInBounds(ctx, cardText.message, fontFamily, {
-    maxWidth: safeRegion.width - 100,
-    maxHeight: messageRegionHeight,
-    initialFontSize: 48,
-    minFontSize: 32,
+  ctx.fillText(`Happy Birthday ${recipientName}!`, textX, textY - 100);
+  
+  // Message
+  ctx.font = `36px ${theme.fontFamily}`;
+  const sanitizedWish = sanitizeCardText(wishText);
+  const shortWish = convertToShortWish(sanitizedWish);
+  
+  const messageFit = fitTextInBounds(ctx, shortWish, theme.fontFamily, {
+    maxWidth: safeRegion.width * 0.9,
+    maxHeight: 400,
+    initialFontSize: 36,
+    minFontSize: 24,
     lineHeightMultiplier: 1.5,
     minLineHeightMultiplier: 1.3,
   });
   
-  ctx.font = `${fittedMessage.fontSize}px ${fontFamily}`;
-  
-  const messageStartY = messageRegionY + (messageRegionHeight - fittedMessage.totalHeight) / 2;
-  
-  fittedMessage.lines.forEach((line, index) => {
-    const lineX = designerState.textAlignment === 'left' ? 100 : 
-                  designerState.textAlignment === 'right' ? canvas.width - 100 : 
-                  canvas.width / 2;
-    const lineY = messageStartY + index * fittedMessage.lineHeight;
-    drawTextWithShadow(ctx, line, lineX, lineY);
-  });
+  ctx.font = `${messageFit.fontSize}px ${theme.fontFamily}`;
+  let messageY = textY;
+  for (const line of messageFit.lines) {
+    ctx.fillText(line, textX, messageY);
+    messageY += messageFit.lineHeight;
+  }
 
-  // Draw footer
-  ctx.font = `36px ${fontFamily}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'bottom';
-  ctx.globalAlpha = 0.8;
-  ctx.fillText(cardText.footer, canvas.width / 2, canvas.height - 80);
-  ctx.globalAlpha = 1;
+  // Draw decorative emojis if enabled
+  if (designerState.emojiDecorationsEnabled) {
+    ctx.font = '48px Arial';
+    const emojis = theme.decorativeEmojis;
+    const emojiCount = 8;
+    
+    for (let i = 0; i < emojiCount; i++) {
+      const emoji = emojis[i % emojis.length];
+      const x = (i / emojiCount) * canvas.width;
+      const y = i % 2 === 0 ? 50 : canvas.height - 50;
+      ctx.fillText(emoji, x, y);
+    }
+  }
 
-  // Apply enhancement pass
+  // Draw border if enabled
+  if (designerState.borderStyle !== 'none') {
+    ctx.strokeStyle = theme.borderColor;
+    ctx.lineWidth = designerState.borderStyle === 'decorative' ? 8 : 4;
+    ctx.strokeRect(20, 20, canvas.width - 40, canvas.height - 40);
+  }
+
+  // Enhancement pass
   enhanceCanvasRender(canvas);
 
   // Return blob or download
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => {
-      if (!blob) {
-        resolve();
-        return;
-      }
-
-      if (returnBlob) {
+  if (returnBlob) {
+    return new Promise((resolve) => {
+      canvas.toBlob((blob) => {
         resolve(blob);
-      } else {
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `birthday-card-${format}-${name.toLowerCase().replace(/\s+/g, '-')}.png`;
-        a.click();
-        URL.revokeObjectURL(url);
-        resolve();
-      }
+      }, 'image/png');
     });
-  });
-}
-
-/**
- * Generates a card variation as a Blob for preview
- */
-export async function generateCardVariationBlob(
-  wish: string,
-  name: string,
-  templateId: TemplateId,
-  themeId: CardTheme,
-  variationIndex: number
-): Promise<Blob | null> {
-  const template = TEMPLATES.find((t) => t.id === templateId) || TEMPLATES[0];
-  const theme = getThemeConfig(themeId);
-  const variation = getVariationParams(variationIndex);
-  
-  const canvas = document.createElement('canvas');
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-
-  canvas.width = 1080;
-  canvas.height = 1080;
-
-  const shortWish = convertToShortWish(wish);
-  const cardText = formatCardTextContent(name, shortWish);
-
-  // Load background
-  let backgroundDrawn = false;
-  try {
-    const bgImage = await loadCardBackgroundImage(theme.backgroundAsset);
-    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-    backgroundDrawn = true;
-  } catch (error) {
-    if (template.backgroundImage) {
-      try {
-        const bgImage = await loadCardBackgroundImage(template.backgroundImage);
-        ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
-        backgroundDrawn = true;
-      } catch {}
-    }
+  } else {
+    // Download
+    const link = document.createElement('a');
+    link.download = `birthday-${format}-${recipientName.toLowerCase().replace(/\s+/g, '-')}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+    return null;
   }
-
-  if (!backgroundDrawn) {
-    const gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, template.canvasBg1);
-    gradient.addColorStop(1, template.canvasBg2);
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-  }
-
-  drawVignetteOverlay(ctx, canvas.width, canvas.height, variation.vignetteIntensity);
-
-  const safeRegion = calculateSafeTextRegion(canvas.width, canvas.height, 8);
-  const titleY = safeRegion.y + 120;
-  const messageRegionY = titleY + 150;
-  const messageRegionHeight = canvas.height - messageRegionY - 200;
-  const footerY = canvas.height - safeRegion.y - 60;
-
-  // Decorations
-  if (theme.decorationStyle === 'sparkles') {
-    drawEdgeSparkles(ctx, canvas.width, canvas.height, theme.decorationColor, variation.decorationCount);
-  } else if (theme.decorationStyle === 'confetti') {
-    drawEdgeConfetti(ctx, canvas.width, canvas.height, theme.decorationColor, variation.decorationCount);
-  } else if (theme.decorationStyle === 'minimal') {
-    drawMinimalCorners(ctx, canvas.width, canvas.height, theme.decorationColor);
-  }
-
-  // Title
-  ctx.fillStyle = theme.titleColor;
-  ctx.font = `bold 72px ${theme.titleFont}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  drawTextWithGlow(ctx, cardText.title, canvas.width / 2, titleY, theme.titleGlow, 20 * variation.glowIntensity);
-
-  // Message
-  ctx.fillStyle = theme.messageColor;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'top';
-  
-  const fittedMessage = fitTextInBounds(ctx, cardText.message, theme.messageFont, {
-    maxWidth: safeRegion.width - 100,
-    maxHeight: messageRegionHeight,
-    initialFontSize: 42,
-    minFontSize: 28,
-    lineHeightMultiplier: 1.5,
-    minLineHeightMultiplier: 1.3,
-  });
-  
-  ctx.font = `${fittedMessage.fontSize}px ${theme.messageFont}`;
-  const messageStartY = messageRegionY + (messageRegionHeight - fittedMessage.totalHeight) / 2;
-  
-  fittedMessage.lines.forEach((line, index) => {
-    const lineY = messageStartY + index * fittedMessage.lineHeight;
-    drawTextWithShadow(ctx, line, canvas.width / 2, lineY);
-  });
-
-  // Footer
-  ctx.fillStyle = theme.footerColor;
-  ctx.font = `32px ${theme.footerFont}`;
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'bottom';
-  ctx.globalAlpha = 0.85;
-  ctx.fillText(cardText.footer, canvas.width / 2, footerY);
-  ctx.globalAlpha = 1;
-
-  enhanceCanvasRender(canvas);
-
-  return new Promise((resolve) => {
-    canvas.toBlob((blob) => resolve(blob));
-  });
 }

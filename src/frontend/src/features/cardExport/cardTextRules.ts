@@ -1,93 +1,86 @@
 /**
- * Card text sanitization and validation utilities.
+ * Card text sanitization and validation utilities
  * Ensures exported/preview card text contains only Title/Message/Footer content
- * and never includes placeholders like "{NAME}" or instruction-like strings.
+ * and never includes placeholders like "{NAME}" or instruction-like strings
  */
-
-export interface CardTextContent {
-  title: string;
-  message: string;
-  footer: string;
-}
-
-const DISALLOWED_TOKENS = [
-  '{NAME}',
-  '{name}',
-  'Title:',
-  'Message:',
-  'Footer:',
-  'Prompt:',
-  'Instructions:',
-  'Generate',
-  'Create',
-];
 
 /**
- * Sanitizes recipient name to prevent placeholder syntax
+ * Sanitizes card text by removing instruction-like content and placeholders
  */
-export function sanitizeRecipientName(name: string): string {
-  if (!name || name.trim().length === 0) {
-    return 'Friend';
+export function sanitizeCardText(text: string): string {
+  let sanitized = text;
+
+  // Remove instruction-like prefixes
+  const instructionPrefixes = [
+    /^Prompt:\s*/i,
+    /^Instructions?:\s*/i,
+    /^Generate:\s*/i,
+    /^Create:\s*/i,
+    /^Title:\s*/i,
+    /^Message:\s*/i,
+    /^Footer:\s*/i,
+  ];
+
+  for (const pattern of instructionPrefixes) {
+    sanitized = sanitized.replace(pattern, '');
   }
-  
-  // Remove any curly braces or instruction-like prefixes
-  let sanitized = name.trim()
-    .replace(/[{}]/g, '')
-    .replace(/^(Title|Message|Footer|Prompt|Instructions):\s*/gi, '');
-  
-  // Capitalize first letter
-  sanitized = sanitized.charAt(0).toUpperCase() + sanitized.slice(1);
-  
-  return sanitized || 'Friend';
+
+  // Remove placeholder patterns
+  const placeholderPatterns = [
+    /\{NAME\}/gi,
+    /\{RECIPIENT\}/gi,
+    /\{YOUR_NAME\}/gi,
+    /\[NAME\]/gi,
+    /\[RECIPIENT\]/gi,
+  ];
+
+  for (const pattern of placeholderPatterns) {
+    sanitized = sanitized.replace(pattern, '');
+  }
+
+  // Clean up extra whitespace
+  sanitized = sanitized.trim().replace(/\s+/g, ' ');
+
+  return sanitized;
 }
 
 /**
- * Removes instruction-like lines and disallowed tokens from text
+ * Formats card text content for export/preview
+ * Accepts either fully specified content or generates fallback
  */
-export function stripInstructionLikeContent(text: string): string {
-  let cleaned = text;
-  
-  // Remove lines that start with instruction-like prefixes
-  cleaned = cleaned
-    .split('\n')
-    .filter(line => {
-      const trimmed = line.trim();
-      return !DISALLOWED_TOKENS.some(token => 
-        trimmed.startsWith(token) || trimmed.includes(token)
-      );
-    })
-    .join('\n');
-  
-  // Remove any remaining disallowed tokens
-  DISALLOWED_TOKENS.forEach(token => {
-    cleaned = cleaned.replace(new RegExp(token, 'gi'), '');
-  });
-  
-  return cleaned.trim();
-}
+export function formatCardTextContent(options: {
+  title?: string;
+  message: string;
+  footer?: string;
+  eventType?: string;
+}): { title: string; message: string; footer: string } {
+  const title = options.title || generateDefaultTitle(options.eventType);
+  const message = sanitizeCardText(options.message);
+  const footer = options.footer || 'Created with WishMint';
 
-/**
- * Validates and formats card text content for export/preview
- */
-export function formatCardTextContent(
-  recipientName: string,
-  wishMessage: string
-): CardTextContent {
-  const sanitizedName = sanitizeRecipientName(recipientName);
-  const sanitizedMessage = stripInstructionLikeContent(wishMessage);
-  
   return {
-    title: `Happy Birthday ${sanitizedName}!`,
-    message: sanitizedMessage,
-    footer: 'Made with ❤️ by WishMint AI',
+    title: sanitizeCardText(title),
+    message,
+    footer: sanitizeCardText(footer),
   };
 }
 
-/**
- * Validates that text doesn't contain placeholders or instructions
- */
-export function isValidCardText(text: string): boolean {
-  return !DISALLOWED_TOKENS.some(token => 
-    text.includes(token)
-  );
+function generateDefaultTitle(eventType?: string): string {
+  if (!eventType || eventType === 'birthday') {
+    return 'Happy Birthday!';
+  }
+
+  const titleMap: Record<string, string> = {
+    wedding: 'Congratulations!',
+    anniversary: 'Happy Anniversary!',
+    party: 'You\'re Invited!',
+    corporate: 'Join Us',
+    festival: 'Happy Holidays!',
+    'baby-shower': 'Baby Shower',
+    graduation: 'Congratulations Graduate!',
+    'love-card': 'With Love',
+    general: 'Celebrate',
+  };
+
+  return titleMap[eventType] || 'Celebrate';
 }

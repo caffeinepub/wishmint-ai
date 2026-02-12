@@ -1,16 +1,19 @@
 # Specification
 
 ## Summary
-**Goal:** Improve single-page navigation and scrolling UX with a sticky, branded navbar, section anchors, active highlighting, scroll progress, and mobile-friendly floating actions.
+**Goal:** Add a new prompt-based “Create Card With AI Prompt” studio mode alongside the existing Quick Form Mode, enabling multi-event card generation with 3 design variations, editable results, and premium export rules.
 
 **Planned changes:**
-- Add a sticky top navigation bar styled to match the existing WishMint premium dark + neon (purple/green) gradient branding, with menu items: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ.
-- Add/ensure section anchor IDs exist exactly as: home, create-wish, templates, marketplace, pricing, dashboard, faq; implement smooth scrolling with sticky-header offset so headings aren’t hidden.
-- Implement active-section highlighting in the navbar that updates smoothly and avoids flicker near section boundaries.
-- Add a thin scroll progress indicator bar at the very top of the viewport with a smooth, branded gradient fill reflecting scroll percentage.
-- Add a floating “Back to Top” button (bottom-right) that appears after ~30% scroll and smoothly scrolls to Home; keep it mobile-safe and non-obstructive.
-- Add a floating quick action button labeled exactly “🎂 Create Wish” that smoothly scrolls to the Wish Generator section (create-wish), with mobile-safe placement.
-- Add mobile optimization: collapse navbar into a hamburger menu at mobile breakpoints; menu opens/closes cleanly, closes on selection, and preserves smooth anchor scrolling without pointer-events/overlay issues.
-- Ensure any new user-facing text is English and that new UI elements do not introduce horizontal overflow or regress existing section layouts; preserve existing /pricing behavior (scroll to Pricing and open the pricing modal).
+- Add a clear mode toggle between “Quick Form Mode” (existing birthday form flow) and “Create Card With AI Prompt” (new prompt flow).
+- Build Prompt Mode UI: a main prompt textbox with placeholder “Describe your card or invitation idea...” plus clickable example prompts that prefill the textbox and validation to prevent empty generation.
+- Implement a deterministic, rule-based prompt analysis step to detect and display/store event type, tone, visual theme keywords, and layout style (with sensible defaults when ambiguous).
+- Generate structured, sanitized card text for Prompt Mode (title/headline, short message, footer branding) and remove instruction-like phrases from rendered output.
+- Update preview/export text logic to be event-adaptive (not hardcoded to birthdays) and support multiple event types without showing “Happy Birthday” unless the event is Birthday.
+- Generate exactly 3 Prompt Mode design variations per run with distinct composition/typography/color treatments while enforcing layout safety (title, decorative focus element, message, footer branding; no overlap/clutter).
+- Add event-adaptive auto-theming (e.g., Birthday vs Wedding vs Corporate vs Baby Shower) with the ability for users to manually override theme selection.
+- Add Prompt Mode edit controls: edit title/message/footer, change tone, switch theme, keep prompt visible/editable, and regenerate to produce a fresh set of 3 variations.
+- Apply existing premium entitlement rules to Prompt Mode exports (free: limited resolution and watermark; premium: HD export with watermark removed; preserve existing sign-in gating).
+- Add premium-area “Coming Soon” UI placeholders for “Video invitation” and “Voice message” (no real capture/playback).
+- Adjust Output section copy so Prompt Mode uses neutral multi-event labeling, while Quick Form Mode retains the existing birthday-pack labels and presentation.
 
-**User-visible outcome:** Users can navigate the page via a sticky navbar (desktop and mobile hamburger), see which section they’re in, track scroll progress, and quickly jump to the top or directly to “🎂 Create Wish” with smooth, branded scrolling.
+**User-visible outcome:** Users can switch between Quick Form Mode and a new prompt-driven card studio, enter a natural-language prompt to generate 3 editable, event-appropriate card variations, and export with free vs premium download rules (plus premium “coming soon” items shown).

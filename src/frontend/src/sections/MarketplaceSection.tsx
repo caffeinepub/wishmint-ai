@@ -1,141 +1,112 @@
 import { forwardRef, useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Store, Plus, Search } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { MarketplaceListingCard } from '../features/marketplace/components/MarketplaceListingCard';
 import { CreateListingDialog } from '../features/marketplace/components/CreateListingDialog';
 import { useGetAllMarketplaceListings } from '../features/marketplace/hooks/useMarketplaceListings';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, Plus, ShoppingBag, Search } from 'lucide-react';
 
-export const MarketplaceSection = forwardRef<HTMLDivElement>((_, ref) => {
-  const { data: listings, isLoading, error } = useGetAllMarketplaceListings();
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const [typeFilter, setTypeFilter] = useState<'all' | 'template' | 'sticker'>('all');
+export const MarketplaceSection = forwardRef<HTMLDivElement>((props, ref) => {
   const [searchQuery, setSearchQuery] = useState('');
+  const [typeFilter, setTypeFilter] = useState<'all' | 'template' | 'sticker'>('all');
+  const [createDialogOpen, setCreateDialogOpen] = useState(false);
 
-  const filteredListings = listings?.filter(listing => {
-    const matchesType = typeFilter === 'all' || listing.contentType.__kind__ === typeFilter;
-    const matchesSearch = searchQuery === '' || 
+  const { data: listings = [], isLoading } = useGetAllMarketplaceListings();
+
+  const filteredListings = listings.filter((listing) => {
+    const matchesSearch =
       listing.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       listing.description.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesType && matchesSearch;
-  }) || [];
+
+    const matchesType =
+      typeFilter === 'all' ||
+      (typeFilter === 'template' && listing.contentType.__kind__ === 'template') ||
+      (typeFilter === 'sticker' && listing.contentType.__kind__ === 'sticker');
+
+    return matchesSearch && matchesType;
+  });
 
   return (
-    <section ref={ref} id="marketplace" className="section-padding bg-background">
-      <div className="section-container">
-        <Reveal>
-          <div className="text-center mb-12">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-neon-green/10 border border-neon-green/20 mb-4">
-              <ShoppingBag className="w-4 h-4 text-neon-green" />
-              <span className="text-sm font-medium text-neon-green">Marketplace</span>
-            </div>
-            <h2 className="section-heading mb-4">
-              Buy & Sell{' '}
-              <span className="bg-gradient-to-r from-neon-green to-neon-purple bg-clip-text text-transparent">
-                Premium Designs
-              </span>
-            </h2>
-            <p className="section-subheading max-w-2xl mx-auto">
-              Browse and purchase unique templates and stickers from talented creators. Start selling your own designs today.
-            </p>
-            <Alert className="mt-6 max-w-2xl mx-auto bg-card/50 border-neon-green/20">
-              <AlertDescription className="text-sm">
-                <strong>Marketplace MVP:</strong> This is a request-based marketplace. Contact sellers directly to complete purchases.
-              </AlertDescription>
-            </Alert>
+    <section id="marketplace" ref={ref} className="scroll-mt-16 w-full py-16 px-4 sm:px-6 lg:px-8 section-transition" style={{ backgroundColor: 'oklch(var(--background-secondary))' }}>
+      <Reveal className="max-w-7xl mx-auto">
+        <div className="text-center mb-12 space-y-4">
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass-card border-brand-purple/30">
+            <Store className="w-4 h-4 text-brand-purple" />
+            <span className="text-sm font-medium text-brand-purple">Marketplace</span>
           </div>
-        </Reveal>
+          <h2 className="text-3xl sm:text-4xl font-bold brand-gradient-text">
+            Buy & Sell Templates
+          </h2>
+          <p className="text-lg max-w-2xl mx-auto" style={{ color: 'oklch(var(--text-body))' }}>
+            Discover premium templates created by the community
+          </p>
+        </div>
 
-        <Reveal delay={0.1}>
-          <div className="flex flex-col lg:flex-row gap-4 mb-8">
-            <div className="flex-1 relative">
+        <Alert className="mb-8 max-w-3xl mx-auto border-brand-purple/30 glass-card">
+          <AlertDescription className="text-center text-sm">
+            <strong>MVP Notice:</strong> Marketplace is in beta. Payment processing coming soon. Contact sellers directly for now.
+          </AlertDescription>
+        </Alert>
+
+        <div className="space-y-6">
+          <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
+            <div className="relative w-full sm:w-96">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
                 placeholder="Search listings..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10"
+                className="pl-10 bg-background/50 border-border/40"
               />
             </div>
-            <div className="flex flex-col sm:flex-row gap-4">
-              <Select value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
-                <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Filter by type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Types</SelectItem>
-                  <SelectItem value="template">Templates</SelectItem>
-                  <SelectItem value="sticker">Stickers</SelectItem>
-                </SelectContent>
-              </Select>
-              <Button
-                onClick={() => setCreateDialogOpen(true)}
-                className="w-full sm:w-auto bg-gradient-to-r from-neon-green to-neon-purple hover:opacity-90 transition-opacity"
-              >
-                <Plus className="w-4 h-4 mr-2" />
-                Create Listing
-              </Button>
-            </div>
+            <Button onClick={() => setCreateDialogOpen(true)} className="btn-primary-gradient text-white rounded-full">
+              <Plus className="w-4 h-4 mr-2" />
+              Create Listing
+            </Button>
           </div>
-        </Reveal>
 
-        {error && (
-          <Reveal delay={0.2}>
-            <Alert variant="destructive" className="mb-8">
-              <AlertDescription>
-                Failed to load marketplace listings. Please try again later.
-              </AlertDescription>
-            </Alert>
-          </Reveal>
-        )}
+          <Tabs value={typeFilter} onValueChange={(v) => setTypeFilter(v as typeof typeFilter)}>
+            <TabsList className="glass-card">
+              <TabsTrigger value="all">All</TabsTrigger>
+              <TabsTrigger value="template">Templates</TabsTrigger>
+              <TabsTrigger value="sticker">Stickers</TabsTrigger>
+            </TabsList>
 
-        {isLoading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="w-8 h-8 animate-spin text-neon-green" />
-          </div>
-        ) : filteredListings.length === 0 ? (
-          <Reveal delay={0.2}>
-            <div className="text-center py-20">
-              <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-neon-green/10 mb-4">
-                <ShoppingBag className="w-8 h-8 text-neon-green" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">
-                {searchQuery || typeFilter !== 'all' ? 'No listings found' : 'No listings yet'}
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                {searchQuery || typeFilter !== 'all'
-                  ? 'Try adjusting your filters or search query.'
-                  : 'Be the first to list a template or sticker for sale!'}
-              </p>
-              {!searchQuery && typeFilter === 'all' && (
-                <Button
-                  onClick={() => setCreateDialogOpen(true)}
-                  className="bg-gradient-to-r from-neon-green to-neon-purple hover:opacity-90"
-                >
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create First Listing
-                </Button>
+            <TabsContent value={typeFilter} className="mt-6">
+              {isLoading ? (
+                <div className="text-center py-12">
+                  <p style={{ color: 'oklch(var(--text-body))' }}>Loading listings...</p>
+                </div>
+              ) : filteredListings.length === 0 ? (
+                <Card className="glass-card border-border/40 rounded-2xl">
+                  <CardContent className="py-12 text-center">
+                    <Store className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-lg font-medium mb-2">No listings found</p>
+                    <p className="text-sm" style={{ color: 'oklch(var(--text-body))' }}>
+                      {searchQuery ? 'Try a different search term' : 'Be the first to create a listing!'}
+                    </p>
+                  </CardContent>
+                </Card>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredListings.map((listing) => (
+                    <MarketplaceListingCard key={listing.id.toString()} listing={listing} />
+                  ))}
+                </div>
               )}
-            </div>
-          </Reveal>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredListings.map((listing, index) => (
-              <Reveal key={listing.id.toString()} delay={0.1 * (index % 3)}>
-                <MarketplaceListingCard listing={listing} />
-              </Reveal>
-            ))}
-          </div>
-        )}
+            </TabsContent>
+          </Tabs>
+        </div>
+      </Reveal>
 
-        <CreateListingDialog
-          open={createDialogOpen}
-          onClose={() => setCreateDialogOpen(false)}
-        />
-      </div>
+      <CreateListingDialog 
+        open={createDialogOpen} 
+        onClose={() => setCreateDialogOpen(false)} 
+      />
     </section>
   );
 });

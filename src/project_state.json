@@ -1,1104 +1,101 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 47,
-  "summary": "WishMint AI now requires a mobile-friendly Manual UPI Payments upgrade flow (QR + UPI ID + UPI deep link) with user-submitted UTR verification and an admin approval panel that activates a 30-day Pro/Creator subscription and unlocks premium features, including backend storage for payment requests and subscriptions with admin access restricted by an environment-variable email allowlist, plus a premium-quality birthday card image generation/design upgrade (short wish converter, strict card text rules, typography/layout hierarchy, themes, variations, and improved visual effects).",
+  "projectStateVersion": 3,
+  "summary": "WishMint is evolving from a form-based birthday generator into an AI Creative Card Studio: users can enter freeform prompts to generate professional multi-event invitation/greeting cards (message + layout + style + visual theme), with editable outputs, multiple variations, and optional premium upgrades while retaining a quick form mode.",
   "architectural_notes": [
-    "Single-file offline-first implementation: all HTML/CSS/JS in one index.html; template-based text generation (no external APIs/keys).",
-    "Use wa.me URL with encodeURIComponent for WhatsApp sharing.",
-    "Use HTML canvas rendering for downloadable share card images.",
-    "Google Sign-In/OAuth requires external network access and third-party integration; this may conflict with fully offline-first/no-external-dependency goals and needs an explicit decision on allowed online-only features.",
-    "Relax gated UX flow: generation is allowed without login; only saving, premium template exports, and advanced features require authentication.",
-    "Add QR code generation locally (client-side) with no external API dependencies to preserve offline-friendly behavior.",
-    "Add SEO meta tags (title/description) directly in index.html head.",
-    "User chose Option 2: implement the premium Canva/Instagram-style card system as a separate standalone card designer module inside the app (not just upgrading the existing card output flow).",
-    "Google Analytics (gtag.js) requires loading scripts from googletagmanager.com; this introduces an external network dependency and may conflict with offline-first/no-external-dependency goals—decide whether analytics is allowed as an online-only enhancement.",
-    "Razorpay subscriptions require online backend components: subscription creation, webhook verification, and secure server-side signature checks; cannot be fully offline-first."
+    "Design UX to avoid confusion between Quick Form Mode and Prompt Mode (clear entry points and naming).",
+    "Card renderer must enforce layout constraints to avoid text overlap/clutter (defined sections and safe text areas).",
+    "Generation pipeline: prompt -> attribute detection (event/tone/theme/layout) -> content generation -> design generation -> 3 variations -> user edit/export.",
+    "Event-adaptive theme assets/decorations should be selected based on detected event type."
   ],
-  "known_issues": [
-    "Deployment/build error encountered when attempting to push/deploy the app to the network.",
-    "Mobile layout bug: unintended right-side black empty space/horizontal overflow; content not stretching full width on small screens.",
-    "Upgrade button not working: clicking/tapping Upgrade does nothing (pricing page/modal/payment flow not opening), possibly due to blocked click events (overlay/pointer-events/z-index), routing/navigation issues, or form submission behavior.",
-    "Generated birthday card images sometimes include prompt/instruction text and produce text-heavy layouts; card render pipeline needs sanitization + short-wish conversion + overflow-safe typography/layout."
-  ],
+  "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-create-a-single-page-react-ui-for-wishmint-ai-with-a-premium-dark-theme-and-neon-gradient-accents-purple-green-using-clean-typography-rounded-cards-subtle-shadows-smooth-spacing-and-mobile-first-responsive-layout-suitable-for-india-audiences-on-phones-and-desktop",
-      "title": "Create a single-page React UI for “WishMint AI” with a premium dark theme and neon gradient accents (purple + green), using clean typography, rounded cards, subtle shadows, smooth spacing, and mobile-first responsive layout suitable for India audiences on phones and desktop.",
+      "id": "feature-add-a-new-creation-mode-called-create-card-with-ai-prompt-that-lets-users-enter-a-freeform-natural-language-prompt-to-generate-a-card-invitation-while-keeping-the-existing-quick-form-based-birthday-generator-as-a-separate-quick-form-mode",
+      "title": "Add a new creation mode called \"Create Card With AI Prompt\" that lets users enter a freeform natural-language prompt to generate a card/invitation, while keeping the existing quick form-based birthday generator as a separate \"Quick Form Mode\".",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-minimal-premium-animations-for-key-section-reveals-and-interactions-fade-slide-ensuring-animations-are-subtle-and-do-not-block-interaction-or-significantly-impact-performance",
-      "title": "Implement minimal premium animations for key section reveals and interactions (fade/slide), ensuring animations are subtle and do not block interaction or significantly impact performance.",
+      "id": "feature-implement-a-prompt-mode-input-ui-with-a-main-textbox-placeholder-describe-your-card-or-invitation-idea-and-a-row-grid-of-clickable-example-prompts-that-prefill-the-textbox",
+      "title": "Implement a Prompt Mode input UI with a main textbox placeholder \"Describe your card or invitation idea...\" and a row/grid of clickable example prompts that prefill the textbox.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-hero-section-with-title-wishmint-ai-subtitle-make-birthdays-feel-personal-in-seconds-and-two-ctas-primary-generate-wish-scrolls-focuses-generator-and-secondary-see-examples-scrolls-to-examples-gallery",
-      "title": "Add a Hero section with title “WishMint AI”, subtitle “Make birthdays feel personal in seconds.”, and two CTAs: primary “Generate Wish” (scrolls/focuses generator) and secondary “See Examples” (scrolls to examples/gallery).",
+      "id": "feature-create-a-prompt-analysis-step-rule-based-deterministic-that-extracts-and-stores-event-type-tone-visual-theme-keywords-and-layout-style-from-the-user-prompt-and-display-the-detected-values-in-the-ui-before-with-the-results",
+      "title": "Create a prompt analysis step (rule-based, deterministic) that extracts and stores: event type, tone, visual theme keywords, and layout style from the user prompt, and display the detected values in the UI before/with the results.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-build-the-core-generator-section-with-the-specified-inputs-name-required-your-name-optional-relationship-dropdown-friend-best-friend-mom-dad-brother-sister-girlfriend-boyfriend-crush-teacher-colleague-tone-dropdown-emotional-funny-romantic-formal-short-sweet-light-roast-language-dropdown-english-hinglish-hindi-personality-dropdown-kind-fun-hardworking-cute-savage-supportive-creative-introvert-and-an-optional-memory-textarea-labeled-add-1-personal-memory-line-optional",
-      "title": "Build the core Generator section with the specified inputs: Name (required), Your name (optional), Relationship dropdown (friend, best friend, mom, dad, brother, sister, girlfriend, boyfriend, crush, teacher, colleague), Tone dropdown (emotional, funny, romantic, formal, short & sweet, light roast), Language dropdown (English, Hinglish, Hindi), Personality dropdown (kind, fun, hardworking, cute, savage, supportive, creative, introvert), and an optional memory textarea labeled “Add 1 personal memory line (optional)”.",
+      "id": "feature-generate-smart-structured-card-content-from-the-prompt-analysis-output-including-1-title-headline-2-short-readable-main-message-3-signature-footer-text-and-ensure-the-content-is-sanitized-to-avoid-instruction-like-text",
+      "title": "Generate smart, structured card content from the prompt analysis output, including: (1) title/headline, (2) short readable main message, (3) signature/footer text, and ensure the content is sanitized to avoid instruction-like text.",
       "reqIds": [
         "REQ-4"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-generator-actions-generate-surprise-me-randomize-copy-all-and-share-on-whatsapp-implement-basic-validation-so-generate-copy-share-requires-name-show-a-clear-inline-error-when-missing",
-      "title": "Add generator actions: “Generate”, “Surprise Me (randomize)”, “Copy All”, and “Share on WhatsApp”. Implement basic validation so Generate/Copy/Share requires Name; show a clear inline error when missing.",
+      "id": "feature-update-the-card-export-preview-text-formatting-logic-so-it-is-not-hardcoded-to-birthdays-e-g-remove-forced-happy-birthday-title-and-instead-uses-the-analyzed-event-type-tone-to-produce-an-appropriate-title-headline-and-footer-for-multiple-event-types-birthday-wedding-anniversary-party-corporate-festival-graduation-baby-shower-love-cards",
+      "title": "Update the card export/preview text formatting logic so it is not hardcoded to birthdays (e.g., remove forced \"Happy Birthday …\" title) and instead uses the analyzed event type + tone to produce an appropriate title/headline and footer for multiple event types (Birthday, Wedding, Anniversary, Party, Corporate, Festival, Graduation, Baby Shower, Love cards).",
       "reqIds": [
         "REQ-5"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-template-based-non-ai-birthday-pack-generation-on-the-client-with-modular-javascript-typescript-functions-generation-must-produce-5-outputs-main-wish-whatsapp-short-instagram-caption-mini-speech-targeting-10-15s-spoken-length-and-hashtags-varying-based-on-relationship-tone-language-personality-and-optional-memory-line",
-      "title": "Implement template-based (non-AI) “Birthday Pack” generation on the client with modular JavaScript/TypeScript functions. Generation must produce 5 outputs: Main Wish, WhatsApp Short, Instagram Caption, Mini Speech (targeting 10–15s spoken length), and Hashtags, varying based on relationship, tone, language, personality, and optional memory line.",
+      "id": "feature-ensure-prompt-mode-renders-3-unique-card-design-variations-per-generation-with-different-layout-compositions-and-different-typography-color-treatments-while-obeying-strict-layout-rules-title-section-decorative-focus-element-short-message-footer-branding-prevent-text-overlap-clutter",
+      "title": "Ensure Prompt Mode renders 3 unique card design variations per generation, with different layout compositions and different typography/color treatments, while obeying strict layout rules: Title section, decorative focus element, short message, footer branding; prevent text overlap/clutter.",
       "reqIds": [
         "REQ-6"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-an-output-section-that-displays-5-output-cards-titled-main-wish-whatsapp-short-instagram-caption-mini-speech-10-15s-and-hashtags-each-card-must-include-a-copy-button-that-copies-only-that-card-s-content",
-      "title": "Create an Output section that displays 5 output cards titled: “Main Wish”, “WhatsApp Short”, “Instagram Caption”, “Mini Speech (10–15s)”, and “Hashtags”. Each card must include a “Copy” button that copies only that card’s content.",
+      "id": "feature-add-event-adaptive-visual-theming-so-decorations-and-background-ornament-choices-change-based-on-detected-event-type-birthday-balloons-confetti-cake-feel-wedding-floral-gold-elegant-ornaments-corporate-minimal-modern-baby-shower-cute-pastel",
+      "title": "Add event-adaptive visual theming so decorations and background/ornament choices change based on detected event type (Birthday → balloons/confetti/cake feel; Wedding → floral/gold/elegant ornaments; Corporate → minimal/modern; Baby Shower → cute/pastel).",
       "reqIds": [
         "REQ-7"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-download-as-card-image-that-renders-a-shareable-card-using-html-canvas-no-external-api-keys-the-exported-image-must-include-wishmint-ai-branding-selected-template-style-and-the-generated-main-wish-and-optionally-recipient-name-allow-downloading-as-a-png-file",
-      "title": "Implement “Download as Card Image” that renders a shareable card using HTML canvas (no external API keys). The exported image must include: WishMint AI branding, selected template style, and the generated Main Wish (and optionally recipient name). Allow downloading as a PNG file.",
+      "id": "feature-add-user-edit-controls-for-prompt-mode-results-edit-generated-text-fields-title-message-footer-switch-theme-change-tone-and-regenerate-designs-keeping-the-prompt-visible-editable",
+      "title": "Add user edit controls for Prompt Mode results: edit generated text fields (title/message/footer), switch theme, change tone, and regenerate designs (keeping the prompt visible/editable).",
       "reqIds": [
         "REQ-8"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-an-examples-gallery-section-showing-6-sample-wishes-covering-different-tones-and-relationships-with-a-tone-filter-that-updates-the-displayed-examples",
-      "title": "Add an Examples/Gallery section showing 6 sample wishes covering different tones and relationships, with a tone filter that updates the displayed examples.",
+      "id": "feature-apply-premium-export-rules-to-prompt-mode-downloads-free-users-get-limited-resolution-export-and-or-watermark-premium-users-get-hd-export-and-watermark-removal-reusing-the-existing-entitlements-model",
+      "title": "Apply premium export rules to Prompt Mode downloads: Free users get limited-resolution export and/or watermark; Premium users get HD export and watermark removal, reusing the existing entitlements model.",
       "reqIds": [
         "REQ-9"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-templates-section-mvp-that-displays-8-selectable-card-templates-minimal-cute-luxury-anime-neon-classic-aesthetic-funny-selecting-a-template-changes-the-styling-used-to-preview-the-generated-wish-and-is-also-used-by-the-download-as-card-image-export",
-      "title": "Add a Templates section (MVP) that displays 8 selectable card templates: Minimal, Cute, Luxury, Anime, Neon, Classic, Aesthetic, Funny. Selecting a template changes the styling used to preview the generated wish and is also used by the “Download as Card Image” export.",
+      "id": "feature-add-ui-placeholders-for-video-invitation-option-and-voice-message-card-option-in-the-premium-area-as-coming-soon-items-gated-behind-premium-do-not-implement-real-video-voice-capture-or-playback",
+      "title": "Add UI placeholders for \"Video invitation option\" and \"Voice message card option\" in the premium area as Coming Soon items gated behind premium (do not implement real video/voice capture or playback).",
       "reqIds": [
         "REQ-10"
       ],
       "version": 1
     },
     {
-      "id": "feature-add-a-pricing-section-with-clearly-presented-tiers-free-text-generation-copy-share-and-pro-unlimited-templates-export-card-image-premium-styles-plus-a-future-subsection-listing-voice-wishes-and-video-slideshow-as-future-features-non-functional",
-      "title": "Add a Pricing section with clearly presented tiers: Free (text generation + copy/share) and Pro (unlimited templates + export card image + premium styles), plus a “Future” subsection listing voice wishes and video slideshow as future features (non-functional).",
+      "id": "feature-update-the-output-section-copy-and-structure-for-prompt-mode-so-it-is-not-birthday-pack-specific-e-g-replace-headings-like-your-birthday-pack-with-a-neutral-multi-event-label-when-prompt-mode-is-used-while-preserving-the-existing-birthday-pack-presentation-for-quick-form-mode",
+      "title": "Update the Output section copy and structure for Prompt Mode so it is not birthday-pack specific (e.g., replace headings like \"Your Birthday Pack\" with a neutral multi-event label when Prompt Mode is used), while preserving the existing birthday-pack presentation for Quick Form Mode.",
       "reqIds": [
         "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-faq-section-covering-privacy-how-it-works-language-support-and-how-to-share-content-must-be-in-english",
-      "title": "Add an FAQ section covering: privacy, how it works, language support, and how to share. Content must be in English.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-footer-with-privacy-policy-terms-and-contact-links-sections-provide-simple-on-page-sections-or-anchor-links-no-external-dependencies-required",
-      "title": "Add a Footer with Privacy Policy, Terms, and Contact links/sections. Provide simple on-page sections or anchor links (no external dependencies required).",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-keep-the-app-fast-and-offline-friendly-by-avoiding-external-api-calls-for-core-functionality-and-ensuring-the-app-works-without-network-access-after-being-loaded-once-all-generation-logic-must-be-local",
-      "title": "Keep the app fast and offline-friendly by avoiding external API calls for core functionality and ensuring the app works without network access after being loaded once. All generation logic must be local.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-built-in-set-of-selectable-birthday-card-background-images-a-small-gallery-that-can-be-used-as-the-background-for-the-card-preview-and-the-exported-png-card",
-      "title": "Add a built-in set of selectable birthday card background images (a small gallery) that can be used as the background for the card preview and the exported PNG card.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-store-the-generated-birthday-card-background-images-as-static-assets-under-frontend-public-assets-generated-and-reference-them-from-the-ui-and-export-logic-by-file-path",
-      "title": "Store the generated birthday card background images as static assets under frontend/public/assets/generated and reference them from the UI and export logic by file path.",
-      "reqIds": [
-        "REQ-16"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-template-selection-ui-to-visually-display-the-birthday-card-background-images-as-selectable-thumbnails-in-addition-to-or-replacing-the-current-gradient-only-previews-and-clearly-indicate-the-currently-selected-background",
-      "title": "Update the template selection UI to visually display the birthday card background images as selectable thumbnails (in addition to, or replacing, the current gradient-only previews) and clearly indicate the currently selected background.",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-card-export-implementation-to-render-the-selected-birthday-card-background-image-onto-the-canvas-before-drawing-text-and-branding-while-preserving-the-existing-text-wrapping-and-downloadable-png-behavior",
-      "title": "Update the card export implementation to render the selected birthday card background image onto the canvas before drawing text and branding, while preserving the existing text wrapping and downloadable PNG behavior.",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-user-login-logout-ui-using-the-existing-internet-identity-authentication-hook-and-present-it-to-users-as-the-app-s-google-based-login-alternative-since-direct-google-oauth-is-not-supported-in-this-stack",
-      "title": "Implement a user login/logout UI using the existing Internet Identity authentication hook, and present it to users as the app’s Google-based login alternative (since direct Google OAuth is not supported in this stack).",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-display-basic-authenticated-user-info-in-the-ui-after-login-using-the-active-identity-principal-as-the-user-identifier-and-keep-the-app-usable-when-not-logged-in",
-      "title": "Display basic authenticated user info in the UI after login, using the active identity principal as the user identifier, and keep the app usable when not logged in.",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-minimal-backend-method-to-verify-authentication-wiring-by-returning-the-caller-principal-and-ensure-the-frontend-can-call-it-using-the-authenticated-actor-when-logged-in",
-      "title": "Add a minimal backend method to verify authentication wiring by returning the caller principal, and ensure the frontend can call it using the authenticated actor when logged in.",
-      "reqIds": [
-        "REQ-21"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enforce-a-gated-flow-so-users-must-be-authenticated-internet-identity-before-they-can-generate-birthday-wishes-or-use-generator-actions-generate-surprise-me-copy-all-share-on-whatsapp-if-the-user-is-not-signed-in-keep-the-generator-section-visible-but-disabled-and-show-a-clear-inline-message-prompting-the-user-to-sign-in",
-      "title": "Enforce a gated flow so users must be authenticated (Internet Identity) before they can generate birthday wishes or use generator actions (Generate, Surprise Me, Copy All, Share on WhatsApp). If the user is not signed in, keep the generator section visible but disabled and show a clear inline message prompting the user to sign in.",
-      "reqIds": [
-        "REQ-22"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-required-plan-selection-step-after-login-authenticated-users-must-select-a-plan-free-or-pro-before-generator-actions-become-enabled-store-the-selected-plan-locally-and-show-the-currently-selected-plan-in-the-ui",
-      "title": "Add a required plan-selection step after login: authenticated users must select a plan (Free or Pro) before generator actions become enabled. Store the selected plan locally and show the currently selected plan in the UI.",
-      "reqIds": [
-        "REQ-23"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-pricing-section-so-its-plan-ctas-function-as-plan-selection-controls-clicking-the-free-cta-selects-free-clicking-the-pro-cta-selects-pro-the-ui-must-clearly-indicate-the-selected-plan-state-and-provide-a-way-to-proceed-to-generation-e-g-scroll-to-the-generator-after-selection",
-      "title": "Update the Pricing section so its plan CTAs function as plan selection controls: clicking the Free CTA selects Free; clicking the Pro CTA selects Pro. The UI must clearly indicate the selected plan state and provide a way to proceed to generation (e.g., scroll to the generator after selection).",
-      "reqIds": [
-        "REQ-24"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-hero-section-primary-cta-generate-wish-respects-the-gated-flow-if-the-user-is-not-logged-in-it-should-prompt-sign-in-instead-of-scrolling-directly-into-an-unusable-generator-if-logged-in-but-no-plan-selected-it-should-scroll-to-pricing-and-prompt-plan-selection-otherwise-it-scrolls-to-the-generator-and-focuses-the-name-input",
-      "title": "Ensure Hero section primary CTA (\"Generate Wish\") respects the gated flow: if the user is not logged in, it should prompt sign-in instead of scrolling directly into an unusable generator; if logged in but no plan selected, it should scroll to Pricing and prompt plan selection; otherwise it scrolls to the generator and focuses the Name input.",
-      "reqIds": [
-        "REQ-25"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-top-left-corner-credit-label-that-reads-exactly-created-by-arion-zi-in-the-top-bar-of-the-hero-section-aligned-opposite-the-existing-authentication-controls",
-      "title": "Add a top-left corner credit label that reads exactly \"Created By Arion Zi\" in the top bar of the Hero section, aligned opposite the existing authentication controls.",
-      "reqIds": [
-        "REQ-26"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-a-ui-polish-pass-to-make-the-website-look-more-professional-by-improving-consistency-of-spacing-typography-hierarchy-and-alignment-across-major-sections-hero-generator-templates-pricing-examples-faq-legal-footer-without-changing-any-existing-feature-behavior-or-gated-flow-logic",
-      "title": "Apply a UI polish pass to make the website look more professional by improving consistency of spacing, typography hierarchy, and alignment across major sections (Hero, Generator, Templates, Pricing, Examples, FAQ, Legal, Footer) without changing any existing feature behavior or gated-flow logic.",
-      "reqIds": [
-        "REQ-27"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-remove-the-login-plan-gating-barrier-for-core-wish-generation-so-that-anonymous-users-can-generate-and-use-generator-actions-generate-wish-surprise-me-copy-all-share-on-whatsapp-without-signing-in-or-selecting-a-plan-while-keeping-the-app-functional-for-authenticated-users",
-      "title": "Remove the login/plan gating barrier for core wish generation so that anonymous users can generate and use generator actions (Generate Wish, Surprise Me, Copy All, Share on WhatsApp) without signing in or selecting a plan, while keeping the app functional for authenticated users.",
-      "reqIds": [
-        "REQ-28"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-upgrade-the-hero-section-to-include-1-an-animated-emotional-tagline-that-reads-exactly-create-birthday-wishes-that-feel-handwritten-and-personal-2-a-small-demo-preview-card-showing-a-sample-generated-wish-under-the-hero-content-and-3-trust-badges-for-free-ai-generator-instant-results-and-multi-language-support-while-keeping-the-existing-wishmint-ai-title-and-premium-dark-gradient-look",
-      "title": "Upgrade the Hero section to include (1) an animated emotional tagline that reads exactly “Create birthday wishes that feel handwritten and personal.”, (2) a small demo preview card showing a sample generated wish under the hero content, and (3) trust badges for “Free AI Generator”, “Instant Results”, and “Multi Language Support”, while keeping the existing “WishMint AI” title and premium dark gradient look.",
-      "reqIds": [
-        "REQ-29"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-two-new-generator-controls-a-wish-length-slider-and-an-emoji-level-slider-and-incorporate-them-into-local-template-based-generation-so-the-generated-outputs-vary-based-on-these-settings-longer-shorter-content-and-more-fewer-emojis",
-      "title": "Add two new generator controls: a Wish Length slider and an Emoji Level slider, and incorporate them into local template-based generation so the generated outputs vary based on these settings (longer/shorter content and more/fewer emojis).",
-      "reqIds": [
-        "REQ-30"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enhance-the-output-section-so-each-of-the-5-output-cards-includes-both-a-copy-button-and-a-share-button-and-add-smooth-subtle-interaction-animations-for-output-cards-and-actions",
-      "title": "Enhance the Output section so each of the 5 output cards includes both a Copy button and a Share button, and add smooth, subtle interaction animations for output cards and actions.",
-      "reqIds": [
-        "REQ-31"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-instagram-story-export-format-option-for-card-downloads-in-addition-to-the-existing-square-export-and-gate-card-image-download-export-behind-authentication-as-a-premium-advanced-feature-anonymous-users-can-still-generate-and-share-text",
-      "title": "Add an “Instagram Story” export format option for card downloads in addition to the existing square export, and gate card image download/export behind authentication as a premium/advanced feature (anonymous users can still generate and share text).",
-      "reqIds": [
-        "REQ-32"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-local-offline-qr-code-generator-feature-as-a-social-viral-tool-allowing-users-to-generate-a-qr-code-from-shareable-content-derived-from-the-generated-wish-pack-no-external-qr-apis",
-      "title": "Implement a local, offline QR code generator feature as a social/viral tool, allowing users to generate a QR code from shareable content derived from the generated wish pack (no external QR APIs).",
-      "reqIds": [
-        "REQ-33"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-new-features-feature-explanation-section-that-uses-icons-and-short-english-descriptions-for-ai-emotional-writing-memory-based-wishes-instant-share-tools-multi-language-support-and-personal-tone-customization",
-      "title": "Add a new “Features” (feature explanation) section that uses icons and short English descriptions for: AI Emotional Writing, Memory Based Wishes, Instant Share Tools, Multi Language Support, and Personal Tone Customization.",
-      "reqIds": [
-        "REQ-34"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-testimonials-section-with-clearly-labeled-demo-fake-testimonials-english-to-improve-trust-styled-consistently-with-the-existing-premium-theme",
-      "title": "Add a Testimonials section with clearly labeled demo/fake testimonials (English) to improve trust, styled consistently with the existing premium theme.",
-      "reqIds": [
-        "REQ-35"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-seo-improvements-by-setting-the-document-meta-title-to-wishmint-ai-ai-birthday-wish-generator-and-meta-description-to-generate-emotional-funny-romantic-ai-birthday-wishes-instantly",
-      "title": "Apply SEO improvements by setting the document meta title to \"WishMint AI – AI Birthday Wish Generator\" and meta description to \"Generate emotional, funny, romantic AI birthday wishes instantly.\".",
-      "reqIds": [
-        "REQ-36"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-footer-and-on-page-link-targets-to-include-an-about-wishmint-ai-link-section-alongside-privacy-policy-terms-and-contact-with-all-user-facing-text-in-english",
-      "title": "Update the footer and on-page link targets to include an “About WishMint AI” link/section alongside Privacy Policy, Terms, and Contact, with all user-facing text in English.",
-      "reqIds": [
-        "REQ-37"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-save-wish-capability-as-a-logged-in-advanced-feature-authenticated-users-can-save-a-generated-birthday-pack-and-view-a-list-of-their-saved-wishes-anonymous-users-cannot-save-and-are-prompted-to-sign-in-when-they-try",
-      "title": "Add a “Save Wish” capability as a logged-in advanced feature: authenticated users can save a generated Birthday Pack and view a list of their saved wishes; anonymous users cannot save and are prompted to sign in when they try.",
-      "reqIds": [
-        "REQ-38"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-identify-and-fix-the-root-cause-of-the-current-deployment-error-so-the-project-can-successfully-build-and-deploy-to-the-internet-computer-network",
-      "title": "Identify and fix the root cause of the current deployment error so the project can successfully build and deploy to the Internet Computer network.",
-      "reqIds": [
-        "REQ-39"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-or-repair-missing-incorrect-internet-computer-project-configuration-required-for-deployment-for-example-canister-configuration-and-frontend-asset-build-integration-so-the-deployment-pipeline-has-all-required-files-and-settings",
-      "title": "Add or repair missing/incorrect Internet Computer project configuration required for deployment (for example: canister configuration and frontend asset build integration) so the deployment pipeline has all required files and settings.",
-      "reqIds": [
-        "REQ-40"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-any-user-facing-error-messaging-shown-during-build-deploy-troubleshooting-if-surfaced-in-the-app-ui-or-logs-is-in-english-and-is-actionable-states-what-failed-and-what-to-try-next",
-      "title": "Ensure any user-facing error messaging shown during build/deploy troubleshooting (if surfaced in the app UI or logs) is in English and is actionable (states what failed and what to try next).",
-      "reqIds": [
-        "REQ-41"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-a-pre-login-demo-mode-so-anonymous-users-can-try-generating-a-birthday-pack-without-signing-in-or-selecting-a-plan",
-      "title": "Implement a pre-login “Demo mode” so anonymous users can try generating a Birthday Pack without signing in or selecting a plan.",
-      "reqIds": [
-        "REQ-42"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-generator-gating-logic-so-authentication-plan-gating-does-not-block-demo-mode-while-keeping-existing-authenticated-flows-intact",
-      "title": "Update generator gating logic so authentication/plan gating does not block Demo mode, while keeping existing authenticated flows intact.",
-      "reqIds": [
-        "REQ-43"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-demo-friendly-onboarding-experience-that-pre-fills-the-generator-with-a-realistic-example-and-generates-outputs-automatically-when-demo-mode-is-started",
-      "title": "Add a demo-friendly onboarding experience that pre-fills the generator with a realistic example and generates outputs automatically when Demo mode is started.",
-      "reqIds": [
-        "REQ-44"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-gate-advanced-auth-only-actions-appropriately-during-demo-mode-and-show-clear-english-prompts-when-an-action-requires-sign-in",
-      "title": "Gate advanced/auth-only actions appropriately during Demo mode and show clear English prompts when an action requires sign-in.",
-      "reqIds": [
-        "REQ-45"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-hero-section-s-prompts-and-ctas-support-the-pre-login-demo-flow-in-addition-to-sign-in",
-      "title": "Ensure the Hero section’s prompts and CTAs support the pre-login demo flow in addition to sign-in.",
-      "reqIds": [
-        "REQ-46"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-separate-standalone-premium-card-designer-module-inside-the-existing-wishmint-ai-react-app-option-2-that-is-clearly-distinct-from-the-current-templates-output-card-preview-and-can-be-entered-from-the-main-flow-after-a-birthday-pack-is-generated",
-      "title": "Create a separate, standalone “Premium Card Designer” module inside the existing WishMint AI React app (Option 2) that is clearly distinct from the current Templates/Output card preview and can be entered from the main flow after a birthday pack is generated.",
-      "reqIds": [
-        "REQ-47"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-the-premium-card-designer-module-implement-a-template-theme-selection-step-before-showing-the-final-designed-card-offering-these-themes-cute-pastel-romantic-love-minimal-luxury-neon-party-and-anime-aesthetic-each-with-premium-styling-backgrounds-typography-and-decorative-vibe-consistent-with-the-theme-name",
-      "title": "In the Premium Card Designer module, implement a template/theme selection step before showing the final designed card, offering these themes: Cute Pastel, Romantic Love, Minimal Luxury, Neon Party, and Anime/Aesthetic, each with premium styling (backgrounds, typography, and decorative vibe) consistent with the theme name.",
-      "reqIds": [
-        "REQ-48"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-interactive-customization-panel-within-the-premium-card-designer-module-that-allows-the-user-to-customize-background-style-font-style-font-color-text-alignment-emoji-decoration-toggle-border-style-and-an-animation-toggle",
-      "title": "Add an interactive customization panel within the Premium Card Designer module that allows the user to customize: background style, font style, font color, text alignment, emoji decoration toggle, border style, and an animation toggle.",
-      "reqIds": [
-        "REQ-49"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-premium-visual-treatment-for-the-premium-card-designer-card-preview-to-look-like-an-instagram-canva-style-greeting-card-including-animated-gradient-background-option-glassmorphism-card-styling-option-card-shadow-glow-controls-or-theme-defaults-and-decorative-emoji-elements-placed-around-the-card-when-enabled",
-      "title": "Implement premium visual treatment for the Premium Card Designer card preview to look like an Instagram/Canva-style greeting card, including: animated gradient background option, glassmorphism card styling option, card shadow/glow controls (or theme defaults), and decorative emoji elements placed around the card when enabled.",
-      "reqIds": [
-        "REQ-50"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-animated-card-preview-experience-in-the-premium-card-designer-module-when-the-card-is-generated-opened-including-fade-in-animation-floating-emoji-animation-when-enabled-and-a-smooth-text-scroll-entrance-animation-when-enabled-while-respecting-reduced-motion-preferences",
-      "title": "Add an animated card preview experience in the Premium Card Designer module when the card is generated/opened, including: fade-in animation, floating emoji animation (when enabled), and a smooth text scroll/entrance animation (when enabled), while respecting reduced-motion preferences.",
-      "reqIds": [
-        "REQ-51"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-photo-support-in-the-premium-card-designer-module-so-a-user-can-add-a-photo-to-the-birthday-wishes-card-using-a-local-file-upload-then-position-it-within-the-card-design-in-a-simple-mobile-friendly-way-e-g-preset-placements-such-as-top-center-bottom-or-draggable-placement-if-already-supported-by-existing-patterns",
-      "title": "Add photo support in the Premium Card Designer module so a user can add a photo to the birthday wishes card using a local file upload, then position it within the card design in a simple, mobile-friendly way (e.g., preset placements such as “Top”, “Center”, “Bottom” or draggable placement if already supported by existing patterns).",
-      "reqIds": [
-        "REQ-52"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-social-export-actions-within-the-premium-card-designer-module-download-as-instagram-story-9-16-download-as-image-share-on-whatsapp-share-on-instagram-and-copy-text-ensure-the-exported-instagram-story-format-uses-a-9-16-canvas-layout-and-that-export-works-fully-offline-after-first-load",
-      "title": "Add social export actions within the Premium Card Designer module: Download as Instagram Story (9:16), Download as Image, Share on WhatsApp, Share on Instagram, and Copy Text; ensure the exported Instagram Story format uses a 9:16 canvas/layout and that export works fully offline after first load.",
-      "reqIds": [
-        "REQ-53"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-extend-the-existing-canvas-export-pipeline-so-the-premium-card-designer-can-export-images-that-reflect-the-new-designer-state-theme-customization-options-optional-user-photo-without-breaking-the-current-exportcardimage-behavior-used-by-outputsection",
-      "title": "Extend the existing canvas export pipeline so the Premium Card Designer can export images that reflect the new designer state (theme + customization options + optional user photo), without breaking the current exportCardImage behavior used by OutputSection.",
-      "reqIds": [
-        "REQ-54"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-future-ready-placeholders-within-the-premium-card-designer-module-ui-for-ai-voice-message-card-birthday-video-slideshow-card-and-memory-photo-collage-card-implemented-as-non-functional-placeholders-with-clear-english-copy-indicating-they-are-coming-soon",
-      "title": "Add “Future ready” placeholders within the Premium Card Designer module UI for: AI voice message card, Birthday video slideshow card, and Memory photo collage card, implemented as non-functional placeholders with clear English copy indicating they are coming soon.",
-      "reqIds": [
-        "REQ-55"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-new-community-section-where-users-can-publish-templates-or-stickers-so-others-can-browse-view-details-and-subscribe-follow-creators-to-build-an-audience",
-      "title": "Add a new “Community” section where users can publish templates or stickers so others can browse, view details, and subscribe/follow creators to build an audience.",
-      "reqIds": [
-        "REQ-56"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-new-marketplace-section-enabling-buy-and-sell-listings-for-templates-stickers-mvp-users-can-create-listings-browse-search-listings-and-express-intent-to-buy-without-integrating-payments",
-      "title": "Add a new “Marketplace” section enabling buy-and-sell listings for templates/stickers (MVP): users can create listings, browse/search listings, and express intent to buy without integrating payments.",
-      "reqIds": [
-        "REQ-58"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-integrate-the-new-community-and-marketplace-sections-into-the-existing-navigation-scroll-flow-and-keep-styling-consistent-with-the-current-premium-dark-neon-theme-using-existing-ui-components-and-animations",
-      "title": "Integrate the new Community and Marketplace sections into the existing navigation/scroll flow and keep styling consistent with the current premium dark + neon theme, using existing UI components and animations.",
-      "reqIds": [
-        "REQ-60"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-promote-the-currently-deployed-draft-version-11-build-to-a-public-production-release-for-wishmint-ai-ensuring-end-users-no-longer-see-any-draft-only-labeling-or-draft-only-behavior-in-the-ui-or-deployed-assets-for-version-11",
-      "title": "Promote the currently deployed “Draft Version 11” build to a public/production release for WishMint AI, ensuring end users no longer see any draft-only labeling or draft-only behavior in the UI or deployed assets for Version 11.",
-      "reqIds": [
-        "REQ-61"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-the-provided-google-analytics-gtag-js-tracking-snippet-to-the-site-html-so-it-loads-on-every-page-view-using-measurement-id-g-zpb7r21lj4",
-      "title": "Add the provided Google Analytics gtag.js tracking snippet to the site HTML so it loads on every page view, using measurement ID G-ZPB7R21LJ4.",
-      "reqIds": [
-        "REQ-62"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-deployed-frontend-content-security-policy-csp-configuration-to-allow-loading-and-using-google-analytics-resources-required-by-gtag-js-without-breaking-existing-internet-identity-and-app-functionality",
-      "title": "Update the deployed frontend Content Security Policy (CSP) configuration to allow loading and using Google Analytics resources required by gtag.js, without breaking existing Internet Identity and app functionality.",
-      "reqIds": [
-        "REQ-63"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-plan-model-used-by-the-app-to-support-three-plans-free-pro-creator-and-plan-entitlements-required-for-feature-locking-free-3-messages-day-watermark-on-downloads-limited-templates-no-hd-export-pro-49-month-unlimited-messages-no-watermark-hd-export-1080x1080-9-16-premium-templates-hindi-romantic-tone-access-surprise-link-generation-creator-149-month-everything-in-pro-creator-marketplace-selling-features-analytics-dashboard-placeholder-all-user-facing-text-must-be-in-english",
-      "title": "Update the plan model used by the app to support three plans (Free, Pro, Creator) and plan entitlements required for feature locking: Free (3 messages/day, watermark on downloads, limited templates, no HD export), Pro (₹49/month: unlimited messages, no watermark, HD export 1080x1080 + 9:16, premium templates, Hindi + Romantic tone access, Surprise Link generation), Creator (₹149/month: everything in Pro + creator marketplace selling features, analytics dashboard placeholder). All user-facing text must be in English.",
-      "reqIds": [
-        "REQ-64"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-message-quota-enforcement-for-the-free-plan-limit-to-3-message-generations-per-calendar-day-for-anonymous-users-enforce-using-localstorage-per-device-for-authenticated-users-enforce-using-backend-storage-keyed-by-principal-when-the-limit-is-reached-block-generation-actions-and-show-a-clear-english-prompt-to-upgrade",
-      "title": "Implement message quota enforcement for the Free plan: limit to 3 message generations per calendar day. For anonymous users, enforce using localStorage per-device; for authenticated users, enforce using backend storage keyed by principal. When the limit is reached, block generation actions and show a clear English prompt to upgrade.",
-      "reqIds": [
-        "REQ-65"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-razorpay-upgrade-entry-point-in-the-pricing-section-ui-for-pro-and-creator-plans-that-starts-a-client-side-payment-flow-placeholder-stub-if-full-razorpay-verification-cannot-be-completed-in-this-environment-the-ui-must-clearly-indicate-that-payments-are-processed-via-razorpay-and-must-not-break-offline-core-generation",
-      "title": "Add a Razorpay upgrade entry-point in the Pricing section UI for Pro and Creator plans that starts a client-side payment flow (placeholder/stub if full Razorpay verification cannot be completed in this environment). The UI must clearly indicate that payments are processed via Razorpay and must not break offline core generation.",
-      "reqIds": [
-        "REQ-67"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-entitlement-based-feature-locking-ux-across-the-app-if-a-feature-is-not-included-in-the-user-s-current-plan-render-it-blurred-disabled-show-a-unlock-premium-button-and-open-a-pricing-comparison-modal-when-clicked-include-the-upgrade-cta-text-exactly-create-something-she-will-never-forget",
-      "title": "Implement entitlement-based feature locking UX across the app: if a feature is not included in the user’s current plan, render it blurred/disabled, show a “Unlock Premium” button, and open a pricing comparison modal when clicked. Include the upgrade CTA text exactly: “Create Something She Will Never Forget 💖”.",
-      "reqIds": [
-        "REQ-68"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-download-export-system-to-support-plan-based-behavior-free-users-can-download-with-a-watermark-pro-creator-users-can-download-without-a-watermark-and-in-hd-1080x1080-and-9-16-keep-the-existing-canvas-based-export-behavior-intact-and-extend-it-to-apply-watermarking-and-size-selection-where-applicable",
-      "title": "Update the download/export system to support plan-based behavior: Free users can download with a watermark; Pro/Creator users can download without a watermark and in HD (1080x1080) and 9:16. Keep the existing canvas-based export behavior intact and extend it to apply watermarking and size selection where applicable.",
-      "reqIds": [
-        "REQ-69"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-pdf-download-option-for-generated-content-at-minimum-the-main-wish-plus-wishmint-ai-branding-gate-pdf-hd-no-watermark-variants-behind-pro-creator-where-applicable-and-apply-watermarking-for-free",
-      "title": "Add PDF download option for generated content (at minimum: the Main Wish plus WishMint AI branding). Gate PDF HD/no-watermark variants behind Pro/Creator where applicable, and apply watermarking for Free.",
-      "reqIds": [
-        "REQ-70"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-surprise-mode-pro-creator-only-that-generates-a-private-link-to-a-dedicated-surprise-view-when-opened-the-page-plays-animated-confetti-a-name-reveal-animation-romantic-background-music-toggleable-mutable-and-a-message-fade-in-animation-store-the-surprise-payload-so-the-link-can-render-without-requiring-the-generator-form-on-open",
-      "title": "Implement “Surprise Mode” (Pro/Creator only) that generates a private link to a dedicated Surprise view. When opened, the page plays: animated confetti, a name reveal animation, romantic background music (toggleable/mutable), and a message fade-in animation. Store the surprise payload so the link can render without requiring the generator form on open.",
-      "reqIds": [
-        "REQ-71"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-improve-the-homepage-for-conversion-change-the-hero-primary-cta-label-from-try-demo-to-exactly-create-magic-now-add-a-social-proof-counter-reading-exactly-3-000-wishes-generated-today-add-a-premium-badge-ui-element-and-add-a-pricing-comparison-table-section-can-be-integrated-into-the-pricing-modal-and-or-pricing-section",
-      "title": "Improve the homepage for conversion: change the Hero primary CTA label from “Try Demo” to exactly “✨ Create Magic Now”; add a social proof counter reading exactly “3,000+ Wishes Generated Today”; add a premium badge UI element; and add a pricing comparison table section (can be integrated into the pricing modal and/or pricing section).",
-      "reqIds": [
-        "REQ-72"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-authenticated-user-dashboard-section-accessible-after-login-that-displays-subscription-status-plan-remaining-free-credits-if-on-free-download-history-saved-templates-and-if-on-creator-an-earnings-panel-placeholder-if-full-payouts-are-not-implemented",
-      "title": "Add an authenticated user dashboard section accessible after login that displays: subscription status/plan, remaining free credits (if on Free), download history, saved templates, and (if on Creator) an earnings panel (placeholder if full payouts are not implemented).",
-      "reqIds": [
-        "REQ-73"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-upgrade-marketplace-capabilities-for-creator-plan-restrict-creation-of-marketplace-listings-to-creator-users-free-pro-users-can-browse-and-add-creator-facing-tracking-of-listing-downloads-or-expresses-interest-interactions-if-downloads-are-not-implemented-in-the-dashboard",
-      "title": "Upgrade Marketplace capabilities for Creator plan: restrict creation of marketplace listings to Creator users (Free/Pro users can browse), and add creator-facing tracking of listing downloads (or expresses-interest interactions if downloads are not implemented) in the dashboard.",
-      "reqIds": [
-        "REQ-74"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-expand-legal-and-trust-content-sections-to-include-terms-conditions-and-refund-policy-in-addition-to-existing-privacy-policy-and-contact-ensure-all-user-facing-text-is-in-english-and-matches-the-site-s-premium-dark-gradient-style",
-      "title": "Add/expand legal and trust content sections to include Terms & Conditions and Refund Policy in addition to existing Privacy Policy and Contact. Ensure all user-facing text is in English and matches the site’s premium dark gradient style.",
-      "reqIds": [
-        "REQ-75"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-continue-with-google-entry-points-for-authentication-that-work-within-the-internet-computer-stack-by-re-labeling-the-existing-internet-identity-login-as-a-google-based-sign-in-alternative-and-expose-it-in-two-contexts-1-a-sign-in-ui-and-2-a-sign-up-ui-both-uis-must-show-a-white-button-with-a-google-icon-and-the-exact-label-continue-with-google-and-both-must-trigger-the-existing-internet-identity-login-flow",
-      "title": "Add “Continue with Google” entry points for authentication that work within the Internet Computer stack by re-labeling the existing Internet Identity login as a Google-based sign-in alternative, and expose it in two contexts: (1) a Sign In UI and (2) a Sign Up UI. Both UIs must show a white button with a Google icon and the exact label “Continue with Google”, and both must trigger the existing Internet Identity login flow.",
-      "reqIds": [
-        "REQ-76"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-after-a-successful-authentication-redirect-the-user-to-the-dashboard-experience-used-by-this-single-page-app-by-automatically-scrolling-focusing-to-the-dashboard-section-when-it-is-available-authenticated-only-and-provide-a-clear-success-state-in-the-auth-ui",
-      "title": "After a successful authentication, redirect the user to the Dashboard experience used by this single-page app by automatically scrolling/focusing to the Dashboard section when it is available (authenticated-only), and provide a clear success state in the auth UI.",
-      "reqIds": [
-        "REQ-77"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-backend-method-that-the-frontend-calls-immediately-after-login-to-ensure-the-user-record-exists-auto-create-on-first-login-and-to-update-lastloginat-mirroring-create-user-if-not-exists-else-log-them-in-behavior-within-the-internet-identity-model",
-      "title": "Add a backend method that the frontend calls immediately after login to ensure the user record exists (auto-create on first login) and to update `lastLoginAt`, mirroring “create user if not exists; else log them in” behavior within the Internet Identity model.",
-      "reqIds": [
-        "REQ-79"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-existing-authentication-ui-copy-to-be-consistent-with-the-new-continue-with-google-presentation-while-keeping-the-current-premium-dark-gradient-theme-and-avoiding-any-breaking-changes-to-frontend-src-hooks-useinternetidentity-ts-and-frontend-src-hooks-useactor-ts-immutable-hook-paths",
-      "title": "Update the existing authentication UI copy to be consistent with the new “Continue with Google” presentation while keeping the current premium dark gradient theme and avoiding any breaking changes to `frontend/src/hooks/useInternetIdentity.ts` and `frontend/src/hooks/useActor.ts` (immutable hook paths).",
-      "reqIds": [
-        "REQ-80"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-in-app-developer-facing-setup-note-in-a-small-non-intrusive-help-dialog-accordion-or-a-readme-like-on-page-section-that-explains-how-continue-with-google-is-implemented-via-internet-identity-in-this-project-including-which-environment-variable-controls-the-identity-provider-url-ii-url-and-what-to-configure-in-production-for-the-internet-computer-deployment",
-      "title": "Add an in-app developer-facing setup note (in a small, non-intrusive help dialog/accordion or a README-like on-page section) that explains how “Continue with Google” is implemented via Internet Identity in this project, including which environment variable controls the identity provider URL (`II_URL`) and what to configure in production for the Internet Computer deployment.",
-      "reqIds": [
-        "REQ-81"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-site-viewport-configuration-by-replacing-the-existing-viewport-meta-tag-in-frontend-index-html-with-exactly-meta-name-viewport-content-width-device-width-initial-scale-1-viewport-fit-cover",
-      "title": "Update the site viewport configuration by replacing the existing viewport meta tag in `frontend/index.html` with exactly: `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />`.",
-      "reqIds": [
-        "REQ-82"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-global-mobile-safe-overflow-prevention-baseline-in-frontend-src-index-css-to-fully-eliminate-horizontal-scrolling-apply-width-100-margin-0-and-overflow-x-hidden-to-html-body-and-ensure-root-is-width-100-with-min-height-100vh",
-      "title": "Add a global, mobile-safe overflow prevention baseline in `frontend/src/index.css` to fully eliminate horizontal scrolling: apply `width: 100%`, `margin: 0`, and `overflow-x: hidden` to `html, body`, and ensure `#root` is `width: 100%` with `min-height: 100vh`.",
-      "reqIds": [
-        "REQ-83"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-premium-dark-gradient-background-covers-the-full-screen-width-height-on-mobile-by-applying-the-background-to-either-body-or-a-single-full-width-top-level-wrapper-e-g-the-app-root-using-width-100vw-or-w-full-and-min-height-100vh-without-introducing-horizontal-overflow",
-      "title": "Ensure the premium dark gradient background covers the full screen width/height on mobile by applying the background to either `body` or a single full-width top-level wrapper (e.g., the `App` root) using `width: 100vw` (or `w-full`) and `min-height: 100vh`, without introducing horizontal overflow.",
-      "reqIds": [
-        "REQ-84"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-audit-and-fix-layout-containers-and-section-components-to-remove-any-non-responsive-fixed-width-constraints-that-can-force-overflow-e-g-w-400px-w-420px-w-450px-or-problematic-max-w-500px-replace-them-with-mobile-first-responsive-patterns-w-full-optional-max-w-480px-mx-auto-and-px-4-p-4-p-6-so-content-stretches-correctly-on-small-screens",
-      "title": "Audit and fix layout containers and section components to remove any non-responsive fixed width constraints that can force overflow (e.g., `w-[400px]`, `w-[420px]`, `w-[450px]`, or problematic `max-w-[500px]`). Replace them with mobile-first responsive patterns (`w-full`, optional `max-w-[480px]`, `mx-auto`, and `px-4` / `p-4` / `p-6`) so content stretches correctly on small screens.",
-      "reqIds": [
-        "REQ-85"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-identify-and-eliminate-the-specific-dom-element-s-causing-right-side-overflow-e-g-oversized-absolutely-positioned-layers-transforms-fixed-alignment-or-any-element-wider-than-100-adjust-the-offending-styles-classes-so-no-element-exceeds-the-viewport-width-on-mobile-while-keeping-existing-ui-behavior-intact",
-      "title": "Identify and eliminate the specific DOM element(s) causing right-side overflow (e.g., oversized absolutely positioned layers, transforms, fixed alignment, or any element wider than 100%). Adjust the offending styles/classes so no element exceeds the viewport width on mobile while keeping existing UI behavior intact.",
-      "reqIds": [
-        "REQ-86"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-fix-all-upgrade-entry-points-so-clicking-tapping-always-triggers-a-visible-action-open-the-pricingcomparisonmodal-and-or-navigate-to-a-pricing-route-and-add-temporary-click-debugging-logs-scope-includes-pricingsection-plan-cta-buttons-e-g-upgrade-to-pro-become-a-creator-any-unlock-premium-upgrade-ctas-e-g-premiumlock-any-other-upgrade-buttons-ctas-in-the-app-that-are-intended-to-upsell-add-a-temporary-console-log-upgrade-clicked-inside-the-click-handler-s-used-by-these-entry-points-to-confirm-the-click-event-fires",
-      "title": "Fix all “Upgrade” entry points so clicking/tapping always triggers a visible action (open the PricingComparisonModal and/or navigate to a pricing route) and add temporary click debugging logs.\n\nScope includes:\n- PricingSection plan CTA buttons (e.g., “Upgrade to Pro”, “Become a Creator”)\n- Any “Unlock Premium” / upgrade CTAs (e.g., PremiumLock)\n- Any other Upgrade buttons/CTAs in the app that are intended to upsell\n\nAdd a temporary `console.log(\"Upgrade clicked\")` inside the click handler(s) used by these entry points to confirm the click event fires.",
-      "reqIds": [
-        "REQ-87"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-identify-and-fix-any-overlay-layer-css-issues-that-can-block-pointer-events-on-the-upgrade-button-s-especially-decorative-absolute-positioned-gradients-blur-layers-and-modal-wrappers-ensure-decorative-layers-that-sit-above-content-use-pointer-events-none-upgrade-unlock-premium-buttons-are-clickable-with-explicit-stacking-interaction-safety-where-needed-e-g-position-relative-z-index-50-pointer-events-auto-apply-fixes-without-changing-the-existing-premium-dark-gradient-visual-design",
-      "title": "Identify and fix any overlay/layer/CSS issues that can block pointer events on the Upgrade button(s), especially decorative absolute-positioned gradients/blur layers and modal wrappers.\n\nEnsure:\n- Decorative layers that sit above content use `pointer-events: none`\n- Upgrade/Unlock Premium buttons are clickable with explicit stacking/interaction safety where needed (e.g., `position: relative`, `z-index: 50`, `pointer-events: auto`).\n\nApply fixes without changing the existing premium dark gradient visual design.",
-      "reqIds": [
-        "REQ-88"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-robust-pricing-navigation-behavior-for-wishmint-ai-so-users-can-reach-pricing-via-a-stable-route-like-url-because-this-app-is-a-single-page-react-app-no-next-js-pages-implement-one-of-the-following-behaviors-either-is-acceptable-and-standardize-it-across-the-app-option-a-preferred-support-pricing-as-a-pseudo-route-that-on-load-automatically-scrolls-to-the-pricingsection-and-optionally-opens-the-pricing-modal-option-b-standardize-on-opening-the-pricing-modal-pricingcomparisonmodal-from-all-upgrade-ctas-and-update-any-existing-pricing-links-to-use-this-behavior-if-option-a-is-implemented-ensure-direct-navigation-to-pricing-works-in-production-hosting-and-does-not-break-other-sections",
-      "title": "Implement robust pricing navigation behavior for WishMint AI so users can reach pricing via a stable route-like URL.\n\nBecause this app is a single-page React app (no Next.js pages), implement one of the following behaviors (either is acceptable) and standardize it across the app:\n- Option A (preferred): support “/pricing” as a pseudo-route that, on load, automatically scrolls to the PricingSection and optionally opens the pricing modal.\n- Option B: standardize on opening the pricing modal (PricingComparisonModal) from all Upgrade CTAs, and update any existing “/pricing” links to use this behavior.\n\nIf Option A is implemented, ensure direct navigation to `/pricing` works in production hosting and does not break other sections.",
-      "reqIds": [
-        "REQ-89"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-upgrade-plan-cta-buttons-do-not-fail-due-to-form-submission-behavior-audit-upgrade-related-buttons-that-might-live-inside-a-form-now-or-in-future-refactors-and-ensure-they-do-not-trigger-unintended-submits-reloads-by-explicitly-using-type-button-when-appropriate-and-preventing-default-where-needed",
-      "title": "Ensure Upgrade/plan CTA buttons do not fail due to form submission behavior.\n\nAudit Upgrade-related buttons that might live inside a `<form>` (now or in future refactors) and ensure they do not trigger unintended submits/reloads by explicitly using `type=\"button\"` when appropriate and preventing default where needed.",
-      "reqIds": [
-        "REQ-90"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-plan-content-shown-in-pricing-ui-matches-the-required-plans-and-entitlements-copy-free-plan-3-wishes-per-day-watermark-limited-templates-pro-plan-49-month-unlimited-wishes-remove-watermark-hd-download-premium-templates-surprise-mode-creator-plan-149-month-sell-templates-voice-wishes-reel-export-marketplace-access-update-the-pricing-section-modal-copy-as-needed-to-match-these-requirements-while-keeping-all-user-facing-text-in-english-and-maintaining-the-existing-dark-premium-ui-styling",
-      "title": "Ensure plan content shown in pricing UI matches the required plans and entitlements copy:\n\n- Free Plan: 3 wishes per day, watermark, limited templates\n- Pro Plan: ₹49/month, unlimited wishes, remove watermark, HD download, premium templates, Surprise mode\n- Creator Plan: ₹149/month, sell templates, voice wishes, reel export, marketplace access\n\nUpdate the pricing section/modal copy as needed to match these requirements while keeping all user-facing text in English and maintaining the existing dark premium UI styling.",
-      "reqIds": [
-        "REQ-91"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-connect-plan-selection-to-a-razorpay-checkout-open-action-so-that-selecting-a-paid-plan-pro-creator-reliably-opens-a-razorpay-payment-experience-use-the-existing-userazorpayupgrade-hook-as-the-integration-point-but-update-it-so-that-when-vite-razorpay-key-id-is-present-initiating-upgrade-attempts-to-open-razorpay-checkout-must-open-a-visible-payment-ui-on-mobile-and-desktop-when-configuration-is-missing-or-checkout-cannot-be-started-in-this-environment-show-a-clear-english-error-toast-that-explains-what-is-missing-and-what-to-do-next-without-breaking-offline-core-generation-keep-the-flow-working-in-caffeine-preview-and-live-deployment-as-a-best-effort-client-side-integration",
-      "title": "Connect plan selection to a Razorpay checkout open action so that selecting a paid plan (Pro/Creator) reliably opens a Razorpay payment experience.\n\nUse the existing `useRazorpayUpgrade` hook as the integration point, but update it so that:\n- When `VITE_RAZORPAY_KEY_ID` is present, initiating upgrade attempts to open Razorpay checkout (must open a visible payment UI on mobile and desktop).\n- When configuration is missing or checkout cannot be started in this environment, show a clear English error/toast that explains what is missing and what to do next (without breaking offline/core generation).\n\nKeep the flow working in Caffeine preview and live deployment as a best-effort client-side integration.",
-      "reqIds": [
-        "REQ-92"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-focused-testing-checklist-and-in-app-verification-points-for-the-upgrade-flow-ensure-the-build-is-manually-verified-for-mobile-screen-desktop-caffeine-preview-deployed-website-verification-must-include-that-upgrade-click-handlers-fire-console-log-and-a-pricing-experience-payment-initiation-ui-is-shown",
-      "title": "Add a focused testing checklist and in-app verification points for the Upgrade flow.\n\nEnsure the build is manually verified for:\n- Mobile screen\n- Desktop\n- Caffeine preview\n- Deployed website\n\nVerification must include that Upgrade click handlers fire (console log) and a pricing experience/payment initiation UI is shown.",
-      "reqIds": [
-        "REQ-93"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-change-all-upgrade-entry-points-e-g-upgrade-to-pro-upgrade-to-creator-unlock-premium-and-any-upgrade-plan-button-so-that-clicking-them-only-opens-the-in-app-pricingcomparisonmodal-and-does-not-immediately-open-or-navigate-to-an-external-full-payment-page",
-      "title": "Change all upgrade entry points (e.g., “Upgrade to Pro”, “Upgrade to Creator”, “Unlock Premium”, and any “Upgrade Plan” button) so that clicking them only opens the in-app PricingComparisonModal and does not immediately open or navigate to an external/full payment page.",
-      "reqIds": [
-        "REQ-94"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-pricingcomparisonmodal-so-plan-upgrade-buttons-do-not-immediately-initiate-razorpay-checkout-instead-the-modal-must-present-an-in-modal-confirmation-step-or-secondary-button-that-the-user-explicitly-clicks-to-proceed-to-payment-keeping-the-user-in-the-app-modal-flow-until-they-confirm",
-      "title": "Update PricingComparisonModal so plan upgrade buttons do not immediately initiate Razorpay checkout. Instead, the modal must present an in-modal confirmation step (or secondary button) that the user explicitly clicks to proceed to payment, keeping the user in the app modal flow until they confirm.",
-      "reqIds": [
-        "REQ-95"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-razorpay-upgrade-initiation-userazorpayupgrade-never-performs-a-full-page-navigation-redirect-as-part-of-the-client-flow-if-checkout-cannot-be-opened-as-an-in-context-experience-show-a-clear-english-error-toast-explaining-that-payment-could-not-be-started-and-to-try-again-later-without-leaving-the-app",
-      "title": "Ensure the Razorpay upgrade initiation (useRazorpayUpgrade) never performs a full-page navigation/redirect as part of the client flow; if checkout cannot be opened as an in-context experience, show a clear English error toast explaining that payment could not be started and to try again later, without leaving the app.",
-      "reqIds": [
-        "REQ-96"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-new-manual-upi-upgrade-flow-in-the-existing-in-app-pricing-upgrade-modal-upgrade-choose-plan-pro-creator-proceed-to-payment-show-qr-upi-id-deep-link-submit-utr-show-pending-verification-all-user-facing-text-must-be-in-english-and-the-ui-must-keep-the-existing-premium-dark-gradient-styling-and-be-mobile-first",
-      "title": "Add a new manual UPI upgrade flow in the existing in-app pricing/upgrade modal: Upgrade → Choose plan (Pro/Creator) → Proceed to Payment → show QR + UPI ID + deep link → submit UTR → show “Pending verification”. All user-facing text must be in English and the UI must keep the existing premium dark gradient styling and be mobile-first.",
-      "reqIds": [
-        "REQ-97"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-integrate-the-provided-qr-image-into-the-project-as-a-static-asset-at-exactly-public-payments-upi-qr-png-and-render-it-crisp-centered-and-responsive-in-the-payment-step-no-blurriness-on-mobile",
-      "title": "Integrate the provided QR image into the project as a static asset at exactly `/public/payments/upi-qr.png` and render it crisp, centered, and responsive in the payment step (no blurriness on mobile).",
-      "reqIds": [
-        "REQ-98"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-upi-deep-link-generation-for-the-open-upi-apps-button-using-the-exact-format-below-and-dynamically-fill-amount-plan-name-upi-pay-pa-6205684456-axl-pn-wishmint-20payments-am-amount-cu-inr-tn-wishmint-20ai-20-plan-where-amount-is-49-pro-or-149-creator-and-plan-is-pro-or-creator",
-      "title": "Implement UPI deep-link generation for the “Open UPI Apps” button using the exact format below and dynamically fill amount + plan name: `upi://pay?pa=6205684456@axl&pn=WishMint%20Payments&am=<AMOUNT>&cu=INR&tn=WishMint%20AI%20<PLAN>` where AMOUNT is 49 (Pro) or 149 (Creator) and PLAN is “Pro” or “Creator”.",
-      "reqIds": [
-        "REQ-99"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-in-the-payment-step-display-the-payment-details-exactly-as-specified-payee-display-name-wishmint-payments-and-upi-id-text-exactly-6205684456-axl-plus-a-copy-upi-button-that-copies-the-upi-id-to-clipboard-and-confirms-success-with-an-english-toast-message",
-      "title": "In the payment step, display the payment details exactly as specified: Payee display name “WishMint Payments” and UPI ID text exactly `6205684456@axl`, plus a “Copy UPI” button that copies the UPI ID to clipboard and confirms success with an English toast/message.",
-      "reqIds": [
-        "REQ-100"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-the-post-payment-submission-form-step-in-the-upgrade-flow-with-these-fields-and-behaviors-utr-transaction-id-required-screenshot-upload-optional-but-recommended-plan-auto-filled-non-editable-amount-auto-filled-non-editable-user-email-auto-filled-when-available-otherwise-ask-user-to-enter-and-persist-it-for-future-requests-include-the-scam-prevention-helper-text-and-sla-in-english",
-      "title": "Add the post-payment submission form step in the upgrade flow with these fields and behaviors: UTR/Transaction ID (required), Screenshot upload (optional but recommended), Plan (auto-filled, non-editable), Amount (auto-filled, non-editable), User email (auto-filled when available; otherwise ask user to enter and persist it for future requests). Include the scam-prevention helper text and SLA in English.",
-      "reqIds": [
-        "REQ-101"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-backend-storage-and-actor-methods-for-payment-requests-with-fields-id-userid-email-plan-amount-utr-screenshoturl-or-equivalent-retrievable-reference-status-pending-approved-rejected-createdat-reviewedat-provide-a-frontend-accessible-method-for-creating-a-new-payment-request-and-querying-the-caller-s-own-requests-status",
-      "title": "Create backend storage and actor methods for `payment_requests` with fields: id, userId, email, plan, amount, utr, screenshotUrl (or equivalent retrievable reference), status (pending/approved/rejected), createdAt, reviewedAt. Provide a frontend-accessible method for creating a new payment request and querying the caller’s own requests/status.",
-      "reqIds": [
-        "REQ-102"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-optional-screenshot-upload-handling-for-payment-requests-accept-an-image-file-from-the-frontend-store-it-in-backend-state-associated-with-the-payment-request-and-make-it-viewable-in-the-admin-panel-if-a-url-cannot-be-used-in-this-stack-implement-an-equivalent-backend-backed-retrieval-method-and-treat-it-as-screenshoturl-in-the-ui-english-labels",
-      "title": "Implement optional screenshot upload handling for payment requests: accept an image file from the frontend, store it in backend state associated with the payment request, and make it viewable in the admin panel. If a URL cannot be used in this stack, implement an equivalent backend-backed retrieval method and treat it as `screenshotUrl` in the UI (English labels).",
-      "reqIds": [
-        "REQ-103"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-admin-panel-ui-to-list-all-payment-requests-and-allow-approve-reject-the-list-must-show-user-identifier-email-plan-amount-utr-screenshot-preview-if-present-status-createdat-reviewedat-approve-must-activate-30-day-subscription-reject-must-set-status-rejected-all-user-facing-text-must-be-in-english",
-      "title": "Add an admin panel UI to list all payment requests and allow approve/reject. The list must show: user identifier, email, plan, amount, UTR, screenshot preview (if present), status, createdAt, reviewedAt. Approve must activate 30-day subscription; reject must set status rejected. All user-facing text must be in English.",
-      "reqIds": [
-        "REQ-105"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-admin-security-so-that-only-admins-can-call-admin-payment-methods-and-access-the-admin-panel-admin-allowlisting-must-be-configured-via-an-environment-variable-driven-allowlist-named-admin-emails-comma-separated-and-enforced-consistently-backend-enforcement-for-admin-methods-ui-gating-for-admin-panel-visibility",
-      "title": "Implement admin security so that only admins can call admin payment methods and access the admin panel. Admin allowlisting must be configured via an environment-variable-driven allowlist named `ADMIN_EMAILS` (comma-separated) and enforced consistently (backend enforcement for admin methods; UI gating for admin panel visibility).",
-      "reqIds": [
-        "REQ-106"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-premium-gating-across-the-app-to-unlock-premium-only-features-when-the-subscription-is-active-and-premiumuntil-or-equivalent-expiresat-is-greater-than-the-current-time-otherwise-premium-features-remain-locked-and-show-upgrade-entry-points-ensure-this-integrates-with-existing-entitlements-hooks-useentitlements-subscription-status-query-and-existing-premium-lock-ui",
-      "title": "Update premium gating across the app to unlock premium-only features when the subscription is active and premiumUntil (or equivalent expiresAt) is greater than the current time; otherwise premium features remain locked and show Upgrade entry points. Ensure this integrates with existing entitlements hooks (`useEntitlements` / subscription status query) and existing premium lock UI.",
-      "reqIds": [
-        "REQ-107"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-replace-razorpay-specific-copy-in-the-pricingcomparisonmodal-confirmation-step-with-the-manual-upi-checkout-flow-copy-and-actions-proceed-to-payment-must-open-the-upi-payment-step-not-razorpay-preserve-the-current-modal-structure-and-styling-and-keep-buttons-as-type-button-to-avoid-accidental-form-submits",
-      "title": "Replace Razorpay-specific copy in the PricingComparisonModal confirmation step with the manual UPI checkout flow copy and actions (Proceed to Payment must open the UPI payment step, not Razorpay). Preserve the current modal structure and styling, and keep buttons as `type=\"button\"` to avoid accidental form submits.",
-      "reqIds": [
-        "REQ-108"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-the-full-manual-upi-payment-flow-works-on-mobile-screens-steps-are-clearly-numbered-buttons-are-reachable-no-overlay-blocks-pointer-events-qr-remains-within-viewport-width-and-deep-link-copy-actions-are-usable-keep-the-existing-dark-premium-gradient-theme-and-subtle-animations-respect-reduced-motion-preferences",
-      "title": "Ensure the full manual UPI payment flow works on mobile screens: steps are clearly numbered, buttons are reachable (no overlay blocks pointer events), QR remains within viewport width, and deep link + copy actions are usable. Keep the existing dark premium gradient theme and subtle animations; respect reduced-motion preferences.",
-      "reqIds": [
-        "REQ-109"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-the-user-provided-upi-qr-code-image-from-the-uploaded-images-into-the-project-as-a-static-asset-at-exactly-frontend-public-payments-upi-qr-png-so-the-manual-upi-payment-step-can-render-it-via-the-existing-qr-image-path-payments-upi-qr-png-ensure-the-image-is-a-crisp-square-png-suitable-for-scanning-on-mobile-no-blurriness-pixelation-when-displayed-at-up-to-280px-wide",
-      "title": "Add the user-provided UPI QR code image (from the uploaded images) into the project as a static asset at exactly `frontend/public/payments/upi-qr.png`, so the Manual UPI payment step can render it via the existing `QR_IMAGE_PATH = '/payments/upi-qr.png'`. Ensure the image is a crisp, square PNG suitable for scanning on mobile (no blurriness/pixelation when displayed at up to ~280px wide).",
-      "reqIds": [
-        "REQ-110"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-enforce-strict-card-text-rules-for-all-birthday-card-image-renders-exports-so-the-card-contains-only-1-title-exactly-happy-birthday-name-with-the-actual-recipient-name-substituted-2-a-short-formatted-wish-message-limited-to-15-20-words-and-3-footer-exactly-made-with-by-wishmint-ai-ensure-the-card-image-never-includes-prompt-instructions-never-includes-placeholders-like-name-and-never-includes-long-paragraph-messages",
-      "title": "Enforce strict card text rules for all birthday card image renders/exports so the card contains ONLY: (1) Title exactly \"Happy Birthday {NAME}!\" with the actual recipient name substituted, (2) a short formatted wish message limited to 15–20 words, and (3) footer exactly \"Made with ❤️ by WishMint AI\". Ensure the card image never includes prompt instructions, never includes placeholders like \"{NAME}\", and never includes long paragraph messages.",
-      "reqIds": [
-        "REQ-111"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-short-wish-converter-step-that-automatically-converts-any-long-wish-text-into-a-short-premium-sounding-card-message-15-20-words-max-before-it-is-used-by-the-canvas-card-export-pipeline-and-any-card-preview-rendering-if-the-source-wish-is-already-short-enough-keep-it-still-sanitized-while-ensuring-it-meets-the-15-20-word-constraint",
-      "title": "Add a \"Short Wish Converter\" step that automatically converts any long wish text into a short, premium-sounding card message (15–20 words max) before it is used by the canvas card export pipeline and any card preview rendering. If the source wish is already short enough, keep it (still sanitized) while ensuring it meets the 15–20 word constraint.",
-      "reqIds": [
-        "REQ-112"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-typography-hierarchy-in-the-canvas-based-birthday-card-export-pipeline-title-uses-a-large-elegant-serif-display-font-stack-message-uses-a-clean-modern-sans-serif-font-stack-and-footer-uses-a-smaller-handwritten-signature-style-font-stack-apply-strong-size-weight-spacing-differences-to-create-clear-hierarchy-while-keeping-text-readable-on-mobile",
-      "title": "Implement typography hierarchy in the canvas-based birthday card export pipeline: Title uses a large elegant serif/display font stack, Message uses a clean modern sans-serif font stack, and Footer uses a smaller handwritten/signature-style font stack. Apply strong size/weight/spacing differences to create clear hierarchy while keeping text readable on mobile.",
-      "reqIds": [
-        "REQ-113"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-canvas-card-layout-to-follow-a-professional-structure-with-consistent-margins-and-breathing-space-title-positioned-top-center-message-centered-decorations-restricted-to-borders-edges-and-balanced-padding-so-the-card-never-feels-overcrowded-do-not-change-existing-app-flows-only-improve-card-render-layout-quality",
-      "title": "Update the canvas card layout to follow a professional structure with consistent margins and breathing space: Title positioned top-center, Message centered, Decorations restricted to borders/edges, and balanced padding so the card never feels overcrowded. Do not change existing app flows; only improve card render/layout quality.",
-      "reqIds": [
-        "REQ-114"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-premium-visual-effects-to-the-canvas-based-exported-card-images-cinematic-soft-lighting-title-glow-soft-shadow-behind-text-depth-of-field-style-background-blur-or-blur-like-overlay-treatment-on-top-of-background-imagery-and-subtle-confetti-sparkle-decorations-around-the-borders-effects-must-be-subtle-premium-and-must-not-reduce-text-readability",
-      "title": "Add premium visual effects to the canvas-based exported card images: cinematic soft lighting, title glow, soft shadow behind text, depth-of-field style background blur (or blur-like overlay treatment on top of background imagery), and subtle confetti/sparkle decorations around the borders. Effects must be subtle, premium, and must not reduce text readability.",
-      "reqIds": [
-        "REQ-115"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-prevent-text-overflow-in-card-exports-and-previews-by-enforcing-both-content-and-layout-constraints-cap-message-word-count-15-20-cap-line-count-and-dynamically-adjust-message-font-size-line-height-if-wrapping-exceeds-the-allowed-safe-region-ensure-text-never-overlaps-decorations-and-remains-readable-on-mobile-screens",
-      "title": "Prevent text overflow in card exports and previews by enforcing both content and layout constraints: cap message word count (15–20), cap line count, and dynamically adjust message font size/line-height if wrapping exceeds the allowed safe region. Ensure text never overlaps decorations and remains readable on mobile screens.",
-      "reqIds": [
-        "REQ-116"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-four-premium-style-themes-for-card-image-generation-luxury-cute-cinematic-modern-instagram-and-wire-theme-selection-into-the-card-export-pipeline-so-each-theme-produces-a-distinct-look-consistent-with-the-theme-definitions-luxury-black-gold-minimal-cute-pastel-gradient-balloons-doodles-cinematic-soft-bokeh-warm-lighting-modern-instagram-trendy-gradient-bold-typography-ensure-the-existing-template-selection-remains-functional-themes-can-be-mapped-from-existing-templates-or-added-as-a-new-selection-for-exports-preview",
-      "title": "Implement four premium style themes for card image generation (Luxury, Cute, Cinematic, Modern Instagram) and wire theme selection into the card export pipeline so each theme produces a distinct look consistent with the theme definitions: Luxury = black & gold minimal; Cute = pastel gradient + balloons/doodles; Cinematic = soft bokeh/warm lighting; Modern Instagram = trendy gradient + bold typography. Ensure the existing template selection remains functional; themes can be mapped from existing templates or added as a new selection for exports/preview.",
-      "reqIds": [
-        "REQ-117"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-enhancement-step-to-the-canvas-export-pipeline-that-runs-after-the-base-card-is-rendered-to-improve-alignment-spacing-lighting-depth-decoration-balance-and-overall-readability-without-changing-any-text-content-the-enhancement-step-must-keep-title-message-footer-text-exactly-the-same-no-text-edits-no-name-message-changes",
-      "title": "Add an enhancement step to the canvas export pipeline that runs after the base card is rendered to improve alignment/spacing, lighting/depth, decoration balance, and overall readability without changing any text content. The enhancement step must keep Title/Message/Footer text exactly the same (no text edits, no name/message changes).",
-      "reqIds": [
-        "REQ-118"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-generate-2-3-card-design-variations-per-wish-per-selected-theme-template-and-update-the-ui-so-users-can-swipe-mobile-or-navigate-desktop-between-the-variations-before-downloading-variations-should-differ-in-decoration-placement-style-lighting-vignette-intensity-and-or-subtle-layout-tweaks-while-keeping-text-content-identical",
-      "title": "Generate 2–3 card design variations per wish (per selected theme/template) and update the UI so users can swipe (mobile) or navigate (desktop) between the variations before downloading. Variations should differ in decoration placement/style, lighting/vignette intensity, and/or subtle layout tweaks while keeping text content identical.",
-      "reqIds": [
-        "REQ-119"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-ui-polish-around-card-generation-preview-fade-in-animation-when-the-preview-card-loads-a-confetti-animation-when-a-new-card-is-generated-and-a-glowing-hover-effect-on-the-preview-card-desktop-while-keeping-interactions-smooth-and-mobile-first-respect-reduced-motion-preferences",
-      "title": "Add UI polish around card generation/preview: fade-in animation when the preview card loads, a confetti animation when a new card is generated, and a glowing hover effect on the preview card (desktop) while keeping interactions smooth and mobile-first. Respect reduced-motion preferences.",
-      "reqIds": [
-        "REQ-120"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-redesign-the-existing-examplessection-example-wishes-ui-to-render-each-example-as-a-premium-mini-greeting-card-preview-instead-of-a-plain-text-card-while-keeping-the-existing-tone-filter-behavior-and-overall-wishmint-ai-premium-dark-neon-theme-consistent",
-      "title": "Redesign the existing ExamplesSection (\"Example Wishes\") UI to render each example as a premium mini greeting-card preview instead of a plain text card, while keeping the existing tone filter behavior and overall WishMint AI premium dark + neon theme consistent.",
-      "reqIds": [
-        "REQ-121"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-automatic-shortening-for-example-wishes-so-each-example-displays-as-a-short-emotionally-engaging-message-limited-to-2-3-lines-maximum-no-paragraph-length-examples-using-deterministic-local-logic",
-      "title": "Implement automatic shortening for example wishes so each example displays as a short, emotionally engaging message limited to 2–3 lines maximum (no paragraph-length examples), using deterministic local logic.",
-      "reqIds": [
-        "REQ-122"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-an-emoji-enhancement-system-for-example-wishes-that-inserts-a-small-number-of-relevant-emojis-based-on-example-relationship-and-tone-e-g-friend-mom-romantic-funny-ensuring-emojis-enhance-the-message-without-overcrowding",
-      "title": "Add an emoji enhancement system for example wishes that inserts a small number of relevant emojis based on example relationship and tone (e.g., Friend, Mom, Romantic, Funny), ensuring emojis enhance the message without overcrowding.",
-      "reqIds": [
-        "REQ-123"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-multiple-premium-typography-style-themes-for-example-cards-cute-luxury-modern-emotional-and-randomly-assign-a-typography-theme-per-example-card-render-variation-enforce-the-rule-never-use-more-than-2-font-families-per-card",
-      "title": "Add multiple premium typography style themes for example cards (Cute, Luxury, Modern, Emotional) and randomly assign a typography theme per example card render/variation. Enforce the rule: never use more than 2 font families per card.",
-      "reqIds": [
-        "REQ-124"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-frontend-font-loading-and-tailwind-font-configuration-to-support-the-required-premium-typography-themes-for-example-wishes-display-playful-serif-clean-sans-optional-handwritten-script-without-breaking-existing-app-typography",
-      "title": "Update frontend font loading and Tailwind font configuration to support the required premium typography themes for Example Wishes (display/playful serif + clean sans + optional handwritten/script), without breaking existing app typography.",
-      "reqIds": [
-        "REQ-125"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-premium-background-texture-styling-for-example-cards-including-gradient-background-styles-plus-at-least-one-overlay-effect-sparkle-confetti-and-soft-glow-effects-with-style-variations-cute-pastel-luxury-gold-accent-neon-glow-minimal-clean-anime-soft-background",
-      "title": "Implement premium background/texture styling for example cards, including gradient background styles plus at least one overlay effect (sparkle/confetti) and soft glow effects, with style variations: Cute Pastel, Luxury Gold Accent, Neon Glow, Minimal Clean, Anime Soft Background.",
-      "reqIds": [
-        "REQ-126"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-visible-visual-style-tag-system-for-example-cards-cute-luxury-emotional-funny-modern-romantic-using-colored-gradient-badges-in-addition-to-the-existing-tone-relationship-metadata-display-or-replacing-it-with-the-new-style-tags-where-appropriate",
-      "title": "Add a visible visual style tag system for example cards (Cute, Luxury, Emotional, Funny, Modern, Romantic) using colored gradient badges, in addition to the existing tone/relationship metadata display or replacing it with the new style tags where appropriate.",
-      "reqIds": [
-        "REQ-127"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-interactive-preview-effects-for-example-cards-on-hover-desktop-or-tap-mobile-apply-slight-zoom-glow-border-show-subtle-floating-emoji-decorations-and-reveal-a-use-this-style-button",
-      "title": "Add interactive preview effects for example cards: on hover (desktop) or tap (mobile), apply slight zoom + glow border, show subtle floating emoji decorations, and reveal a \"Use This Style\" button.",
-      "reqIds": [
-        "REQ-128"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-wire-the-use-this-style-button-in-each-example-card-to-prefill-the-generator-form-with-that-example-s-name-relationship-tone-and-any-other-relevant-local-fields-and-scroll-focus-into-the-generator-section-without-requiring-authentication-or-breaking-existing-demo-quota-flows",
-      "title": "Wire the \"Use This Style\" button in each example card to prefill the Generator form with that example’s name/relationship/tone (and any other relevant local fields) and scroll/focus into the Generator section, without requiring authentication or breaking existing demo/quota flows.",
-      "reqIds": [
-        "REQ-129"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-replace-the-current-simple-grid-list-presentation-in-examplessection-with-a-pinterest-instagram-style-responsive-card-grid-layout-masonry-like-optimized-for-mobile-first-viewing",
-      "title": "Replace the current simple grid/list presentation in ExamplesSection with a Pinterest/Instagram-style responsive card grid layout (masonry-like), optimized for mobile-first viewing.",
-      "reqIds": [
-        "REQ-130"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-2-3-design-variations-per-example-wish-card-per-displayed-example-by-varying-font-pairing-decoration-style-emoji-placement-and-background-variation-while-keeping-the-underlying-example-content-consistent-with-the-shortened-message-rules",
-      "title": "Add 2–3 design variations per example wish card (per displayed example) by varying font pairing, decoration style, emoji placement, and background variation, while keeping the underlying example content consistent with the shortened message rules.",
-      "reqIds": [
-        "REQ-131"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-robust-mobile-optimization-for-the-upgraded-example-wishes-gallery-prevent-text-overflow-clamp-lines-safely-scale-fonts-responsively-keep-cards-readable-and-ensure-no-element-exceeds-viewport-width-no-horizontal-scroll",
-      "title": "Ensure robust mobile optimization for the upgraded Example Wishes gallery: prevent text overflow, clamp lines safely, scale fonts responsively, keep cards readable, and ensure no element exceeds viewport width (no horizontal scroll).",
-      "reqIds": [
-        "REQ-132"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-sticky-top-navigation-bar-that-remains-fixed-while-scrolling-and-matches-the-existing-wishmint-premium-dark-neon-purple-green-gradient-branding-the-navbar-must-include-menu-items-home-create-wish-templates-marketplace-pricing-dashboard-faq-clicking-a-menu-item-must-smoothly-scroll-to-the-corresponding-section",
-      "title": "Add a sticky top navigation bar that remains fixed while scrolling and matches the existing WishMint premium dark + neon (purple/green) gradient branding. The navbar must include menu items: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ. Clicking a menu item must smoothly scroll to the corresponding section.",
-      "reqIds": [
-        "REQ-133"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-assign-anchor-ids-to-the-major-website-sections-using-the-exact-ids-specified-home-id-home-wish-generator-id-create-wish-templates-id-templates-marketplace-id-marketplace-pricing-id-pricing-dashboard-id-dashboard-faq-id-faq-ensure-existing-scroll-ref-behaviors-continue-to-work-and-scrolling-accounts-for-the-sticky-header-so-section-titles-are-not-hidden-under-the-navbar",
-      "title": "Assign anchor IDs to the major website sections using the exact IDs specified: Home id=\"home\"; Wish Generator id=\"create-wish\"; Templates id=\"templates\"; Marketplace id=\"marketplace\"; Pricing id=\"pricing\"; Dashboard id=\"dashboard\"; FAQ id=\"faq\". Ensure existing scroll/ref behaviors continue to work and scrolling accounts for the sticky header so section titles are not hidden under the navbar.",
-      "reqIds": [
-        "REQ-134"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-active-section-highlighting-in-the-sticky-navigation-bar-as-the-user-scrolls-the-currently-viewed-section-s-corresponding-nav-item-must-be-visibly-highlighted-the-highlight-must-update-smoothly-and-be-stable-no-rapid-flicker",
-      "title": "Implement active-section highlighting in the sticky navigation bar: as the user scrolls, the currently viewed section’s corresponding nav item must be visibly highlighted. The highlight must update smoothly and be stable (no rapid flicker).",
-      "reqIds": [
-        "REQ-135"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-thin-scroll-progress-indicator-bar-at-the-very-top-of-the-page-that-shows-the-user-s-scroll-percentage-through-the-main-page-content-the-bar-must-use-a-gradient-progress-color-consistent-with-wishmint-branding-and-animate-smoothly-as-the-user-scrolls",
-      "title": "Add a thin scroll progress indicator bar at the very top of the page that shows the user’s scroll percentage through the main page content. The bar must use a gradient progress color consistent with WishMint branding and animate smoothly as the user scrolls.",
-      "reqIds": [
-        "REQ-136"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-floating-back-to-top-button-positioned-at-the-bottom-right-of-the-viewport-it-must-appear-only-after-the-user-scrolls-at-least-30-down-the-page-and-must-smoothly-scroll-the-user-back-to-the-top-home-style-it-as-a-glowing-wishmint-button-and-ensure-it-does-not-block-important-ui-on-mobile",
-      "title": "Add a floating “Back to Top” button positioned at the bottom-right of the viewport. It must appear only after the user scrolls at least 30% down the page and must smoothly scroll the user back to the top (Home). Style it as a glowing WishMint button and ensure it does not block important UI on mobile.",
-      "reqIds": [
-        "REQ-137"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-a-floating-quick-action-button-labeled-exactly-create-wish-that-scrolls-the-user-directly-to-the-wish-generator-section-id-create-wish-this-button-must-be-mobile-safe-not-blocking-content-and-visually-consistent-with-wishmint-glowing-neon-styling",
-      "title": "Add a floating quick action button labeled exactly \"🎂 Create Wish\" that scrolls the user directly to the Wish Generator section (id=\"create-wish\"). This button must be mobile-safe (not blocking content) and visually consistent with WishMint glowing/neon styling.",
-      "reqIds": [
-        "REQ-138"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-implement-mobile-optimization-for-the-new-navigation-system-on-mobile-breakpoints-collapse-the-sticky-navigation-items-into-a-hamburger-menu-that-can-be-opened-closed-the-menu-must-retain-smooth-scrolling-to-section-anchors-and-must-not-introduce-overlay-pointer-events-issues-that-block-page-interaction",
-      "title": "Implement mobile optimization for the new navigation system: on mobile breakpoints, collapse the sticky navigation items into a hamburger menu that can be opened/closed. The menu must retain smooth scrolling to section anchors and must not introduce overlay/pointer-events issues that block page interaction.",
-      "reqIds": [
-        "REQ-139"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-any-user-facing-text-introduced-by-the-new-navigation-scroller-features-is-in-english-and-the-new-ui-elements-sticky-navbar-progress-bar-floating-buttons-hamburger-menu-preserve-the-existing-premium-dark-gradient-look-and-do-not-regress-current-section-layouts",
-      "title": "Ensure any user-facing text introduced by the new navigation/scroller features is in English, and the new UI elements (sticky navbar, progress bar, floating buttons, hamburger menu) preserve the existing premium dark gradient look and do not regress current section layouts.",
-      "reqIds": [
-        "REQ-140"
       ],
       "version": 1
     }
@@ -1106,359 +103,61 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Create mobile-first single-page layout with dark premium theme, neon (purple+green) accents, responsive typography/cards, and subtle fade/slide animations",
+      "summary": "Add prompt-based card creation mode with a main natural-language prompt input (\"Describe your card or invitation idea...\") and example prompts",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Hero section with title/subtitle and CTAs (Generate Wish, See Examples)",
+      "summary": "Implement AI prompt analysis to auto-detect event type, tone, visual theme, layout style, and message format",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Generator form with required Name + optional Your Name, dropdowns (relationship, tone, language, personality), optional memory line, and validation",
+      "summary": "Generate smart card content: professional message, structured text hierarchy, short readable message, and signature/footer",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Template-based wish generation producing 5 outputs (Main Wish, WhatsApp Short, Instagram Caption, Mini Speech 10–15s, Hashtags)",
+      "summary": "Generate professional card designs following strict layout rules (title, decorative focus element, short emotional message, footer branding) and prevent text overlap/clutter",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-5",
-      "summary": "Output UI: 5 cards each with Copy button, plus Copy All and Share on WhatsApp actions",
+      "summary": "Output 3 unique design variations per prompt with different compositions, typography, and color treatments",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Implement WhatsApp sharing via wa.me link with encoded combined text",
+      "summary": "Support multiple card types/events beyond birthdays (wedding, anniversary, party, baby shower, corporate, festival, etc.) with event-adaptive themes/decorations",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-7",
-      "summary": "Surprise Me button to randomize inputs and generate",
+      "summary": "Add user edit controls: edit generated text, switch themes, change tone, and regenerate design",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-8",
-      "summary": "Download as Card Image feature using HTML canvas rendering of selected template + generated wish",
+      "summary": "Add premium upgrade system: free vs premium exports (watermark/limited resolution vs HD export), plus extra templates and optional video invitation/voice message card options",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-9",
-      "summary": "Examples/Gallery section with 6 sample wishes and tone filter",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "Templates section showing 8 selectable card templates (Minimal, Cute, Luxury, Anime, Neon, Classic, Aesthetic, Funny) and applying selection to display",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-11",
-      "summary": "Pricing section: Free vs Pro, plus Future roadmap (voice wishes, video slideshow)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-12",
-      "summary": "FAQ section covering privacy, how it works, language support, and sharing",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-13",
-      "summary": "Footer with Privacy Policy, Terms, and Contact links/sections",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-14",
-      "summary": "Deliver complete working offline-friendly single index.html with modular JS functions and brief local run instructions; no external API keys",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-15",
-      "summary": "Add built-in birthday card images/backgrounds (a small gallery of selectable card image designs) to use in the card preview/export",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-16",
-      "summary": "Add a login/authentication system using Google (Google Sign-In / OAuth)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "Improve overall UI polish to make the website look more professional (refine typography, spacing, alignment, consistency)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-19",
-      "summary": "Add a top-left corner credit label/text: “Created By Arion Zi”",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "Remove login barrier for initial generation: allow users to generate the first wish without signing in; require login only for saving wishes, premium template exports, and other advanced features",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-21",
-      "summary": "Hero improvements: animated emotional tagline, mini demo preview of a generated wish under hero, and trust badges (Free AI Generator, Instant Results, Multi Language Support)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-22",
-      "summary": "Enhance generator inputs with Wish Length slider and Emoji Level slider (in addition to name/relationship/tone/language/personality/memory)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-23",
-      "summary": "Output cards: add per-card Share button (alongside Copy) and smooth animations for card interactions",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-24",
-      "summary": "Card Template Studio: selectable styles (Cute, Luxury, Minimal, Anime, Aesthetic, Neon) and generate downloadable shareable birthday poster/image using selected style",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-25",
-      "summary": "Add Feature Explanation section with icons and short descriptions (AI Emotional Writing, Memory Based Wishes, Instant Share Tools, Multi Language Support, Personal Tone Customization)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-26",
-      "summary": "Add social/viral features: Instagram Story download format and QR code generator for sharing",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-27",
-      "summary": "Add Testimonials section (demo/fake testimonials for now) to increase trust",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-28",
-      "summary": "SEO improvements: add meta title \"WishMint AI – AI Birthday Wish Generator\" and meta description \"Generate emotional, funny, romantic AI birthday wishes instantly.\"",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-29",
-      "summary": "Footer update: include About WishMint AI link/section in addition to Privacy Policy, Terms, and Contact",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-30",
-      "summary": "Add ability to save generated wishes for logged-in users (as a gated advanced feature)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-31",
-      "summary": "Add a pre-login demo system so users can try the app (demo generation/preview) before authentication is required for advanced features",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-32",
-      "summary": "Create a separate standalone premium card designer module (Option 2) with multiple animated card themes, customization panel (background/font/color/alignment/borders/emoji+animation toggles), photo support, premium visual effects (glassmorphism/particles/hover), and social exports (download image + 9:16 Instagram Story, share to WhatsApp/Instagram, copy text), plus placeholders for future voice/video/collage features",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-33",
-      "summary": "Add a community posting section where users can post/share templates or stickers to build an audience; others can view and subscribe/follow creators",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-34",
-      "summary": "Add buy-and-sell marketplace features (a section enabling buying/selling of templates/stickers or related items)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-36",
-      "summary": "Implement backend storage and APIs for Community posts and creator subscriptions using the existing single Motoko actor, with authenticated write operations and anonymous read access.",
-      "reqIds": [
-        "REQ-57"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-38",
-      "summary": "Implement backend storage and APIs for Marketplace listings and buyer intent requests in the single Motoko actor, using authenticated writes and anonymous read access.",
-      "reqIds": [
-        "REQ-59"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-39",
-      "summary": "Add Google Analytics (gtag.js) tracking script to the website using measurement ID G-ZPB7R21LJ4",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-40",
-      "summary": "Integrate Razorpay subscriptions/payments (UPI, cards, netbanking, wallets) with subscription status storage, webhook verification, and protection of premium routes/features",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-41",
-      "summary": "Implement plan system with quotas/entitlements: Free (3 msgs/day, watermark, limited templates, no HD), Pro ₹49/mo (unlimited, no watermark, HD exports 1080x1080 + 9:16, premium templates, Hindi+Romantic tone, Surprise Links), Creator ₹149/mo (Pro + sell templates, reel MP4 export, voice generation, custom branding, analytics dashboard)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-42",
-      "summary": "Add premium feature-locking UX: blur locked features for Free users, show “Unlock Premium” button, and pricing comparison modal + upgrade CTA copy “Create Something She Will Never Forget”",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-43",
-      "summary": "Expand download/export system: PNG + PDF + MP4 (Reel Mode), watermarking for Free, no-watermark + HD for paid; allow html2canvas or server-side rendering approach",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-44",
-      "summary": "Add Surprise Mode / Surprise Link feature (Pro+): generate private link that plays confetti, name reveal animation, romantic background music, and message fade-in animation",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-45",
-      "summary": "Add Voice Message Generator (Premium): convert message to AI voice (male/female) with optional background music and MP3 download",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-46",
-      "summary": "Add Reel Generator (Premium): generate Instagram Reel-style 9:16 animated text + background music and export MP4; Free gets watermark + 480p, Premium gets 1080p no watermark",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-47",
-      "summary": "Improve homepage conversion UI: change hero CTA to “Create Magic Now”, add social proof counter (“3,000+ Wishes Generated Today”), premium badge UI, testimonials, and a pricing comparison table",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-48",
-      "summary": "Add authenticated user dashboard showing subscription status, remaining free credits, download history, saved templates, and Creator earnings",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-49",
-      "summary": "Marketplace upgrade for Creator plan: upload templates with price + preview, track downloads, and integrate Razorpay payouts",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-50",
-      "summary": "Add trust/legal pages: Terms & Conditions, Privacy Policy, Refund Policy, and Contact page/sections",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-53",
-      "summary": "Add subscription status storage and retrieval in the backend for authenticated users, including: current plan, subscription state (e.g., active/canceled/expired), and timestamps. Expose query methods for the frontend to fetch the caller’s subscription status and update methods intended to be called after payment verification.",
-      "reqIds": [
-        "REQ-66"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-54",
-      "summary": "Implement Google OAuth 2.0 authentication: add “Continue with Google” button on Sign Up/Sign In, verify Google token server-side, auto-create user if new or log in if existing, store (fullName, email, googleId, profilePhoto, provider, createdAt, lastLoginAt), handle account linking/duplicate email rules, secure sessions (JWT access+refresh or httpOnly cookies), rate-limit auth endpoints, redirect to Dashboard, and provide setup instructions (consent screen, redirect URIs, env vars)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-57",
-      "summary": "Implement backend persistence for basic authentication metadata for authenticated principals: create a user-auth record keyed by caller principal that stores `provider`, `createdAt`, and `lastLoginAt`, and update `lastLoginAt` on each successful login verification call from the frontend.",
-      "reqIds": [
-        "REQ-78"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-58",
-      "summary": "Fix mobile layout overflow causing black empty space on the right; add viewport meta tag, remove fixed-width constraints, ensure full-width wrappers/background gradient coverage, and prevent horizontal scrolling across 360/390/414px widths while maintaining dark premium gradient design",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-59",
-      "summary": "Change Upgrade/paid plan CTA behavior to open an in-app pricing/upgrade modal instead of navigating directly to a full payment page (Razorpay checkout should be initiated from within the modal flow)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-60",
-      "summary": "Implement Manual UPI Payment system: Upgrade → choose Pro/Creator plan → proceed to payment modal/page showing plan+amount, QR image, UPI ID (6205684456@axl) with copy button, and 'Open UPI Apps' deep link with dynamic amount; then UTR submission form (UTR required, screenshot optional, email/plan/amount auto), show 'Pending verification', plus admin panel to approve/reject and on approve unlock premium for 30 days; includes backend tables/collections (payment_requests, subscriptions) and APIs with admin secured via ADMIN_EMAILS env var",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-68",
-      "summary": "Create backend storage and methods for `subscriptions` with fields userId, plan, premiumUntil, status. Integrate this with the existing subscription status system so that when a payment is approved, premium is activated for exactly 30 days and premium gating recognizes it.",
-      "reqIds": [
-        "REQ-104"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-69",
-      "summary": "Upgrade birthday card image generation quality to premium level: enforce strict card text rules (Title: “Happy Birthday {NAME}!”, Message: 15–20 word short wish only, Footer: “Made with ❤️ by WishMint AI”), never render prompt instructions/placeholders, add automatic short-wish converter, apply typography hierarchy + professional layout + premium visual effects, add style themes (Luxury/Cute/Cinematic/Modern Instagram), prevent text overflow, generate 2–3 design variations with swipe UI, and add UI animations (fade-in, confetti, glow hover) optimized for mobile",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-70",
-      "summary": "Upgrade the Example Wishes section into a premium social-media-style card gallery: auto-shorten example texts to 2–3 lines, apply themed typography (max 2 font families/card), emoji enhancement by relationship/tone, textured/gradient backgrounds with glow/confetti overlays, style-tag badges, interactive hover/tap effects with “Use This Style” CTA, Pinterest/Instagram-style grid layout, 2–3 design variations per example, and strict mobile overflow-safe readability",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-71",
-      "summary": "Upgrade website navigation/scrolling UX: add sticky top nav (Home/Create Wish/Templates/Marketplace/Pricing/Dashboard/FAQ) with active section highlighting + smooth scroll, add anchor IDs for sections, add Back-to-Top button (appears after 30% scroll), add top scroll-progress indicator bar, add optional floating quick action 'Create Wish' button, and mobile hamburger menu optimization ensuring floating UI doesn’t block content",
+      "summary": "Keep both creation modes: Quick Form Mode and Prompt Mode, with UI labeling like \"Create Card With AI Prompt\"",
       "reqIds": [],
       "status": "pending"
     }
   ],
   "gameProjectType": "none",
-  "projectName": "WishMint AI",
+  "projectName": "WishMint",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }

@@ -2,13 +2,12 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-sticky-top-navigation-bar-that-remains-fixed-while-scrolling-and-matches-the-existing-wishmint-premium-dark-neon-purple-green-gradient-branding-the-navbar-must-include-menu-items-home-create-wish-templates-marketplace-pricing-dashboard-faq-clicking-a-menu-item-must-smoothly-scroll-to-the-corresponding-section",
-      "featureTitle": "Add a sticky top navigation bar that remains fixed while scrolling and matches the existing WishMint premium dark + neon (purple/green) gradient branding. The navbar must include menu items: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ. Clicking a menu item must smoothly scroll to the corresponding section.",
+      "featureId": "feature-add-a-new-creation-mode-called-create-card-with-ai-prompt-that-lets-users-enter-a-freeform-natural-language-prompt-to-generate-a-card-invitation-while-keeping-the-existing-quick-form-based-birthday-generator-as-a-separate-quick-form-mode",
+      "featureTitle": "Add a new creation mode called \"Create Card With AI Prompt\" that lets users enter a freeform natural-language prompt to generate a card/invitation, while keeping the existing quick form-based birthday generator as a separate \"Quick Form Mode\".",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/navigation/StickyNavbar.tsx",
-        "frontend/src/index.css",
-        "frontend/src/lib/scroll.ts"
+        "frontend/src/features/promptStudio/types.ts",
+        "frontend/src/sections/GeneratorSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -20,22 +19,147 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-133"
+        "REQ-1"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-assign-anchor-ids-to-the-major-website-sections-using-the-exact-ids-specified-home-id-home-wish-generator-id-create-wish-templates-id-templates-marketplace-id-marketplace-pricing-id-pricing-dashboard-id-dashboard-faq-id-faq-ensure-existing-scroll-ref-behaviors-continue-to-work-and-scrolling-accounts-for-the-sticky-header-so-section-titles-are-not-hidden-under-the-navbar",
-      "featureTitle": "Assign anchor IDs to the major website sections using the exact IDs specified: Home id=\"home\"; Wish Generator id=\"create-wish\"; Templates id=\"templates\"; Marketplace id=\"marketplace\"; Pricing id=\"pricing\"; Dashboard id=\"dashboard\"; FAQ id=\"faq\". Ensure existing scroll/ref behaviors continue to work and scrolling accounts for the sticky header so section titles are not hidden under the navbar.",
+      "featureId": "feature-implement-a-prompt-mode-input-ui-with-a-main-textbox-placeholder-describe-your-card-or-invitation-idea-and-a-row-grid-of-clickable-example-prompts-that-prefill-the-textbox",
+      "featureTitle": "Implement a Prompt Mode input UI with a main textbox placeholder \"Describe your card or invitation idea...\" and a row/grid of clickable example prompts that prefill the textbox.",
+      "files": [
+        "frontend/src/features/promptStudio/components/PromptModeInput.tsx",
+        "frontend/src/sections/GeneratorSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-2"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-prompt-analysis-step-rule-based-deterministic-that-extracts-and-stores-event-type-tone-visual-theme-keywords-and-layout-style-from-the-user-prompt-and-display-the-detected-values-in-the-ui-before-with-the-results",
+      "featureTitle": "Create a prompt analysis step (rule-based, deterministic) that extracts and stores: event type, tone, visual theme keywords, and layout style from the user prompt, and display the detected values in the UI before/with the results.",
+      "files": [
+        "frontend/src/features/promptStudio/components/PromptAnalysisSummary.tsx",
+        "frontend/src/features/promptStudio/promptAnalysis.ts",
+        "frontend/src/sections/GeneratorSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-3"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-generate-smart-structured-card-content-from-the-prompt-analysis-output-including-1-title-headline-2-short-readable-main-message-3-signature-footer-text-and-ensure-the-content-is-sanitized-to-avoid-instruction-like-text",
+      "featureTitle": "Generate smart, structured card content from the prompt analysis output, including: (1) title/headline, (2) short readable main message, (3) signature/footer text, and ensure the content is sanitized to avoid instruction-like text.",
+      "files": [
+        "frontend/src/features/cardExport/cardTextRules.ts",
+        "frontend/src/features/promptStudio/promptContentGeneration.ts",
+        "frontend/src/sections/GeneratorSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-4"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-the-card-export-preview-text-formatting-logic-so-it-is-not-hardcoded-to-birthdays-e-g-remove-forced-happy-birthday-title-and-instead-uses-the-analyzed-event-type-tone-to-produce-an-appropriate-title-headline-and-footer-for-multiple-event-types-birthday-wedding-anniversary-party-corporate-festival-graduation-baby-shower-love-cards",
+      "featureTitle": "Update the card export/preview text formatting logic so it is not hardcoded to birthdays (e.g., remove forced \"Happy Birthday …\" title) and instead uses the analyzed event type + tone to produce an appropriate title/headline and footer for multiple event types (Birthday, Wedding, Anniversary, Party, Corporate, Festival, Graduation, Baby Shower, Love cards).",
+      "files": [
+        "frontend/src/features/cardExport/canvasExport.ts",
+        "frontend/src/features/cardExport/cardTextRules.ts",
+        "frontend/src/sections/OutputSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-prompt-mode-renders-3-unique-card-design-variations-per-generation-with-different-layout-compositions-and-different-typography-color-treatments-while-obeying-strict-layout-rules-title-section-decorative-focus-element-short-message-footer-branding-prevent-text-overlap-clutter",
+      "featureTitle": "Ensure Prompt Mode renders 3 unique card design variations per generation, with different layout compositions and different typography/color treatments, while obeying strict layout rules: Title section, decorative focus element, short message, footer branding; prevent text overlap/clutter.",
+      "files": [
+        "frontend/src/features/cardExport/canvasExport.ts",
+        "frontend/src/features/cardExport/generateCardVariations.ts",
+        "frontend/src/sections/OutputSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-6"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-event-adaptive-visual-theming-so-decorations-and-background-ornament-choices-change-based-on-detected-event-type-birthday-balloons-confetti-cake-feel-wedding-floral-gold-elegant-ornaments-corporate-minimal-modern-baby-shower-cute-pastel",
+      "featureTitle": "Add event-adaptive visual theming so decorations and background/ornament choices change based on detected event type (Birthday → balloons/confetti/cake feel; Wedding → floral/gold/elegant ornaments; Corporate → minimal/modern; Baby Shower → cute/pastel).",
+      "files": [
+        "frontend/src/features/promptStudio/eventThemeMapping.ts",
+        "frontend/src/sections/OutputSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "authorization@4.0.0",
+        "blob-storage@4.0.0"
+      ],
+      "testIds": [
+        "REQ-7"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-user-edit-controls-for-prompt-mode-results-edit-generated-text-fields-title-message-footer-switch-theme-change-tone-and-regenerate-designs-keeping-the-prompt-visible-editable",
+      "featureTitle": "Add user edit controls for Prompt Mode results: edit generated text fields (title/message/footer), switch theme, change tone, and regenerate designs (keeping the prompt visible/editable).",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/index.css",
-        "frontend/src/sections/DashboardSection.tsx",
-        "frontend/src/sections/FaqSection.tsx",
-        "frontend/src/sections/GeneratorSection.tsx",
-        "frontend/src/sections/HeroSection.tsx",
-        "frontend/src/sections/PricingSection.tsx",
-        "frontend/src/sections/TemplatesSection.tsx"
+        "frontend/src/features/promptStudio/components/PromptModeEditorPanel.tsx",
+        "frontend/src/sections/OutputSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -47,17 +171,16 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-134"
+        "REQ-8"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-active-section-highlighting-in-the-sticky-navigation-bar-as-the-user-scrolls-the-currently-viewed-section-s-corresponding-nav-item-must-be-visibly-highlighted-the-highlight-must-update-smoothly-and-be-stable-no-rapid-flicker",
-      "featureTitle": "Implement active-section highlighting in the sticky navigation bar: as the user scrolls, the currently viewed section’s corresponding nav item must be visibly highlighted. The highlight must update smoothly and be stable (no rapid flicker).",
+      "featureId": "feature-apply-premium-export-rules-to-prompt-mode-downloads-free-users-get-limited-resolution-export-and-or-watermark-premium-users-get-hd-export-and-watermark-removal-reusing-the-existing-entitlements-model",
+      "featureTitle": "Apply premium export rules to Prompt Mode downloads: Free users get limited-resolution export and/or watermark; Premium users get HD export and watermark removal, reusing the existing entitlements model.",
       "files": [
-        "frontend/src/components/navigation/StickyNavbar.tsx",
-        "frontend/src/hooks/useActiveSection.ts",
-        "frontend/src/index.css"
+        "frontend/src/features/cardExport/canvasExport.ts",
+        "frontend/src/sections/OutputSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -69,18 +192,16 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-135"
+        "REQ-9"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-thin-scroll-progress-indicator-bar-at-the-very-top-of-the-page-that-shows-the-user-s-scroll-percentage-through-the-main-page-content-the-bar-must-use-a-gradient-progress-color-consistent-with-wishmint-branding-and-animate-smoothly-as-the-user-scrolls",
-      "featureTitle": "Add a thin scroll progress indicator bar at the very top of the page that shows the user’s scroll percentage through the main page content. The bar must use a gradient progress color consistent with WishMint branding and animate smoothly as the user scrolls.",
+      "featureId": "feature-add-ui-placeholders-for-video-invitation-option-and-voice-message-card-option-in-the-premium-area-as-coming-soon-items-gated-behind-premium-do-not-implement-real-video-voice-capture-or-playback",
+      "featureTitle": "Add UI placeholders for \"Video invitation option\" and \"Voice message card option\" in the premium area as Coming Soon items gated behind premium (do not implement real video/voice capture or playback).",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/navigation/ScrollProgressBar.tsx",
-        "frontend/src/hooks/useScrollProgress.ts",
-        "frontend/src/index.css"
+        "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
+        "frontend/src/sections/OutputSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -92,17 +213,16 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-136"
+        "REQ-10"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-floating-back-to-top-button-positioned-at-the-bottom-right-of-the-viewport-it-must-appear-only-after-the-user-scrolls-at-least-30-down-the-page-and-must-smoothly-scroll-the-user-back-to-the-top-home-style-it-as-a-glowing-wishmint-button-and-ensure-it-does-not-block-important-ui-on-mobile",
-      "featureTitle": "Add a floating “Back to Top” button positioned at the bottom-right of the viewport. It must appear only after the user scrolls at least 30% down the page and must smoothly scroll the user back to the top (Home). Style it as a glowing WishMint button and ensure it does not block important UI on mobile.",
+      "featureId": "feature-update-the-output-section-copy-and-structure-for-prompt-mode-so-it-is-not-birthday-pack-specific-e-g-replace-headings-like-your-birthday-pack-with-a-neutral-multi-event-label-when-prompt-mode-is-used-while-preserving-the-existing-birthday-pack-presentation-for-quick-form-mode",
+      "featureTitle": "Update the Output section copy and structure for Prompt Mode so it is not birthday-pack specific (e.g., replace headings like \"Your Birthday Pack\" with a neutral multi-event label when Prompt Mode is used), while preserving the existing birthday-pack presentation for Quick Form Mode.",
       "files": [
         "frontend/src/App.tsx",
-        "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
-        "frontend/src/index.css"
+        "frontend/src/sections/OutputSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -114,74 +234,7 @@
         "blob-storage@4.0.0"
       ],
       "testIds": [
-        "REQ-137"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-floating-quick-action-button-labeled-exactly-create-wish-that-scrolls-the-user-directly-to-the-wish-generator-section-id-create-wish-this-button-must-be-mobile-safe-not-blocking-content-and-visually-consistent-with-wishmint-glowing-neon-styling",
-      "featureTitle": "Add a floating quick action button labeled exactly \"🎂 Create Wish\" that scrolls the user directly to the Wish Generator section (id=\"create-wish\"). This button must be mobile-safe (not blocking content) and visually consistent with WishMint glowing/neon styling.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-138"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-mobile-optimization-for-the-new-navigation-system-on-mobile-breakpoints-collapse-the-sticky-navigation-items-into-a-hamburger-menu-that-can-be-opened-closed-the-menu-must-retain-smooth-scrolling-to-section-anchors-and-must-not-introduce-overlay-pointer-events-issues-that-block-page-interaction",
-      "featureTitle": "Implement mobile optimization for the new navigation system: on mobile breakpoints, collapse the sticky navigation items into a hamburger menu that can be opened/closed. The menu must retain smooth scrolling to section anchors and must not introduce overlay/pointer-events issues that block page interaction.",
-      "files": [
-        "frontend/src/components/navigation/StickyNavbar.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-139"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-any-user-facing-text-introduced-by-the-new-navigation-scroller-features-is-in-english-and-the-new-ui-elements-sticky-navbar-progress-bar-floating-buttons-hamburger-menu-preserve-the-existing-premium-dark-gradient-look-and-do-not-regress-current-section-layouts",
-      "featureTitle": "Ensure any user-facing text introduced by the new navigation/scroller features is in English, and the new UI elements (sticky navbar, progress bar, floating buttons, hamburger menu) preserve the existing premium dark gradient look and do not regress current section layouts.",
-      "files": [
-        "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
-        "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
-        "frontend/src/components/navigation/ScrollProgressBar.tsx",
-        "frontend/src/components/navigation/StickyNavbar.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-140"
+        "REQ-11"
       ],
       "confidence": "high"
     }

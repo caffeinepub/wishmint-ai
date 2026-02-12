@@ -1,181 +1,224 @@
 {
   "kind": "build_request",
-  "title": "Upgrade navigation + scrolling UX with sticky navbar, anchors, progress bar, and floating actions",
+  "title": "Add prompt-based AI Creative Card Studio mode with multi-event card generation, 3 variations, editing, and premium export rules",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-133",
-      "text": "Add a sticky top navigation bar that remains fixed while scrolling and matches the existing WishMint premium dark + neon (purple/green) gradient branding. The navbar must include menu items: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ. Clicking a menu item must smoothly scroll to the corresponding section.",
+      "id": "REQ-1",
+      "text": "Add a new creation mode called \"Create Card With AI Prompt\" that lets users enter a freeform natural-language prompt to generate a card/invitation, while keeping the existing quick form-based birthday generator as a separate \"Quick Form Mode\".",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "ADD STICKY NAVIGATION BAR ... Navigation Menu Items: • Home • Create Wish • Templates • Marketplace • Pricing • Dashboard • FAQ ... Stay fixed at top ... Smooth scroll to selected section"
+          "Keep BOTH systems:\n\n👉 Quick Form Mode (Fast users)\n👉 Prompt Mode (Creative users)\n\nRename feature to:\n\n👉 \"Create Card With AI Prompt\""
         ]
       },
       "acceptanceCriteria": [
-        "A sticky navigation bar is visible at the top of the page and stays fixed during scroll.",
-        "Navbar includes exactly these labels: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ.",
-        "Clicking each navbar item performs a smooth scroll to the correct section (no abrupt jump).",
-        "Navbar styling uses the existing WishMint neon gradient look and does not introduce horizontal overflow."
+        "The create section offers a clear toggle/segmented control between \"Quick Form Mode\" and \"Create Card With AI Prompt\".",
+        "Quick Form Mode retains the current form UX and continues to generate the existing birthday pack outputs without regressions.",
+        "Prompt Mode presents a single main prompt input and does not require the birthday-specific fields (name/tone/relationship/etc.) to generate a result."
       ]
     },
     {
-      "id": "REQ-134",
-      "text": "Assign anchor IDs to the major website sections using the exact IDs specified: Home id=\"home\"; Wish Generator id=\"create-wish\"; Templates id=\"templates\"; Marketplace id=\"marketplace\"; Pricing id=\"pricing\"; Dashboard id=\"dashboard\"; FAQ id=\"faq\". Ensure existing scroll/ref behaviors continue to work and scrolling accounts for the sticky header so section titles are not hidden under the navbar.",
+      "id": "REQ-2",
+      "text": "Implement a Prompt Mode input UI with a main textbox placeholder \"Describe your card or invitation idea...\" and a row/grid of clickable example prompts that prefill the textbox.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "ADD SECTION ID LINKS ... Home Section → id=\"home\" ... Wish Generator → id=\"create-wish\" ... Templates → id=\"templates\" ... Marketplace → id=\"marketplace\" ... Pricing → id=\"pricing\" ... Dashboard → id=\"dashboard\" ... FAQ → id=\"faq\""
+          "Add a main input box:\n\nPlaceholder:\n\"Describe your card or invitation idea...\"\n\nExample prompts displayed below input:\n• Luxury birthday invitation for 50th birthday\n• Cute baby shower invitation\n• Romantic anniversary wish card\n• Elegant wedding invitation"
         ]
       },
       "acceptanceCriteria": [
-        "The DOM contains elements for each major section with the exact IDs: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
-        "Navbar clicks scroll to these anchored sections reliably.",
-        "When a section is scrolled to, its heading/content is not obscured by the sticky navbar (header offset is handled).",
-        "Existing special navigation behavior for /pricing (scrolling to Pricing and opening the pricing modal) continues to work."
+        "Prompt Mode shows the placeholder text exactly: \"Describe your card or invitation idea...\".",
+        "At least the 4 provided example prompts are visible and clickable; clicking an example fills the prompt box.",
+        "The Generate action is disabled or shows validation until the prompt contains non-whitespace text."
       ]
     },
     {
-      "id": "REQ-135",
-      "text": "Implement active-section highlighting in the sticky navigation bar: as the user scrolls, the currently viewed section’s corresponding nav item must be visibly highlighted. The highlight must update smoothly and be stable (no rapid flicker).",
+      "id": "REQ-3",
+      "text": "Create a prompt analysis step (rule-based, deterministic) that extracts and stores: event type, tone, visual theme keywords, and layout style from the user prompt, and display the detected values in the UI before/with the results.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Highlight current active section"
+          "AI analyses prompt and detects:\n\n✔ Event type\n✔ Tone\n✔ Theme\n✔ Layout style\n✔ Message format\n\nSystem must automatically detect:\n\n• Event Type\n(Birthday, Wedding, Anniversary, Party, Corporate, Festival, etc.)\n\n• Tone\n(Formal, Romantic, Emotional, Fun, Luxury, Cute)\n\n• Visual Theme\n(Floral, Royal, Minimal, Modern, Cartoon, Elegant, etc.)\n\n• Layout Style\n(Invitation layout, Greeting card layout, Poster layout)"
         ]
       },
       "acceptanceCriteria": [
-        "As the user scrolls through the page, the nav item for the visible section is highlighted.",
-        "The highlight changes when the viewport enters a new section and does not flicker excessively while near boundaries.",
-        "Highlight styling is clearly visible in the existing premium dark theme."
+        "Given prompts containing obvious keywords (e.g., \"wedding\", \"baby shower\", \"corporate\", \"festival\", \"luxury\", \"cute\", \"formal\"), the app consistently detects and surfaces matching event type/tone/theme/layout values.",
+        "If the prompt is ambiguous, the app chooses sensible defaults and clearly labels them as selected values (not blank).",
+        "Detected values are stored in app state and used downstream by card text generation and theme selection."
       ]
     },
     {
-      "id": "REQ-136",
-      "text": "Add a thin scroll progress indicator bar at the very top of the page that shows the user’s scroll percentage through the main page content. The bar must use a gradient progress color consistent with WishMint branding and animate smoothly as the user scrolls.",
+      "id": "REQ-4",
+      "text": "Generate smart, structured card content from the prompt analysis output, including: (1) title/headline, (2) short readable main message, (3) signature/footer text, and ensure the content is sanitized to avoid instruction-like text.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "ADD SCROLL PROGRESS INDICATOR ... Add thin progress bar at top of page showing scroll percentage ... Gradient progress color ... Smooth animated fill while scrolling"
+          "AI must generate:\n\n✔ Professional message content\n✔ Structured card text hierarchy\n✔ Short readable message\n✔ Signature or footer text"
         ]
       },
       "acceptanceCriteria": [
-        "A thin progress bar is rendered at the top edge of the viewport and remains visible while scrolling.",
-        "The progress bar fill reflects scroll progress from 0% (top) to 100% (bottom).",
-        "The fill animates smoothly and uses a purple/green gradient consistent with the existing theme."
+        "Prompt Mode generation produces a title, message, and footer fields for every result.",
+        "Generated text is short enough to render on a square card without overflow using existing fit/wrap rules (no clipped text).",
+        "Instruction-like content (e.g., \"Prompt:\", \"Instructions:\", \"Generate\") is removed from rendered card text.",
+        "The footer uses consistent branding (e.g., WishMint branding) across variations."
       ]
     },
     {
-      "id": "REQ-137",
-      "text": "Add a floating “Back to Top” button positioned at the bottom-right of the viewport. It must appear only after the user scrolls at least 30% down the page and must smoothly scroll the user back to the top (Home). Style it as a glowing WishMint button and ensure it does not block important UI on mobile.",
+      "id": "REQ-5",
+      "text": "Update the card export/preview text formatting logic so it is not hardcoded to birthdays (e.g., remove forced \"Happy Birthday …\" title) and instead uses the analyzed event type + tone to produce an appropriate title/headline and footer for multiple event types (Birthday, Wedding, Anniversary, Party, Corporate, Festival, Graduation, Baby Shower, Love cards).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "ADD BACK TO TOP BUTTON ... Appear after user scrolls 30% down page ... Positioned bottom right ... Smooth scroll user back to top ... Use glowing WishMint style button"
+          "Not just birthday.\n\nYou Can Support All Card Types\n\nBirthday, Wedding Invitations, Party Invitations, Baby Shower, Love Cards, Graduation, Festival Wishes, Corporate Invitations, Anniversary"
         ]
       },
       "acceptanceCriteria": [
-        "The Back to Top button is hidden near the top of the page and becomes visible after scrolling beyond ~30% of total scroll height.",
-        "Clicking the button smoothly scrolls to the top/home section.",
-        "The button is positioned bottom-right and is visually consistent with the existing neon/glow style.",
-        "On small screens, the button does not cover primary actions/inputs (uses safe spacing and responsive sizing)."
+        "For a wedding prompt, the card title/headline is wedding-appropriate (not birthday-specific).",
+        "For a corporate invitation prompt, the title/headline and wording are corporate-appropriate (not romantic/birthday).",
+        "No user flow in Prompt Mode produces a card preview that contains the literal phrase \"Happy Birthday\" unless the analyzed event type is Birthday."
       ]
     },
     {
-      "id": "REQ-138",
-      "text": "Add a floating quick action button labeled exactly \"🎂 Create Wish\" that scrolls the user directly to the Wish Generator section (id=\"create-wish\"). This button must be mobile-safe (not blocking content) and visually consistent with WishMint glowing/neon styling.",
+      "id": "REQ-6",
+      "text": "Ensure Prompt Mode renders 3 unique card design variations per generation, with different layout compositions and different typography/color treatments, while obeying strict layout rules: Title section, decorative focus element, short message, footer branding; prevent text overlap/clutter.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "ADD QUICK ACTION FLOAT BUTTON (Optional but recommended) ... Floating button labeled: \"🎂 Create Wish\" ... Scroll user directly to wish generator section"
+          "AI generates:\n\n• Wish text\n• Card design\n• 3 variations\n\nCards must follow strict layout rules:\n\n• Title Section\n• Decorative Focus Element\n• Short Emotional Message\n• Footer Branding\n\nPrevent text overlap or clutter.\n\nGenerate:\n\n• 3 unique design variations\n• Different layout compositions\n• Different typography and color treatments"
         ]
       },
       "acceptanceCriteria": [
-        "A floating button labeled exactly \"🎂 Create Wish\" is available and clickable.",
-        "Clicking the button smoothly scrolls to the create-wish section.",
-        "Button placement/sizing is responsive and does not obstruct core content on mobile."
+        "Exactly 3 variations are generated and viewable (e.g., in the existing carousel) for each Prompt Mode generation.",
+        "Variations differ in composition and appearance beyond just minor decoration offsets (e.g., at least one of: layout variant, typography pairing, color treatment).",
+        "No variation renders overlapping title/message/footer; text remains within safe bounds on 1080×1080 output.",
+        "Variations preserve the same semantic content hierarchy (title/message/footer) for a given generation."
       ]
     },
     {
-      "id": "REQ-139",
-      "text": "Implement mobile optimization for the new navigation system: on mobile breakpoints, collapse the sticky navigation items into a hamburger menu that can be opened/closed. The menu must retain smooth scrolling to section anchors and must not introduce overlay/pointer-events issues that block page interaction.",
+      "id": "REQ-7",
+      "text": "Add event-adaptive visual theming so decorations and background/ornament choices change based on detected event type (Birthday → balloons/confetti/cake feel; Wedding → floral/gold/elegant ornaments; Corporate → minimal/modern; Baby Shower → cute/pastel).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "MOBILE OPTIMIZATION ... Convert navigation bar into hamburger menu ... Maintain smooth scroll navigation ... Ensure floating buttons do not block content"
+          "EVENT ADAPTIVE THEMES\n\nAutomatically select decorations based on event type:\n\nBirthday → Balloons, confetti, cake\nWedding → Floral, gold, elegant ornaments\nCorporate → Minimal modern layouts\nBaby Shower → Cute pastel illustrations"
         ]
       },
       "acceptanceCriteria": [
-        "On mobile widths, the navbar displays a hamburger menu instead of the full horizontal menu.",
-        "Opening the hamburger menu shows the full list of nav items (Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ).",
-        "Selecting an item closes the menu and smoothly scrolls to the target section.",
-        "No overlay layers block pointer events on underlying content when the menu is closed."
+        "When the detected event type changes, the default selected card theme/decoration style changes accordingly without requiring manual selection.",
+        "At least the four event mappings listed (Birthday, Wedding, Corporate, Baby Shower) produce visibly different decoration/background treatments in the preview.",
+        "Users can still manually override the selected theme after auto-selection."
       ]
     },
     {
-      "id": "REQ-140",
-      "text": "Ensure any user-facing text introduced by the new navigation/scroller features is in English, and the new UI elements (sticky navbar, progress bar, floating buttons, hamburger menu) preserve the existing premium dark gradient look and do not regress current section layouts.",
+      "id": "REQ-8",
+      "text": "Add user edit controls for Prompt Mode results: edit generated text fields (title/message/footer), switch theme, change tone, and regenerate designs (keeping the prompt visible/editable).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-6"
+          "msg-1"
         ],
         "quotes": [
-          "Use English for any user-facing text in the build request."
+          "USER EDIT CONTROLS\n\nAllow users to:\n\n• Edit generated text\n• Switch themes\n• Change tone\n• Regenerate design"
         ]
       },
       "acceptanceCriteria": [
-        "All new labels/tooltips/toasts/messages related to navigation are in English.",
-        "The new navigation elements visually match the existing WishMint premium dark + neon gradient style.",
-        "No new horizontal scrolling is introduced by the navigation UI (mobile and desktop)."
+        "Users can edit the generated text and immediately see the preview/variations update (or regenerate variations from the edited text).",
+        "Users can change tone via a control; the system re-generates text (and/or styling) consistent with the new tone.",
+        "A \"Regenerate\" action produces a fresh set of 3 variations for the same prompt (without requiring retyping).",
+        "Theme switching continues to work as it does today, but applies to Prompt Mode outputs as well."
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Apply premium export rules to Prompt Mode downloads: Free users get limited-resolution export and/or watermark; Premium users get HD export and watermark removal, reusing the existing entitlements model.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "PREMIUM UPGRADE SYSTEM\n\nFree users:\n• Limited resolution\n• Watermark\n\nPremium users:\n• HD export\n• Extra templates\n• Video invitation option\n• Voice message card option"
+        ]
+      },
+      "acceptanceCriteria": [
+        "If the user is not entitled to HD export, the downloaded image is limited-resolution and includes a visible watermark.",
+        "If the user is entitled to HD export, the downloaded image is 1080×1080 (or higher if already supported) and contains no watermark.",
+        "If the user is anonymous/demo, downloading still requires sign-in (existing behavior preserved).",
+        "Premium gating uses the existing plan entitlements (no new auth system)."
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Add UI placeholders for \"Video invitation option\" and \"Voice message card option\" in the premium area as Coming Soon items gated behind premium (do not implement real video/voice capture or playback).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Premium users:\n• Video invitation option\n• Voice message card option"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The UI shows \"Video invitation\" and \"Voice message\" as premium/coming-soon capabilities without broken links or dead-end flows.",
+        "Clicking these items explains they are coming soon and does not attempt to access microphone/camera or upload media."
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Update the Output section copy and structure for Prompt Mode so it is not birthday-pack specific (e.g., replace headings like \"Your Birthday Pack\" with a neutral multi-event label when Prompt Mode is used), while preserving the existing birthday-pack presentation for Quick Form Mode.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-1"
+        ],
+        "quotes": [
+          "Allow users to type natural language prompts and automatically generate professional invitation and wish cards for multiple event types."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When outputs are generated via Prompt Mode, the Output section uses neutral language (e.g., \"Your Card\" / \"Your Invitation\") and does not label the result as birthday-only.",
+        "When outputs are generated via Quick Form Mode, the Output section continues to display the existing birthday pack labels and behavior.",
+        "Switching modes and generating in each mode shows the correct corresponding output framing without stale text from the other mode."
       ]
     }
   ],
   "constraints": [
-    "Frontend changes only; no backend changes required.",
-    "Do not edit files under frontend immutablePaths (e.g., frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
-    "Preserve existing /pricing pseudo-route behavior in frontend/src/App.tsx (scroll to Pricing and open PricingComparisonModal).",
-    "Keep all scrolling smooth; respect reduced-motion preferences where applicable.",
-    "Do not introduce horizontal overflow; floating/sticky elements must stay within viewport on mobile."
+    "Frontend must not edit files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
+    "Backend must remain a single Motoko actor in backend/main.mo; only add migration.mo if persistent state schema must change.",
+    "Do not integrate external AI/LLM services (no OpenAI/Anthropic/etc.); implement prompt analysis and content generation locally/rule-based.",
+    "Use English for any user-facing text."
   ],
   "nonGoals": [
-    "Do not redesign or change the content of existing sections (Generator, Templates, Marketplace, Pricing, Dashboard, FAQ) beyond adding the required anchor IDs and navigation affordances.",
-    "Do not add new pages or a multi-page router; keep the app as a single-page scroll experience.",
-    "Do not change payment, subscription, quota, generation, or export logic."
+    "Building or integrating a real AI image generator (e.g., DALL·E-style) for card artwork.",
+    "Implementing real-time collaboration, chat, or WebSocket-based features.",
+    "Implementing actual video invitation rendering/export, or voice recording/storage/playback (only Coming Soon UI in this iteration).",
+    "Adding third-party authentication providers beyond Internet Identity."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

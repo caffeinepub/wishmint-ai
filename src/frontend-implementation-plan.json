@@ -1,257 +1,284 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "WishMint single-page navigation UX: sticky navbar, anchored smooth scrolling, scroll spy, progress bar, and floating actions",
+  "title": "AI Prompt Card Studio mode with deterministic prompt analysis, 3 variations, editing, and premium export gating",
   "requirements": [
     {
-      "id": "REQ-133",
-      "summary": "Add a sticky top navigation bar matching WishMint dark + neon gradient branding with smooth-scroll menu items for all major sections.",
+      "id": "REQ-1",
+      "summary": "Add a creation-mode toggle that keeps existing Quick Form birthday generator and adds a separate “Create Card With AI Prompt” mode.",
       "acceptanceCriteria": [
-        "A sticky navigation bar is visible at the top of the page and stays fixed during scroll.",
-        "Navbar includes exactly these labels: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ.",
-        "Clicking each navbar item performs a smooth scroll to the correct section (no abrupt jump).",
-        "Navbar styling uses the existing WishMint neon gradient look and does not introduce horizontal overflow."
+        "The create section offers a clear toggle/segmented control between \"Quick Form Mode\" and \"Create Card With AI Prompt\".",
+        "Quick Form Mode retains the current form UX and continues to generate the existing birthday pack outputs without regressions.",
+        "Prompt Mode presents a single main prompt input and does not require the birthday-specific fields (name/tone/relationship/etc.) to generate a result."
       ],
       "file_operations": [
-        {
-          "path": "frontend/src/components/navigation/StickyNavbar.tsx",
-          "operation": "create",
-          "description": "Create a sticky top navigation component rendering exactly: Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ; implement click handlers that trigger smooth scrolling to the corresponding anchor IDs while respecting reduced-motion preferences. Use shadcn-ui Button (and other existing shadcn-ui primitives if needed) for consistent styling and focus states. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/lib/scroll.ts",
-          "operation": "create",
-          "description": "Add a small scroll utility to smoothly scroll to a given anchor ID with a sticky-header offset and reduced-motion support."
-        },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire StickyNavbar into the single-page layout so it is present during normal browsing (non-surprise, non-premium-designer flows) and does not disrupt existing section rendering; ensure nav item clicks call the shared scroll helper."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add theme-consistent navbar styling helpers (gradient background, blur, glow, z-index) and guard against horizontal overflow caused by fixed/sticky elements."
-        }
-      ]
-    },
-    {
-      "id": "REQ-134",
-      "summary": "Assign exact anchor IDs to major sections and ensure sticky-header offset handling while preserving existing /pricing behavior.",
-      "acceptanceCriteria": [
-        "The DOM contains elements for each major section with the exact IDs: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
-        "Navbar clicks scroll to these anchored sections reliably.",
-        "When a section is scrolled to, its heading/content is not obscured by the sticky navbar (header offset is handled).",
-        "Existing special navigation behavior for /pricing (scrolling to Pricing and opening the pricing modal) continues to work."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/sections/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Add id=\"home\" to the top-level Home section element and apply an anchor/offset class so it is not hidden beneath the sticky navbar when navigated to."
+          "description": "Extend app context/state to track the selected creation mode (Quick Form vs Create Card With AI Prompt) and store Prompt Mode state separately from existing birthday form/outputs, ensuring Quick Form generation remains unchanged. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/sections/GeneratorSection.tsx",
           "operation": "modify",
-          "description": "Add id=\"create-wish\" to the Wish Generator section container element (the one used for scrolling) and apply sticky-header offset handling via a shared class."
+          "description": "Add a segmented control/toggle UI at the top of the create section to switch between “Quick Form Mode” and “Create Card With AI Prompt”, rendering the existing birthday form only for Quick Form and rendering the new Prompt Mode UI for Prompt Mode. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/sections/TemplatesSection.tsx",
-          "operation": "modify",
-          "description": "Add id=\"templates\" to the Templates section container element and apply sticky-header offset handling via a shared class."
+          "path": "frontend/src/features/promptStudio/types.ts",
+          "operation": "create",
+          "description": "Define Prompt Mode types (e.g., PromptAnalysis fields, generated card text fields, variation inputs, and Prompt Studio state) to keep Prompt Mode isolated from BirthdayPack types. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Implement Prompt Mode input UI with placeholder text and clickable example prompts that prefill the textbox and validate non-empty input.",
+      "acceptanceCriteria": [
+        "Prompt Mode shows the placeholder text exactly: \"Describe your card or invitation idea...\".",
+        "At least the 4 provided example prompts are visible and clickable; clicking an example fills the prompt box.",
+        "The Generate action is disabled or shows validation until the prompt contains non-whitespace text."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/promptStudio/components/PromptModeInput.tsx",
+          "operation": "create",
+          "description": "Create Prompt Mode input UI containing a main textarea with placeholder \"Describe your card or invitation idea...\" and a row/grid of clickable example prompts that set the textarea value; include prompt non-whitespace validation that disables Generate until valid. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/sections/PricingSection.tsx",
+          "path": "frontend/src/sections/GeneratorSection.tsx",
           "operation": "modify",
-          "description": "Add id=\"pricing\" to the Pricing section container element (the same one referenced by the existing ref) and apply sticky-header offset handling via a shared class; keep layout/content intact."
+          "description": "Wire the new PromptModeInput into Prompt Mode rendering (only when “Create Card With AI Prompt” is selected) and connect its prompt value + Generate action to Prompt Mode state. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Add a deterministic rule-based prompt analysis step to detect event type, tone, visual theme keywords, and layout style; display detected values and store them for downstream generation.",
+      "acceptanceCriteria": [
+        "Given prompts containing obvious keywords (e.g., \"wedding\", \"baby shower\", \"corporate\", \"festival\", \"luxury\", \"cute\", \"formal\"), the app consistently detects and surfaces matching event type/tone/theme/layout values.",
+        "If the prompt is ambiguous, the app chooses sensible defaults and clearly labels them as selected values (not blank).",
+        "Detected values are stored in app state and used downstream by card text generation and theme selection."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/promptStudio/promptAnalysis.ts",
+          "operation": "create",
+          "description": "Implement deterministic, rule-based prompt parsing that returns: event type, tone, visual theme keywords, and layout style with sensible defaults; ensure output is stable for the same prompt. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/sections/DashboardSection.tsx",
-          "operation": "modify",
-          "description": "Add id=\"dashboard\" to the Dashboard section container element and apply sticky-header offset handling via a shared class."
+          "path": "frontend/src/features/promptStudio/components/PromptAnalysisSummary.tsx",
+          "operation": "create",
+          "description": "Create a compact UI summary that displays the detected event type, tone, theme keywords, and layout style for Prompt Mode prior to/alongside results. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/sections/FaqSection.tsx",
+          "path": "frontend/src/sections/GeneratorSection.tsx",
           "operation": "modify",
-          "description": "Add id=\"faq\" to the FAQ section container element and apply sticky-header offset handling via a shared class."
+          "description": "On Prompt Mode Generate, run the rule-based analysis, store results in Prompt Mode state, and render PromptAnalysisSummary in the Prompt Mode flow. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Generate structured card text (title, short message, footer) from the analysis output and sanitize text to remove instruction-like content.",
+      "acceptanceCriteria": [
+        "Prompt Mode generation produces a title, message, and footer fields for every result.",
+        "Generated text is short enough to render on a square card without overflow using existing fit/wrap rules (no clipped text).",
+        "Instruction-like content (e.g., \"Prompt:\", \"Instructions:\", \"Generate\") is removed from rendered card text.",
+        "The footer uses consistent branding (e.g., WishMint branding) across variations."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/promptStudio/promptContentGeneration.ts",
+          "operation": "create",
+          "description": "Implement local/rule-based structured text generation using prompt analysis output to produce {title, message, footer}; ensure message is short and readable for 1080×1080 rendering and uses consistent WishMint branding in the footer. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/cardExport/cardTextRules.ts",
+          "operation": "modify",
+          "description": "Generalize text sanitization utilities so they can sanitize Prompt Mode-generated title/message/footer and remove instruction-like tokens from all rendered card text (not just wishMessage). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/GeneratorSection.tsx",
+          "operation": "modify",
+          "description": "Connect Prompt Mode Generate to call promptContentGeneration after promptAnalysis and store the structured text fields for downstream preview/export. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Update export/preview text formatting so it’s not hardcoded to birthdays and uses event type + tone to produce appropriate headline/footer for multiple event types.",
+      "acceptanceCriteria": [
+        "For a wedding prompt, the card title/headline is wedding-appropriate (not birthday-specific).",
+        "For a corporate invitation prompt, the title/headline and wording are corporate-appropriate (not romantic/birthday).",
+        "No user flow in Prompt Mode produces a card preview that contains the literal phrase \"Happy Birthday\" unless the analyzed event type is Birthday."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/cardExport/cardTextRules.ts",
+          "operation": "modify",
+          "description": "Replace the hardcoded birthday title logic in formatCardTextContent with an event-aware/title strategy that accepts either (a) fully specified Prompt Mode title/message/footer or (b) generates a fallback title based on event type + tone; ensure \"Happy Birthday\" only appears when event type is Birthday. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/cardExport/canvasExport.ts",
+          "operation": "modify",
+          "description": "Update canvas rendering to accept Prompt Mode structured text (title/message/footer) and/or event metadata so previews/exports use event-appropriate titles/footers rather than forcing birthday wording. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "When rendering Prompt Mode outputs, ensure the card preview/export uses the Prompt Mode structured text and analyzed event type/tone rather than the birthday-specific name-based title path. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Ensure Prompt Mode generates exactly 3 distinct design variations per generation with strict layout hierarchy and no text overlap on 1080×1080.",
+      "acceptanceCriteria": [
+        "Exactly 3 variations are generated and viewable (e.g., in the existing carousel) for each Prompt Mode generation.",
+        "Variations differ in composition and appearance beyond just minor decoration offsets (e.g., at least one of: layout variant, typography pairing, color treatment).",
+        "No variation renders overlapping title/message/footer; text remains within safe bounds on 1080×1080 output.",
+        "Variations preserve the same semantic content hierarchy (title/message/footer) for a given generation."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/cardExport/generateCardVariations.ts",
+          "operation": "modify",
+          "description": "Enhance variation parameters to drive more meaningful differences (e.g., distinct layout composition, typography pairing choice, and/or color treatment knobs) while keeping the same semantic text hierarchy. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/cardExport/canvasExport.ts",
+          "operation": "modify",
+          "description": "Apply variation parameters to rendering (layout variants + style treatments) while enforcing safe regions and fit rules to prevent overlap/clutter on 1080×1080. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Ensure Prompt Mode generation always produces and displays exactly 3 variations via the existing CardVariationsCarousel, reusing the same variation count and refreshing previews on each generation/regeneration. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Add event-adaptive theming so default theme/decoration changes with detected event type, while still allowing manual override.",
+      "acceptanceCriteria": [
+        "When the detected event type changes, the default selected card theme/decoration style changes accordingly without requiring manual selection.",
+        "At least the four event mappings listed (Birthday, Wedding, Corporate, Baby Shower) produce visibly different decoration/background treatments in the preview.",
+        "Users can still manually override the selected theme after auto-selection."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/promptStudio/eventThemeMapping.ts",
+          "operation": "create",
+          "description": "Implement a deterministic mapping from detected event type (at minimum: Birthday, Wedding, Corporate, Baby Shower) to a recommended card theme/decoration preset used as the Prompt Mode default. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "When Prompt Mode results are generated and analysis is available, auto-select the recommended theme from eventThemeMapping (only if the user has not manually overridden theme), while keeping the existing theme Select for manual override. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/cardExport/cardThemes.ts",
+          "operation": "modify",
+          "description": "If needed to support event-adaptive visuals, extend theme definitions or add additional themes backed by existing generated assets to make event mappings visibly distinct (e.g., minimal/modern for Corporate, floral/luxury for Wedding, pastel/cute for Baby Shower). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Add Prompt Mode edit controls to edit title/message/footer, switch theme, change tone, and regenerate designs while keeping prompt visible/editable.",
+      "acceptanceCriteria": [
+        "Users can edit the generated text and immediately see the preview/variations update (or regenerate variations from the edited text).",
+        "Users can change tone via a control; the system re-generates text (and/or styling) consistent with the new tone.",
+        "A \"Regenerate\" action produces a fresh set of 3 variations for the same prompt (without requiring retyping).",
+        "Theme switching continues to work as it does today, but applies to Prompt Mode outputs as well."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/promptStudio/components/PromptModeEditorPanel.tsx",
+          "operation": "create",
+          "description": "Create Prompt Mode edit controls for title/message/footer editing, tone selection, theme selection passthrough, and actions for “Regenerate designs” and “Regenerate text”; keep the prompt visible and editable. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Render PromptModeEditorPanel when the current outputs come from Prompt Mode; wire edits to update preview/variations (either immediate rerender or regenerate blobs), and ensure Regenerate creates a fresh 3-variation set without clearing the prompt. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Preserve the existing /pricing pseudo-route behavior in this file while updating scrolling to use the shared offset-aware scroll helper (so Pricing headings are not obscured by the sticky navbar) and still opening PricingComparisonModal as currently implemented."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Introduce a shared anchor offset rule (e.g., a class applied to anchored sections) using scroll-margin-top based on the sticky navbar height so scrollIntoView/anchor navigation does not hide headings."
+          "description": "Extend app context APIs to support Prompt Mode state updates (prompt text, analysis, generated structured text, selected tone/theme, regenerate counters) without impacting Quick Form behavior. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-135",
-      "summary": "Highlight the active section in the sticky navbar using a stable scroll-spy mechanism.",
+      "id": "REQ-9",
+      "summary": "Apply premium export gating to Prompt Mode downloads: free gets watermark and/or limited resolution; premium gets HD and no watermark; preserve existing sign-in requirement for downloads.",
       "acceptanceCriteria": [
-        "As the user scrolls through the page, the nav item for the visible section is highlighted.",
-        "The highlight changes when the viewport enters a new section and does not flicker excessively while near boundaries.",
-        "Highlight styling is clearly visible in the existing premium dark theme."
+        "If the user is not entitled to HD export, the downloaded image is limited-resolution and includes a visible watermark.",
+        "If the user is entitled to HD export, the downloaded image is 1080×1080 (or higher if already supported) and contains no watermark.",
+        "If the user is anonymous/demo, downloading still requires sign-in (existing behavior preserved).",
+        "Premium gating uses the existing plan entitlements (no new auth system)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useActiveSection.ts",
-          "operation": "create",
-          "description": "Create a scroll-spy hook based on IntersectionObserver to determine the currently active anchored section (home, create-wish, templates, marketplace, pricing, dashboard, faq) with stability controls to prevent boundary flicker."
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Use the existing entitlements model via useEntitlements to gate Prompt Mode download behavior: keep the existing demo/sign-in check, and pass export options (HD vs limited-res, watermark on/off) based on entitlements. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/navigation/StickyNavbar.tsx",
+          "path": "frontend/src/features/cardExport/canvasExport.ts",
           "operation": "modify",
-          "description": "Use the active-section hook to apply a clear neon/glow highlight style to the corresponding nav item, updating smoothly without rapid flicker. Use shadcn-ui Button styling variants if appropriate. Verify the component's usage instructions before implementing."
+          "description": "Add optional export options for resolution scaling and watermark rendering (e.g., overlay text/branding) and ensure Prompt Mode exports respect entitlements: limited resolution + watermark for non-HD users; 1080×1080 + no watermark for HD entitled users. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/features/subscription/useEntitlements.ts",
           "operation": "modify",
-          "description": "Add a theme-consistent active nav item style (neon border/underline/glow) that remains legible in the premium dark theme."
+          "description": "If necessary, expose a small helper shape (or reuse existing entitlements fields) so OutputSection can reliably determine hdExport and watermarkDownloads at download time without introducing any new auth system. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-136",
-      "summary": "Add a thin, top-of-viewport scroll progress indicator with WishMint gradient and smooth animation.",
+      "id": "REQ-10",
+      "summary": "Add premium-gated Coming Soon UI items for “Video invitation option” and “Voice message card option” with safe click behavior (no mic/camera/media).",
       "acceptanceCriteria": [
-        "A thin progress bar is rendered at the top edge of the viewport and remains visible while scrolling.",
-        "The progress bar fill reflects scroll progress from 0% (top) to 100% (bottom).",
-        "The fill animates smoothly and uses a purple/green gradient consistent with the existing theme."
+        "The UI shows \"Video invitation\" and \"Voice message\" as premium/coming-soon capabilities without broken links or dead-end flows.",
+        "Clicking these items explains they are coming soon and does not attempt to access microphone/camera or upload media."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/hooks/useScrollProgress.ts",
-          "operation": "create",
-          "description": "Create a hook that computes scroll progress (0..1) for the main document using requestAnimationFrame-driven scroll/resize listeners for smooth updates and minimal jank."
+          "path": "frontend/src/features/premiumCardDesigner/ComingSoonTiles.tsx",
+          "operation": "modify",
+          "description": "Update Coming Soon tiles to include explicit items labeled \"Video invitation\" and \"Voice message\" and ensure they are presented as premium/coming-soon capabilities. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/navigation/ScrollProgressBar.tsx",
+          "path": "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
           "operation": "create",
-          "description": "Create a thin fixed progress bar component at the very top of the viewport that renders a WishMint purple/green gradient fill and animates smoothly based on useScrollProgress; respect reduced-motion preferences. Use shadcn-ui primitives only if helpful. Verify the component's usage instructions before implementing."
+          "description": "Add a small premium-area UI component that lists \"Video invitation\" and \"Voice message\" as Coming Soon and on click shows an explanatory dialog/toast; do not invoke microphone/camera APIs or any upload flow. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Wire PremiumComingSoonActions into the Prompt Mode premium area (near export/premium actions) and gate its visibility behind premium UI rules while remaining non-breaking for Quick Form Mode. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Update Output section copy/structure to be neutral for Prompt Mode while preserving existing birthday-pack presentation for Quick Form Mode.",
+      "acceptanceCriteria": [
+        "When outputs are generated via Prompt Mode, the Output section uses neutral language (e.g., \"Your Card\" / \"Your Invitation\") and does not label the result as birthday-only.",
+        "When outputs are generated via Quick Form Mode, the Output section continues to display the existing birthday pack labels and behavior.",
+        "Switching modes and generating in each mode shows the correct corresponding output framing without stale text from the other mode."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Make OutputSection render mode-specific headings and output structure: keep \"Your Birthday Pack\" and 5-output grid for Quick Form, but show neutral multi-event copy (e.g., \"Your Card\" / \"Your Invitation\") and Prompt Mode-specific fields (title/message/footer + variations) for Prompt Mode; ensure switching modes doesn’t leave stale labels. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Wire ScrollProgressBar so it renders during the main single-page experience (not in surprise mode / premium designer mode), and ensure its z-index stacks correctly above the page without causing layout shift."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add minimal global styles for the progress bar (height, gradient, transform origin, z-index) and ensure it does not introduce horizontal overflow."
-        }
-      ]
-    },
-    {
-      "id": "REQ-137",
-      "summary": "Add a floating Back to Top button that appears after ~30% scroll and smoothly scrolls to Home, mobile-safe and neon-styled.",
-      "acceptanceCriteria": [
-        "The Back to Top button is hidden near the top of the page and becomes visible after scrolling beyond ~30% of total scroll height.",
-        "Clicking the button smoothly scrolls to the top/home section.",
-        "The button is positioned bottom-right and is visually consistent with the existing neon/glow style.",
-        "On small screens, the button does not cover primary actions/inputs (uses safe spacing and responsive sizing)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
-          "operation": "create",
-          "description": "Create a floating bottom-right Back to Top control that becomes visible after scroll progress >= 0.3, and on click smoothly scrolls to id=\"home\" using the shared offset-aware scroll helper; ensure responsive sizing and safe-area spacing for mobile. Use shadcn-ui Button for consistent interaction states. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Render the FloatingBackToTopButton during the main single-page experience and ensure it does not overlap critical UI (stacking/spacing with the quick action button)."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add utility styles for floating action positioning (safe-area inset padding, max-width constraints, glow) to avoid horizontal overflow and mobile obstruction."
-        }
-      ]
-    },
-    {
-      "id": "REQ-138",
-      "summary": "Add a floating quick action button labeled exactly \"🎂 Create Wish\" that scrolls to the Wish Generator section.",
-      "acceptanceCriteria": [
-        "A floating button labeled exactly \"🎂 Create Wish\" is available and clickable.",
-        "Clicking the button smoothly scrolls to the create-wish section.",
-        "Button placement/sizing is responsive and does not obstruct core content on mobile."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
-          "operation": "create",
-          "description": "Create a floating quick action button labeled exactly \"🎂 Create Wish\" that smoothly scrolls to id=\"create-wish\" using the shared scroll helper; ensure mobile-safe placement (bottom-right with spacing from viewport edges and other floating actions). Use shadcn-ui Button for consistent styling. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Render FloatingCreateWishButton alongside other navigation affordances, ensuring it is present in the main single-page experience and does not block key inputs on mobile."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add/adjust floating action container styles so multiple floating buttons can stack without overflow (responsive sizing + safe-area spacing)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-139",
-      "summary": "Optimize navigation for mobile by collapsing nav items into a hamburger menu with smooth scrolling and no pointer-events issues.",
-      "acceptanceCriteria": [
-        "On mobile widths, the navbar displays a hamburger menu instead of the full horizontal menu.",
-        "Opening the hamburger menu shows the full list of nav items (Home, Create Wish, Templates, Marketplace, Pricing, Dashboard, FAQ).",
-        "Selecting an item closes the menu and smoothly scrolls to the target section.",
-        "No overlay layers block pointer events on underlying content when the menu is closed."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/navigation/StickyNavbar.tsx",
-          "operation": "modify",
-          "description": "Implement responsive behavior: show full horizontal nav on desktop and a hamburger-triggered menu on mobile; ensure selecting a menu item closes the menu and performs offset-aware smooth scrolling. Use shadcn-ui Button (and optionally a shadcn-ui menu/sheet primitive if already present) for accessible interactions. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add mobile menu layout styles (backdrop/overlay only when open, correct z-index, pointer-events toggling when closed) ensuring underlying page remains interactive when the menu is closed and no horizontal overflow is introduced."
-        }
-      ]
-    },
-    {
-      "id": "REQ-140",
-      "summary": "Ensure new navigation UI uses English text, matches existing premium dark + neon gradient styling, respects reduced motion, and does not regress layouts or introduce horizontal overflow.",
-      "acceptanceCriteria": [
-        "All new labels/tooltips/toasts/messages related to navigation are in English.",
-        "The new navigation elements visually match the existing WishMint premium dark + neon gradient style.",
-        "No new horizontal scrolling is introduced by the navigation UI (mobile and desktop)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/navigation/StickyNavbar.tsx",
-          "operation": "modify",
-          "description": "Audit all user-facing text introduced by navbar/mobile menu for English-only labels; ensure styling aligns with the existing premium dark + neon gradient theme and includes accessible aria-labels in English. Use shadcn-ui components for consistent typography/focus states where applicable. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/navigation/ScrollProgressBar.tsx",
-          "operation": "modify",
-          "description": "Ensure progress bar animation respects reduced-motion preferences (minimize/disable animated transitions when reduced motion is enabled) and uses theme-consistent gradient styling."
-        },
-        {
-          "path": "frontend/src/components/navigation/FloatingBackToTopButton.tsx",
-          "operation": "modify",
-          "description": "Ensure Back to Top button uses English aria-label/title text (if any), respects reduced-motion, and remains mobile-safe (no overlap with primary inputs). Use shadcn-ui Button where applicable. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/components/navigation/FloatingCreateWishButton.tsx",
-          "operation": "modify",
-          "description": "Ensure quick action button styling matches neon/glow theme and remains mobile-safe; keep label exactly \"🎂 Create Wish\" and ensure any accessibility text is English. Use shadcn-ui Button where applicable. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add final guardrails to prevent horizontal overflow from fixed/sticky/floating UI (e.g., clamp widths to viewport, use safe-area insets, and avoid negative margins) while preserving existing section layouts."
+          "description": "Ensure the app state distinguishes whether current outputs are from Quick Form or Prompt Mode so OutputSection can render correct framing and avoid stale text when switching modes. Verify the component's usage instructions before implementing."
         }
       ]
     }
