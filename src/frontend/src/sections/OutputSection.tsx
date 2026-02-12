@@ -13,6 +13,7 @@ import { exportCardToCanvas } from '../features/cardExport/canvasExport';
 import { generateCardVariations } from '../features/cardExport/generateCardVariations';
 import { CardVariationsCarousel } from '../features/cardExport/components/CardVariationsCarousel';
 import { GenerationConfetti } from '../features/cardExport/components/GenerationConfetti';
+import { PromptVariationsCarousel } from '../features/promptStudio/components/PromptVariationsCarousel';
 import { PromptAnalysisSummary } from '../features/promptStudio/components/PromptAnalysisSummary';
 import { PromptModeEditorPanel } from '../features/promptStudio/components/PromptModeEditorPanel';
 import { PremiumComingSoonActions } from '../features/promptStudio/components/PremiumComingSoonActions';
@@ -47,7 +48,7 @@ export function OutputSection() {
   const { entitlements, isAuthenticated: hasAuth } = useEntitlements();
   const hasGenerated = useRef(false);
 
-  const isPromptMode = creationMode === 'prompt-studio' && promptStudioState.content !== null;
+  const isPromptMode = creationMode === 'prompt-studio' && promptStudioState.aiVariations !== null;
   const isQuickFormMode = creationMode === 'quick-form' && outputs !== null;
 
   // Auto-select theme based on event type for Prompt Mode
@@ -69,17 +70,15 @@ export function OutputSection() {
         hasGenerated.current = true;
         setTimeout(() => setShowConfetti(false), 3000);
       }
-    } else if (isPromptMode && promptStudioState.content) {
-      generatePromptModePreviews();
-      
-      // Show confetti
+    } else if (isPromptMode && promptStudioState.aiVariations) {
+      // Show confetti for prompt mode
       if (!hasGenerated.current || promptStudioState.regenerateCounter > 0) {
         setShowConfetti(true);
         hasGenerated.current = true;
         setTimeout(() => setShowConfetti(false), 3000);
       }
     }
-  }, [outputs, selectedTheme, selectedTemplate, isPromptMode, promptStudioState.content, promptStudioState.regenerateCounter]);
+  }, [outputs, selectedTheme, selectedTemplate, isPromptMode, promptStudioState.aiVariations, promptStudioState.regenerateCounter]);
 
   const generatePreviews = async () => {
     if (!outputs) return;
@@ -106,15 +105,13 @@ export function OutputSection() {
     const variations = generateCardVariations();
     const previews: string[] = [];
     
+    const cardText = `${promptStudioState.content.title}\n\n${promptStudioState.content.message}`;
+    
     for (const variation of variations) {
       const canvas = await exportCardToCanvas(
-        promptStudioState.content.message,
+        cardText,
         selectedTheme,
-        variation,
-        {
-          title: promptStudioState.content.title,
-          footer: promptStudioState.content.footer,
-        }
+        variation
       );
       previews.push(canvas.toDataURL('image/png'));
     }
@@ -124,86 +121,47 @@ export function OutputSection() {
   };
 
   const handleCopyAll = async () => {
-    if (!outputs) return;
+    let success = false;
+    if (isQuickFormMode && outputs) {
+      const formatted = formatBirthdayPack(outputs);
+      success = await copyToClipboard(formatted);
+    } else if (isPromptMode && promptStudioState.aiVariations) {
+      const currentVariation = promptStudioState.aiVariations[promptStudioState.selectedVariationIndex];
+      const text = `${currentVariation.title}\n\n${currentVariation.mainText}\n\n${currentVariation.footerText}`;
+      success = await copyToClipboard(text);
+    }
     
-    const text = formatBirthdayPack(outputs);
-    await copyToClipboard(text);
-    setCopied(true);
-    toast.success('Copied to clipboard!');
-    setTimeout(() => setCopied(false), 2000);
+    if (success) {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
   };
 
   const handleWhatsAppShare = () => {
-    if (!outputs) return;
-    
-    const text = formatBirthdayPack(outputs);
-    const url = createWhatsAppLink(text);
-    window.open(url, '_blank');
+    if (isQuickFormMode && outputs) {
+      const formatted = formatBirthdayPack(outputs);
+      const url = createWhatsAppLink(formatted);
+      window.open(url, '_blank');
+    } else if (isPromptMode && promptStudioState.aiVariations) {
+      const currentVariation = promptStudioState.aiVariations[promptStudioState.selectedVariationIndex];
+      const text = `${currentVariation.title}\n\n${currentVariation.mainText}\n\n${currentVariation.footerText}`;
+      const url = createWhatsAppLink(text);
+      window.open(url, '_blank');
+    }
   };
 
   const handleDownloadCard = async () => {
-    if (!isAuthenticated) {
-      toast.error('Please sign in to download cards');
-      return;
-    }
-
+    if (!cardPreviews[selectedVariation]) return;
+    
     setIsExporting(true);
     
     try {
-      const variation = generateCardVariations()[selectedVariation];
-      
-      // Determine export options based on entitlements
-      const exportOptions = {
-        resolution: entitlements.hdExport ? 1080 : 720,
-        watermark: !entitlements.hdExport,
-      };
-      
-      let canvas: HTMLCanvasElement;
-      
-      if (isPromptMode && promptStudioState.content) {
-        canvas = await exportCardToCanvas(
-          promptStudioState.content.message,
-          selectedTheme,
-          variation,
-          {
-            title: promptStudioState.content.title,
-            footer: promptStudioState.content.footer,
-            ...exportOptions,
-          }
-        );
-      } else if (outputs) {
-        canvas = await exportCardToCanvas(
-          outputs.mainWish,
-          selectedTheme,
-          variation,
-          exportOptions
-        );
-      } else {
-        return;
-      }
-      
-      // Download
       const link = document.createElement('a');
       link.download = `wishmint-card-${Date.now()}.png`;
-      link.href = canvas.toDataURL('image/png');
+      link.href = cardPreviews[selectedVariation];
       link.click();
-      
-      toast.success('Card downloaded!');
-      
-      // Show upgrade prompt for free users
-      if (!entitlements.hdExport) {
-        setTimeout(() => {
-          toast.info('Upgrade to Pro for HD downloads without watermark', {
-            action: {
-              label: 'Upgrade',
-              onClick: () => openPricingModal('pro'),
-            },
-          });
-        }, 1000);
-      }
     } catch (error) {
-      console.error('Export error:', error);
-      toast.error('Failed to download card');
+      console.error('Download error:', error);
     } finally {
       setIsExporting(false);
     }
@@ -214,19 +172,29 @@ export function OutputSection() {
     setUserOverrodeTheme(true);
   };
 
-  const handleToneChange = (tone: ToneType) => {
+  const handleToneChange = async (newTone: ToneType) => {
     if (!promptStudioState.analysis) return;
+    
+    setIsRegenerating(true);
+    
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    
+    const newContent = regenerateCardContent(promptStudioState.analysis, newTone);
     
     setPromptStudioState({
       ...promptStudioState,
-      selectedTone: tone,
+      content: newContent,
+      selectedTone: newTone,
     });
+    
+    setIsRegenerating(false);
   };
 
   const handleRegenerateText = async () => {
     if (!promptStudioState.analysis) return;
     
     setIsRegenerating(true);
+    
     await new Promise((resolve) => setTimeout(resolve, 500));
     
     const newContent = regenerateCardContent(
@@ -240,28 +208,24 @@ export function OutputSection() {
     });
     
     setIsRegenerating(false);
-    toast.success('Text regenerated!');
   };
 
-  const handleRegenerateDesigns = async () => {
-    setIsRegenerating(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
+  const handleContentEdit = (field: 'title' | 'message' | 'footer', value: string) => {
+    if (!promptStudioState.content) return;
     
     setPromptStudioState({
       ...promptStudioState,
-      regenerateCounter: promptStudioState.regenerateCounter + 1,
+      content: {
+        ...promptStudioState.content,
+        [field]: value,
+      },
     });
-    
-    setIsRegenerating(false);
-    toast.success('Designs regenerated!');
   };
 
-  const handleContentChange = (newContent: typeof promptStudioState.content) => {
-    if (!newContent) return;
-    
+  const handlePromptVariationSelect = (index: number) => {
     setPromptStudioState({
       ...promptStudioState,
-      content: newContent,
+      selectedVariationIndex: index,
     });
   };
 
@@ -270,189 +234,195 @@ export function OutputSection() {
   }
 
   return (
-    <section id="output-section" className="scroll-mt-16 w-full py-16 px-4 sm:px-6 lg:px-8" style={{ backgroundColor: 'oklch(var(--background))' }}>
-      <GenerationConfetti trigger={showConfetti} />
-      
+    <section id="output-section" className="scroll-mt-16 w-full py-16 px-4 sm:px-6 lg:px-8">
       <Reveal className="max-w-6xl mx-auto space-y-8">
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl sm:text-4xl font-bold">
-            {isPromptMode ? 'Your Card' : 'Your Birthday Pack'}
-          </h2>
-          <p className="text-lg" style={{ color: 'oklch(var(--text-body))' }}>
-            {isPromptMode 
-              ? 'Your AI-generated card is ready!'
-              : 'Your personalized birthday wishes are ready!'}
-          </p>
-        </div>
-
+        <GenerationConfetti trigger={showConfetti} />
+        
         {isQuickFormMode && outputs && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              <Card className="glass-card border-border/40 rounded-xl hover-glow">
-                <CardHeader>
-                  <CardTitle className="text-lg">Main Wish</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm whitespace-pre-wrap" style={{ color: 'oklch(var(--text-body))' }}>
-                    {outputs.mainWish}
-                  </p>
-                </CardContent>
-              </Card>
+            {/* Quick Form Mode Output */}
+            <Card className="glass-card border-border/40 rounded-2xl">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">Your Birthday Pack</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Main Birthday Wish</Label>
+                    <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                      <p className="whitespace-pre-wrap">{outputs.mainWish}</p>
+                    </div>
+                  </div>
 
-              <Card className="glass-card border-border/40 rounded-xl hover-glow">
-                <CardHeader>
-                  <CardTitle className="text-lg">WhatsApp Short</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm whitespace-pre-wrap" style={{ color: 'oklch(var(--text-body))' }}>
-                    {outputs.whatsappShort}
-                  </p>
-                </CardContent>
-              </Card>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">WhatsApp Short Message</Label>
+                    <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                      <p className="whitespace-pre-wrap">{outputs.whatsappShort}</p>
+                    </div>
+                  </div>
 
-              <Card className="glass-card border-border/40 rounded-xl hover-glow">
-                <CardHeader>
-                  <CardTitle className="text-lg">Instagram Caption</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm whitespace-pre-wrap" style={{ color: 'oklch(var(--text-body))' }}>
-                    {outputs.instagramCaption}
-                  </p>
-                </CardContent>
-              </Card>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Instagram Caption</Label>
+                    <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                      <p className="whitespace-pre-wrap">{outputs.instagramCaption}</p>
+                    </div>
+                  </div>
 
-              <Card className="glass-card border-border/40 rounded-xl hover-glow">
-                <CardHeader>
-                  <CardTitle className="text-lg">Mini Speech</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm whitespace-pre-wrap" style={{ color: 'oklch(var(--text-body))' }}>
-                    {outputs.miniSpeech}
-                  </p>
-                </CardContent>
-              </Card>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Mini Speech</Label>
+                    <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                      <p className="whitespace-pre-wrap">{outputs.miniSpeech}</p>
+                    </div>
+                  </div>
 
-              <Card className="glass-card border-border/40 rounded-xl hover-glow">
-                <CardHeader>
-                  <CardTitle className="text-lg">Hashtags</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-sm" style={{ color: 'oklch(var(--text-body))' }}>
-                    {outputs.hashtags}
-                  </p>
-                </CardContent>
-              </Card>
-            </div>
+                  <div className="space-y-2">
+                    <Label className="text-sm font-semibold">Hashtags</Label>
+                    <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                      <p className="whitespace-pre-wrap">{outputs.hashtags}</p>
+                    </div>
+                  </div>
+                </div>
 
-            <div className="flex flex-wrap gap-3 justify-center">
-              <Button onClick={handleCopyAll} variant="outline" className="gap-2">
-                {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
-                {copied ? 'Copied!' : 'Copy All'}
-              </Button>
-              <Button onClick={handleWhatsAppShare} variant="outline" className="gap-2">
-                <Share2 className="w-4 h-4" />
-                Share on WhatsApp
-              </Button>
-            </div>
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <Button onClick={handleCopyAll} variant="outline" className="flex-1">
+                    {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                    {copied ? 'Copied!' : 'Copy All'}
+                  </Button>
+                  <Button onClick={handleWhatsAppShare} variant="outline" className="flex-1">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share on WhatsApp
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card Preview for Quick Form */}
+            <Card id="card-preview-section" className="glass-card border-border/40 rounded-2xl scroll-mt-16">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">Card Preview</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label>Card Theme</Label>
+                  <Select value={selectedTheme} onValueChange={handleThemeChange}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="luxury">Luxury Black & Gold</SelectItem>
+                      <SelectItem value="cute">Cute Pastel</SelectItem>
+                      <SelectItem value="cinematic">Cinematic Warm</SelectItem>
+                      <SelectItem value="modern">Modern Instagram</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {cardPreviews.length > 0 && (
+                  <>
+                    <CardVariationsCarousel
+                      variations={cardPreviews}
+                      selectedIndex={selectedVariation}
+                      onVariationSelect={setSelectedVariation}
+                    />
+
+                    <Button
+                      onClick={handleDownloadCard}
+                      disabled={isExporting}
+                      className="w-full premium-button"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      {isExporting ? 'Downloading...' : 'Download Card'}
+                    </Button>
+                  </>
+                )}
+              </CardContent>
+            </Card>
           </>
         )}
 
-        {isPromptMode && promptStudioState.analysis && promptStudioState.content && (
-          <div className="space-y-6">
-            <PromptAnalysisSummary analysis={promptStudioState.analysis} />
-            
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              <div className="lg:col-span-2 space-y-4">
-                <Card className="glass-card border-border/40 rounded-xl">
-                  <CardHeader>
-                    <CardTitle>Card Preview</CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {cardPreviews.length > 0 && (
-                      <CardVariationsCarousel
-                        variations={cardPreviews}
-                        selectedIndex={selectedVariation}
-                        onVariationSelect={setSelectedVariation}
-                      />
-                    )}
-                  </CardContent>
-                </Card>
-              </div>
-              
-              <div className="space-y-4">
-                <Card className="glass-card border-border/40 rounded-xl">
-                  <CardHeader>
-                    <CardTitle>Customize</CardTitle>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <PromptModeEditorPanel
-                      content={promptStudioState.content}
-                      selectedTone={promptStudioState.selectedTone || promptStudioState.analysis.tone}
-                      onContentChange={handleContentChange}
-                      onToneChange={handleToneChange}
-                      onRegenerateText={handleRegenerateText}
-                      onRegenerateDesigns={handleRegenerateDesigns}
-                      isRegenerating={isRegenerating}
-                    />
-                  </CardContent>
-                </Card>
-              </div>
-            </div>
-          </div>
-        )}
-
-        <Card className="glass-card border-border/40 rounded-xl">
-          <CardHeader>
-            <CardTitle>Card Design</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="theme-select">Theme</Label>
-              <Select value={selectedTheme} onValueChange={(value) => handleThemeChange(value as CardTheme)}>
-                <SelectTrigger id="theme-select" className="bg-background/50 border-border/40">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="luxury">Luxury</SelectItem>
-                  <SelectItem value="cute">Cute</SelectItem>
-                  <SelectItem value="cinematic">Cinematic</SelectItem>
-                  <SelectItem value="modern-instagram">Modern Instagram</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            {cardPreviews.length > 0 && (
-              <div className="space-y-4">
-                <CardVariationsCarousel
-                  variations={cardPreviews}
-                  selectedIndex={selectedVariation}
-                  onVariationSelect={setSelectedVariation}
+        {isPromptMode && promptStudioState.aiVariations && (
+          <>
+            {/* Prompt Mode Output */}
+            <Card id="card-preview-section" className="glass-card border-border/40 rounded-2xl scroll-mt-16">
+              <CardHeader>
+                <CardTitle className="text-2xl font-bold text-center">Your AI-Generated Card</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Variation Selector */}
+                <PromptVariationsCarousel
+                  totalVariations={promptStudioState.aiVariations.length}
+                  selectedIndex={promptStudioState.selectedVariationIndex}
+                  onSelectVariation={handlePromptVariationSelect}
                 />
-              </div>
-            )}
 
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Button
-                onClick={handleDownloadCard}
-                disabled={isExporting}
-                className="flex-1 premium-button"
-              >
-                <Download className="w-4 h-4 mr-2" />
-                {isExporting ? 'Exporting...' : 'Download Card Image'}
-              </Button>
-              <Button
-                onClick={openPremiumDesigner}
-                variant="outline"
-                className="flex-1"
-              >
-                <Sparkles className="w-4 h-4 mr-2" />
-                Create Premium Card
-              </Button>
-            </div>
+                {/* Current Variation Display */}
+                {promptStudioState.aiVariations[promptStudioState.selectedVariationIndex] && (
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Title</Label>
+                      <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                        <p className="text-lg font-semibold">
+                          {promptStudioState.aiVariations[promptStudioState.selectedVariationIndex].title}
+                        </p>
+                      </div>
+                    </div>
 
-            {isPromptMode && <PremiumComingSoonActions />}
-          </CardContent>
-        </Card>
+                    {promptStudioState.aiVariations[promptStudioState.selectedVariationIndex].subtitle && (
+                      <div className="space-y-2">
+                        <Label className="text-sm font-semibold">Subtitle</Label>
+                        <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                          <p className="text-sm text-muted-foreground">
+                            {promptStudioState.aiVariations[promptStudioState.selectedVariationIndex].subtitle}
+                          </p>
+                        </div>
+                      </div>
+                    )}
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Main Text</Label>
+                      <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                        <p className="whitespace-pre-wrap">
+                          {promptStudioState.aiVariations[promptStudioState.selectedVariationIndex].mainText}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-sm font-semibold">Footer</Label>
+                      <div className="p-4 rounded-lg bg-background/50 border border-border/40">
+                        <p className="text-sm">
+                          {promptStudioState.aiVariations[promptStudioState.selectedVariationIndex].footerText}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {promptStudioState.aiVariations[promptStudioState.selectedVariationIndex].themeTags.map((tag, index) => (
+                        <span
+                          key={index}
+                          className="px-3 py-1 text-xs rounded-full bg-brand-purple/10 text-brand-purple border border-brand-purple/20"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                <div className="flex flex-col sm:flex-row gap-3 pt-4">
+                  <Button onClick={handleCopyAll} variant="outline" className="flex-1">
+                    {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
+                    {copied ? 'Copied!' : 'Copy Text'}
+                  </Button>
+                  <Button onClick={handleWhatsAppShare} variant="outline" className="flex-1">
+                    <Share2 className="w-4 h-4 mr-2" />
+                    Share on WhatsApp
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          </>
+        )}
       </Reveal>
     </section>
   );

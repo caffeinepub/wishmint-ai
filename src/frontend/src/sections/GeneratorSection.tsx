@@ -6,20 +6,20 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
-import { Sparkles, Shuffle, Wand2 } from 'lucide-react';
+import { Sparkles, Shuffle, Wand2, Loader2 } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { useAppContext } from '../App';
 import { generateBirthdayPack } from '../features/generator/generateBirthdayPack';
 import { randomizeForm } from '../features/generator/randomize';
 import { RELATIONSHIPS, TONES, LANGUAGES, PERSONALITIES } from '../features/generator/constants';
 import { PromptModeInput } from '../features/promptStudio/components/PromptModeInput';
-import { analyzePrompt } from '../features/promptStudio/promptAnalysis';
-import { generateCardContent } from '../features/promptStudio/promptContentGeneration';
+import { generateCardFromPrompt } from '../features/promptStudio/generateCardFromPrompt';
 import { usePrefersReducedMotion } from '../hooks/usePrefersReducedMotion';
+import { toast } from 'sonner';
 import type { GeneratorFormData } from '../features/generator/types';
 
 interface GeneratorSectionProps {
-  nameInputRef?: React.RefObject<HTMLInputElement>;
+  nameInputRef?: React.RefObject<HTMLInputElement | null>;
 }
 
 export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps>(
@@ -34,6 +34,7 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
       setPromptStudioState,
     } = useAppContext();
     const [isGenerating, setIsGenerating] = useState(false);
+    const [promptText, setPromptText] = useState('');
     const prefersReducedMotion = usePrefersReducedMotion();
 
     const handleInputChange = (field: keyof GeneratorFormData, value: string) => {
@@ -69,39 +70,61 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
       }, 100);
     };
 
-    const handlePromptStudioGenerate = async () => {
+    const handlePromptGenerate = async () => {
+      // Validation
+      if (promptText.trim().length < 10) {
+        toast.error('Please describe your card idea (min 10 characters).');
+        return;
+      }
+
+      // Prevent double-click
+      if (isGenerating) {
+        return;
+      }
+
       setIsGenerating(true);
       
-      // Simulate generation delay
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      
-      // Analyze prompt
-      const analysis = analyzePrompt(promptStudioState.prompt);
-      
-      // Generate content
-      const content = generateCardContent(analysis);
-      
-      // Update state
-      setPromptStudioState({
-        ...promptStudioState,
-        analysis,
-        content,
-        selectedTone: analysis.tone,
-        regenerateCounter: promptStudioState.regenerateCounter + 1,
-      });
-      
-      // Clear Quick Form outputs to show Prompt Studio outputs
-      setOutputs(null);
-      
-      setIsGenerating(false);
-
-      // Scroll to output section
-      setTimeout(() => {
-        const outputSection = document.querySelector('#output-section');
-        if (outputSection) {
-          outputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      try {
+        // Call AI generation
+        const response = await generateCardFromPrompt(promptText);
+        
+        // Validate response
+        if (!response.variations || response.variations.length !== 3) {
+          throw new Error('Invalid response format');
         }
-      }, 100);
+
+        // Validate each variation has required fields
+        for (const variation of response.variations) {
+          if (!variation.title || !variation.mainText || !variation.footerText) {
+            throw new Error('Missing required fields in variation');
+          }
+        }
+
+        // Update state with 3 variations
+        setPromptStudioState({
+          ...promptStudioState,
+          prompt: promptText,
+          aiVariations: response.variations,
+          selectedVariationIndex: 0,
+          regenerateCounter: promptStudioState.regenerateCounter + 1,
+        });
+        
+        // Clear Quick Form outputs to show Prompt Studio outputs
+        setOutputs(null);
+        
+        // Auto-scroll to Card Preview
+        setTimeout(() => {
+          const cardPreview = document.querySelector('#card-preview-section');
+          if (cardPreview) {
+            cardPreview.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        }, 100);
+      } catch (error) {
+        console.error('Card generation error:', error);
+        toast.error('Couldn\'t generate card. Please try again.');
+      } finally {
+        setIsGenerating(false);
+      }
     };
 
     return (
@@ -261,12 +284,17 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                     Describe your card or invitation idea and let AI create it for you
                   </p>
                   
-                  <PromptModeInput
-                    value={promptStudioState.prompt}
-                    onChange={(value) => setPromptStudioState({ ...promptStudioState, prompt: value })}
-                    onGenerate={handlePromptStudioGenerate}
-                    isGenerating={isGenerating}
-                  />
+                  <form onSubmit={(e) => {
+                    e.preventDefault();
+                    handlePromptGenerate();
+                  }}>
+                    <PromptModeInput
+                      value={promptText}
+                      onChange={setPromptText}
+                      onGenerate={handlePromptGenerate}
+                      isGenerating={isGenerating}
+                    />
+                  </form>
                 </>
               )}
             </CardContent>

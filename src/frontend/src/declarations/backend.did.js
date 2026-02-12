@@ -111,6 +111,24 @@ export const UserAuth = IDL.Record({
   'lastLoginAt' : IDL.Int,
   'createdAt' : IDL.Int,
 });
+export const http_header = IDL.Record({
+  'value' : IDL.Text,
+  'name' : IDL.Text,
+});
+export const http_request_result = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
+});
+export const TransformationInput = IDL.Record({
+  'context' : IDL.Vec(IDL.Nat8),
+  'response' : http_request_result,
+});
+export const TransformationOutput = IDL.Record({
+  'status' : IDL.Nat,
+  'body' : IDL.Vec(IDL.Nat8),
+  'headers' : IDL.Vec(http_header),
+});
 
 export const idlService = IDL.Service({
   '_caffeineStorageBlobIsLive' : IDL.Func(
@@ -248,6 +266,11 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'saveTemplate' : IDL.Func([IDL.Nat], [], []),
   'subscribeToCreator' : IDL.Func([IDL.Principal], [], []),
+  'transform' : IDL.Func(
+      [TransformationInput],
+      [TransformationOutput],
+      ['query'],
+    ),
   'updatePaymentRequestStatus' : IDL.Func([IDL.Text, PaymentStatus], [], []),
   'updatePaymentStatus' : IDL.Func([IDL.Text, PaymentStatus], [], []),
   'updateSubscriptionStatus' : IDL.Func(
@@ -368,6 +391,21 @@ export const idlFactory = ({ IDL }) => {
     'provider' : IDL.Text,
     'lastLoginAt' : IDL.Int,
     'createdAt' : IDL.Int,
+  });
+  const http_header = IDL.Record({ 'value' : IDL.Text, 'name' : IDL.Text });
+  const http_request_result = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
+  });
+  const TransformationInput = IDL.Record({
+    'context' : IDL.Vec(IDL.Nat8),
+    'response' : http_request_result,
+  });
+  const TransformationOutput = IDL.Record({
+    'status' : IDL.Nat,
+    'body' : IDL.Vec(IDL.Nat8),
+    'headers' : IDL.Vec(http_header),
   });
   
   return IDL.Service({
@@ -526,6 +564,11 @@ export const idlFactory = ({ IDL }) => {
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
     'saveTemplate' : IDL.Func([IDL.Nat], [], []),
     'subscribeToCreator' : IDL.Func([IDL.Principal], [], []),
+    'transform' : IDL.Func(
+        [TransformationInput],
+        [TransformationOutput],
+        ['query'],
+      ),
     'updatePaymentRequestStatus' : IDL.Func([IDL.Text, PaymentStatus], [], []),
     'updatePaymentStatus' : IDL.Func([IDL.Text, PaymentStatus], [], []),
     'updateSubscriptionStatus' : IDL.Func(

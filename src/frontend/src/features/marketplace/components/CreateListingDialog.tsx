@@ -9,103 +9,88 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertCircle, Crown } from 'lucide-react';
 import { useCreateMarketplaceListing } from '../hooks/useCreateMarketplaceListing';
 import { useInternetIdentity } from '../../../hooks/useInternetIdentity';
-import { useEntitlements } from '../../subscription/useEntitlements';
 import { useAppContext } from '../../../App';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AlertCircle } from 'lucide-react';
 
 interface CreateListingDialogProps {
   open: boolean;
-  onClose: () => void;
+  onOpenChange: (open: boolean) => void;
 }
 
-export function CreateListingDialog({ open, onClose }: CreateListingDialogProps) {
-  const { identity } = useInternetIdentity();
-  const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
-  const { entitlements } = useEntitlements();
-  const { openPricingModal } = useAppContext();
-  const createMutation = useCreateMarketplaceListing();
+type ContentType = 'template' | 'sticker';
 
+export function CreateListingDialog({ open, onOpenChange }: CreateListingDialogProps) {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [price, setPrice] = useState('');
-  const [contentType, setContentType] = useState<'template' | 'sticker'>('template');
+  const [contentType, setContentType] = useState<ContentType>('template');
+  const [contentId, setContentId] = useState('1');
 
-  const canCreateListing = isAuthenticated && entitlements.creatorMarketplace;
+  const { mutate: createListing, isPending } = useCreateMarketplaceListing();
+  const { identity } = useInternetIdentity();
+  const { openPricingModal } = useAppContext();
+
+  const isAuthenticated = !!identity;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canCreateListing) return;
 
-    const priceNum = parseFloat(price);
-    if (isNaN(priceNum) || priceNum <= 0) {
+    if (!isAuthenticated) {
       return;
     }
 
-    const contentTypeParam = contentType === 'template'
-      ? { __kind__: 'template' as const, template: BigInt(1) }
-      : { __kind__: 'sticker' as const, sticker: BigInt(1) };
+    const priceNum = parseInt(price, 10);
+    if (isNaN(priceNum) || priceNum < 0) {
+      alert('Please enter a valid price');
+      return;
+    }
 
-    createMutation.mutate(
-      { title, description, price: BigInt(Math.floor(priceNum)), contentType: contentTypeParam },
+    const contentIdNum = BigInt(contentId);
+
+    createListing(
+      {
+        title,
+        description,
+        price: BigInt(priceNum),
+        contentType:
+          contentType === 'template'
+            ? { __kind__: 'template', template: contentIdNum }
+            : { __kind__: 'sticker', sticker: contentIdNum },
+      },
       {
         onSuccess: () => {
           setTitle('');
           setDescription('');
           setPrice('');
           setContentType('template');
-          onClose();
+          setContentId('1');
+          onOpenChange(false);
         },
       }
     );
   };
 
-  const handleClose = () => {
-    if (!createMutation.isPending) {
-      setTitle('');
-      setDescription('');
-      setPrice('');
-      setContentType('template');
-      onClose();
-    }
-  };
-
   return (
-    <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="max-w-lg">
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Create Marketplace Listing</DialogTitle>
           <DialogDescription>
-            List your template or sticker for sale
+            Share your templates and stickers with the community
           </DialogDescription>
         </DialogHeader>
 
         {!isAuthenticated ? (
-          <Alert className="bg-neon-green/10 border-neon-green/20">
-            <AlertCircle className="h-4 w-4 text-neon-green" />
-            <AlertDescription className="text-sm">
-              Please sign in to create a listing and start selling your designs.
-            </AlertDescription>
-          </Alert>
-        ) : !canCreateListing ? (
-          <Alert className="bg-neon-purple/10 border-neon-purple/20">
-            <Crown className="h-4 w-4 text-neon-purple" />
-            <AlertDescription className="text-sm">
-              Creating marketplace listings requires Creator plan.{' '}
-              <button
-                onClick={() => {
-                  handleClose();
-                  openPricingModal('creator');
-                }}
-                className="underline font-semibold hover:text-neon-purple"
-              >
-                Upgrade now
-              </button>
+          <Alert>
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              Please sign in to create marketplace listings
             </AlertDescription>
           </Alert>
         ) : (
@@ -114,17 +99,16 @@ export function CreateListingDialog({ open, onClose }: CreateListingDialogProps)
               <Label htmlFor="listing-title">Title</Label>
               <Input
                 id="listing-title"
-                placeholder="Give your listing a descriptive title"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
+                placeholder="e.g., Elegant Birthday Template"
                 required
-                disabled={createMutation.isPending}
               />
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="listing-type">Type</Label>
-              <Select value={contentType} onValueChange={(v) => setContentType(v as typeof contentType)} disabled={createMutation.isPending}>
+              <Label htmlFor="listing-type">Content Type</Label>
+              <Select value={contentType} onValueChange={(value) => setContentType(value as ContentType)}>
                 <SelectTrigger id="listing-type">
                   <SelectValue />
                 </SelectTrigger>
@@ -140,13 +124,11 @@ export function CreateListingDialog({ open, onClose }: CreateListingDialogProps)
               <Input
                 id="listing-price"
                 type="number"
-                min="0"
-                step="1"
-                placeholder="49"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
+                placeholder="49"
+                min="0"
                 required
-                disabled={createMutation.isPending}
               />
             </div>
 
@@ -154,31 +136,33 @@ export function CreateListingDialog({ open, onClose }: CreateListingDialogProps)
               <Label htmlFor="listing-description">Description</Label>
               <Textarea
                 id="listing-description"
-                placeholder="Describe what makes your design unique and worth purchasing"
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
-                required
+                placeholder="Describe your template or sticker..."
                 rows={4}
-                disabled={createMutation.isPending}
+                required
               />
             </div>
 
+            <Alert className="bg-brand-purple/10 border-brand-purple/30">
+              <AlertDescription className="text-sm">
+                Creating marketplace listings requires a Creator plan.{' '}
+                <button
+                  type="button"
+                  onClick={() => openPricingModal()}
+                  className="underline font-semibold hover:text-brand-purple"
+                >
+                  Upgrade now
+                </button>
+              </AlertDescription>
+            </Alert>
+
             <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleClose}
-                disabled={createMutation.isPending}
-              >
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button
-                type="submit"
-                disabled={createMutation.isPending || !title || !description || !price}
-                className="bg-gradient-to-r from-neon-green to-neon-purple hover:opacity-90"
-              >
-                {createMutation.isPending && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-                Create Listing
+              <Button type="submit" disabled={isPending}>
+                {isPending ? 'Creating...' : 'Create Listing'}
               </Button>
             </DialogFooter>
           </form>

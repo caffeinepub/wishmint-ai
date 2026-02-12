@@ -1,63 +1,70 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T20:43:04.625Z",
-  "summary": "Diff implements a new Prompt Studio mode with prompt input + examples, deterministic prompt analysis, local/rule-based content generation (title/message/footer with WishMint branding), a detected-style UI summary, an editor panel (edit text + tone + regenerate), event→theme auto-recommendation, and 3 generated variation params. Some acceptance criteria appear only partially covered or not evidenced (notably premium export gating/watermark+resolution, premium-only Coming Soon gating, and ensuring variations differ in typography/color).",
+  "generatedAt": "2026-02-12T21:41:54.768Z",
+  "summary": "Sidebar/mobile navigation was updated to use button click handlers that call smoothScrollToAnchor (with reduced-motion support) and close the mobile sheet, and the scroll utility was updated to account for sticky-header height. However, the diff evidence does not confirm that the required in-page section ID \"create-wish\" exists exactly once on the landing page, nor that all required sections have the consistent scroll margin.",
   "missing_requirements": [
     {
-      "id": "REQ-6",
-      "requirement": "Prompt Mode renders 3 unique card design variations with different layout compositions and different typography/color treatments (not just minor offsets), maintaining strict hierarchy and preventing overlap.",
-      "reason": "While 3 variation parameter sets are generated, the diff evidence only shows changes in decorationOffset/vignetteIntensity/glowIntensity/layoutVariant. No evidence that typography pairings or color treatments change per variation (as required), nor evidence that layoutVariant is actually applied in rendering logic.",
+      "id": "REQ-1",
+      "requirement": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
+      "reason": "The diff shows sections with ids home (via summary), templates, marketplace, pricing, dashboard, and faq, but provides no evidence of any section element with id=\"create-wish\", nor evidence that there is exactly one element per required ID across the document.",
       "evidence": [
-        "frontend/src/features/cardExport/generateCardVariations.ts",
-        "frontend/src/features/cardExport/canvasExport.ts (truncated)"
+        "frontend-file-summaries.txt (HeroSection.tsx mentions id=\"home\"; no mention of create-wish)",
+        "frontend/src/sections/TemplatesSection.tsx (id=\"templates\")",
+        "frontend/src/sections/MarketplaceSection.tsx (id=\"marketplace\")",
+        "frontend/src/sections/PricingSection.tsx (id=\"pricing\")",
+        "frontend/src/sections/DashboardSection.tsx (id=\"dashboard\")",
+        "frontend/src/sections/FaqSection.tsx (id=\"faq\")"
       ]
     },
     {
-      "id": "REQ-9",
-      "requirement": "Apply premium export rules to Prompt Mode downloads: free users get limited-resolution export and/or watermark; premium users get HD export and watermark removal; anonymous/demo download still requires sign-in; reuse existing entitlements.",
-      "reason": "Although canvas export supports options for resolution and watermark and OutputSection imports/useEntitlements, the diff summary does not show download/export logic that conditionally sets resolution/watermark based on entitlements for Prompt Mode, or preserves the sign-in gating for anonymous users.",
+      "id": "REQ-4",
+      "requirement": "Apply a consistent safe scroll margin to all main sections targeted by sidebar navigation so headings/content are visible below the sticky header after navigation.",
+      "reason": "Several sections shown include className=\"scroll-mt-16\", but the diff does not provide evidence for the \"create-wish\" target section having the same scroll margin (and the create-wish section itself is not evidenced).",
       "evidence": [
-        "frontend/src/features/cardExport/canvasExport.ts (truncated)",
-        "frontend/src/sections/OutputSection.tsx (truncated)"
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "requirement": "Add UI placeholders for Video invitation option and Voice message card option in the premium area as Coming Soon items gated behind premium.",
-      "reason": "The Coming Soon buttons/toast are implemented, but there is no evidence they are gated behind premium/entitlements (i.e., only shown in premium area or disabled/hidden for non-premium users).",
-      "evidence": [
-        "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
-        "frontend/src/sections/OutputSection.tsx (truncated)"
+        "frontend/src/sections/TemplatesSection.tsx",
+        "frontend/src/sections/MarketplaceSection.tsx",
+        "frontend/src/sections/PricingSection.tsx",
+        "frontend/src/sections/DashboardSection.tsx",
+        "frontend/src/sections/FaqSection.tsx",
+        "frontend-file-summaries.txt (HeroSection.tsx mentions scroll-mt-16; no evidence for create-wish)"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Broad UI/UX redesign and navigation/section styling changes (hero gradients, pricing cards, legal sections formatting, templates/examples section adjustments, new animation hooks/components) beyond the Prompt Studio feature requirements.",
-      "reason": "These changes are not requested by any REQ-1..REQ-11 items (which focus on Prompt Mode, variations, theming, editing, export gating, and coming-soon placeholders).",
+      "description": "Added React Query-based data fetching/mutations hooks (download history, saved templates, creator earnings, record download, save template).",
+      "reason": "Not requested by the BuildRequest (request is strictly about in-page sidebar smooth scrolling and header offset).",
       "evidence": [
-        "frontend-file-summaries.txt (HeroSection/PricingSection/FaqSection/FooterSection/LegalSections/TemplatesSection/ExamplesSection/Reveal/useInView/usePrefersReducedMotion)"
+        "frontend/src/hooks/useQueries.ts"
+      ]
+    },
+    {
+      "description": "Dashboard section behavior expanded to include authenticated/unauthenticated UI and queries for downloads/saved templates/earnings, plus admin panel hooks and an auth entry dialog.",
+      "reason": "Not requested by the BuildRequest; exceeds the scope of a navigation/scroll fix.",
+      "evidence": [
+        "frontend/src/sections/DashboardSection.tsx"
+      ]
+    },
+    {
+      "description": "Marketplace section includes search/filter UI and a create listing dialog flow.",
+      "reason": "Not requested by the BuildRequest; unrelated to sidebar smooth-scroll behavior.",
+      "evidence": [
+        "frontend/src/sections/MarketplaceSection.tsx"
       ]
     }
   ],
-  "confidence": 0.66,
+  "confidence": 0.74,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/App.tsx",
-    "frontend/src/features/cardExport/canvasExport.ts",
-    "frontend/src/features/cardExport/cardTextRules.ts",
-    "frontend/src/features/cardExport/generateCardVariations.ts",
-    "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
-    "frontend/src/features/promptStudio/components/PromptAnalysisSummary.tsx",
-    "frontend/src/features/promptStudio/components/PromptModeEditorPanel.tsx",
-    "frontend/src/features/promptStudio/components/PromptModeInput.tsx",
-    "frontend/src/features/promptStudio/eventThemeMapping.ts",
-    "frontend/src/features/promptStudio/promptAnalysis.ts",
-    "frontend/src/features/promptStudio/promptContentGeneration.ts",
-    "frontend/src/features/promptStudio/types.ts",
-    "frontend/src/sections/GeneratorSection.tsx",
-    "frontend/src/sections/OutputSection.tsx",
+    "frontend/src/components/navigation/StickyNavbar.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/lib/scroll.ts",
+    "frontend/src/sections/DashboardSection.tsx",
+    "frontend/src/sections/FaqSection.tsx",
+    "frontend/src/sections/MarketplaceSection.tsx",
+    "frontend/src/sections/PricingSection.tsx",
+    "frontend/src/sections/TemplatesSection.tsx",
     "project_state.json"
   ]
 }

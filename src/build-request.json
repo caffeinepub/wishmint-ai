@@ -1,221 +1,88 @@
 {
   "kind": "build_request",
-  "title": "Add prompt-based AI Creative Card Studio mode with multi-event card generation, 3 variations, editing, and premium export rules",
+  "title": "Fix sidebar navigation to smooth-scroll to in-page sections (no redirect/reload)",
   "priority": "normal",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Add a new creation mode called \"Create Card With AI Prompt\" that lets users enter a freeform natural-language prompt to generate a card/invitation, while keeping the existing quick form-based birthday generator as a separate \"Quick Form Mode\".",
+      "text": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Keep BOTH systems:\n\n👉 Quick Form Mode (Fast users)\n👉 Prompt Mode (Creative users)\n\nRename feature to:\n\n👉 \"Create Card With AI Prompt\""
+          "Ensure all main sections have correct IDs:\n\nHome → id=\"home\"\nCreate Wish → id=\"create-wish\"\nTemplates → id=\"templates\"\nMarketplace → id=\"marketplace\"\nPricing → id=\"pricing\"\nDashboard → id=\"dashboard\"\nFAQ → id=\"faq\""
         ]
       },
       "acceptanceCriteria": [
-        "The create section offers a clear toggle/segmented control between \"Quick Form Mode\" and \"Create Card With AI Prompt\".",
-        "Quick Form Mode retains the current form UX and continues to generate the existing birthday pack outputs without regressions.",
-        "Prompt Mode presents a single main prompt input and does not require the birthday-specific fields (name/tone/relationship/etc.) to generate a result."
+        "Document contains exactly one element per required section ID: #home, #create-wish, #templates, #marketplace, #pricing, #dashboard, #faq.",
+        "Clicking a navigation item for any of these IDs scrolls to a visible section (no missing target element)."
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement a Prompt Mode input UI with a main textbox placeholder \"Describe your card or invitation idea...\" and a row/grid of clickable example prompts that prefill the textbox.",
+      "text": "Update the sidebar/mobile navigation click handling so clicking any menu item performs in-page smooth scrolling to the target section and does not trigger route navigation, full page reload, or redirect to Home.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Add a main input box:\n\nPlaceholder:\n\"Describe your card or invitation idea...\"\n\nExample prompts displayed below input:\n• Luxury birthday invitation for 50th birthday\n• Cute baby shower invitation\n• Romantic anniversary wish card\n• Elegant wedding invitation"
+          "When a sidebar item is clicked:\n\n• Do NOT redirect to homepage\n• Do NOT reload page\n• Close sidebar menu\n• Smoothly scroll to the selected section",
+          "Remove any sidebar link that uses:\n\n• href=\"/\"\n• href=\"#\"\n• Router navigation that always loads homepage\n\nReplace navigation with in-page scroll behavior."
         ]
       },
       "acceptanceCriteria": [
-        "Prompt Mode shows the placeholder text exactly: \"Describe your card or invitation idea...\".",
-        "At least the 4 provided example prompts are visible and clickable; clicking an example fills the prompt box.",
-        "The Generate action is disabled or shows validation until the prompt contains non-whitespace text."
+        "Sidebar/mobile menu items do not use href=\"/\", href=\"#\", or router navigation for in-page section navigation.",
+        "Clicking any sidebar/mobile menu item keeps the user on the current page (no reload) and does not reset scroll position to the top unless the selected section is Home.",
+        "After clicking a menu item, the sidebar/mobile sheet closes.",
+        "Scrolling to sections uses a smooth animation when prefers-reduced-motion is not enabled."
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Create a prompt analysis step (rule-based, deterministic) that extracts and stores: event type, tone, visual theme keywords, and layout style from the user prompt, and display the detected values in the UI before/with the results.",
+      "text": "Implement/standardize smooth scrolling for sidebar navigation using the existing smoothScrollToAnchor utility and ensure it is the single mechanism used by sidebar navigation for section scrolling.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "AI analyses prompt and detects:\n\n✔ Event type\n✔ Tone\n✔ Theme\n✔ Layout style\n✔ Message format\n\nSystem must automatically detect:\n\n• Event Type\n(Birthday, Wedding, Anniversary, Party, Corporate, Festival, etc.)\n\n• Tone\n(Formal, Romantic, Emotional, Fun, Luxury, Cute)\n\n• Visual Theme\n(Floral, Royal, Minimal, Modern, Cartoon, Elegant, etc.)\n\n• Layout Style\n(Invitation layout, Greeting card layout, Poster layout)"
+          "ADD SMOOTH SCROLL FUNCTION\n\nSidebar clicks must scroll using smooth scroll animation to the selected section."
         ]
       },
       "acceptanceCriteria": [
-        "Given prompts containing obvious keywords (e.g., \"wedding\", \"baby shower\", \"corporate\", \"festival\", \"luxury\", \"cute\", \"formal\"), the app consistently detects and surfaces matching event type/tone/theme/layout values.",
-        "If the prompt is ambiguous, the app chooses sensible defaults and clearly labels them as selected values (not blank).",
-        "Detected values are stored in app state and used downstream by card text generation and theme selection."
+        "Sidebar navigation calls the existing smoothScrollToAnchor(anchorId) for all section targets.",
+        "When the user has prefers-reduced-motion enabled, the scroll behavior becomes non-animated (instant)."
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Generate smart, structured card content from the prompt analysis output, including: (1) title/headline, (2) short readable main message, (3) signature/footer text, and ensure the content is sanitized to avoid instruction-like text.",
+      "text": "Fix sticky-header offset so scrolled-to sections are not hidden behind the sticky header by applying a consistent safe scroll margin to all main sections and ensuring the scroll utility offsets by the sticky header height.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "AI must generate:\n\n✔ Professional message content\n✔ Structured card text hierarchy\n✔ Short readable message\n✔ Signature or footer text"
+          "ADD HEADER OFFSET FIX\n\nBecause of sticky header:\n\nEnsure scroll stops slightly below header by adding safe scroll margin to all sections."
         ]
       },
       "acceptanceCriteria": [
-        "Prompt Mode generation produces a title, message, and footer fields for every result.",
-        "Generated text is short enough to render on a square card without overflow using existing fit/wrap rules (no clipped text).",
-        "Instruction-like content (e.g., \"Prompt:\", \"Instructions:\", \"Generate\") is removed from rendered card text.",
-        "The footer uses consistent branding (e.g., WishMint branding) across variations."
-      ]
-    },
-    {
-      "id": "REQ-5",
-      "text": "Update the card export/preview text formatting logic so it is not hardcoded to birthdays (e.g., remove forced \"Happy Birthday …\" title) and instead uses the analyzed event type + tone to produce an appropriate title/headline and footer for multiple event types (Birthday, Wedding, Anniversary, Party, Corporate, Festival, Graduation, Baby Shower, Love cards).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Not just birthday.\n\nYou Can Support All Card Types\n\nBirthday, Wedding Invitations, Party Invitations, Baby Shower, Love Cards, Graduation, Festival Wishes, Corporate Invitations, Anniversary"
-        ]
-      },
-      "acceptanceCriteria": [
-        "For a wedding prompt, the card title/headline is wedding-appropriate (not birthday-specific).",
-        "For a corporate invitation prompt, the title/headline and wording are corporate-appropriate (not romantic/birthday).",
-        "No user flow in Prompt Mode produces a card preview that contains the literal phrase \"Happy Birthday\" unless the analyzed event type is Birthday."
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "text": "Ensure Prompt Mode renders 3 unique card design variations per generation, with different layout compositions and different typography/color treatments, while obeying strict layout rules: Title section, decorative focus element, short message, footer branding; prevent text overlap/clutter.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "AI generates:\n\n• Wish text\n• Card design\n• 3 variations\n\nCards must follow strict layout rules:\n\n• Title Section\n• Decorative Focus Element\n• Short Emotional Message\n• Footer Branding\n\nPrevent text overlap or clutter.\n\nGenerate:\n\n• 3 unique design variations\n• Different layout compositions\n• Different typography and color treatments"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Exactly 3 variations are generated and viewable (e.g., in the existing carousel) for each Prompt Mode generation.",
-        "Variations differ in composition and appearance beyond just minor decoration offsets (e.g., at least one of: layout variant, typography pairing, color treatment).",
-        "No variation renders overlapping title/message/footer; text remains within safe bounds on 1080×1080 output.",
-        "Variations preserve the same semantic content hierarchy (title/message/footer) for a given generation."
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Add event-adaptive visual theming so decorations and background/ornament choices change based on detected event type (Birthday → balloons/confetti/cake feel; Wedding → floral/gold/elegant ornaments; Corporate → minimal/modern; Baby Shower → cute/pastel).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "EVENT ADAPTIVE THEMES\n\nAutomatically select decorations based on event type:\n\nBirthday → Balloons, confetti, cake\nWedding → Floral, gold, elegant ornaments\nCorporate → Minimal modern layouts\nBaby Shower → Cute pastel illustrations"
-        ]
-      },
-      "acceptanceCriteria": [
-        "When the detected event type changes, the default selected card theme/decoration style changes accordingly without requiring manual selection.",
-        "At least the four event mappings listed (Birthday, Wedding, Corporate, Baby Shower) produce visibly different decoration/background treatments in the preview.",
-        "Users can still manually override the selected theme after auto-selection."
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Add user edit controls for Prompt Mode results: edit generated text fields (title/message/footer), switch theme, change tone, and regenerate designs (keeping the prompt visible/editable).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "USER EDIT CONTROLS\n\nAllow users to:\n\n• Edit generated text\n• Switch themes\n• Change tone\n• Regenerate design"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Users can edit the generated text and immediately see the preview/variations update (or regenerate variations from the edited text).",
-        "Users can change tone via a control; the system re-generates text (and/or styling) consistent with the new tone.",
-        "A \"Regenerate\" action produces a fresh set of 3 variations for the same prompt (without requiring retyping).",
-        "Theme switching continues to work as it does today, but applies to Prompt Mode outputs as well."
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Apply premium export rules to Prompt Mode downloads: Free users get limited-resolution export and/or watermark; Premium users get HD export and watermark removal, reusing the existing entitlements model.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "PREMIUM UPGRADE SYSTEM\n\nFree users:\n• Limited resolution\n• Watermark\n\nPremium users:\n• HD export\n• Extra templates\n• Video invitation option\n• Voice message card option"
-        ]
-      },
-      "acceptanceCriteria": [
-        "If the user is not entitled to HD export, the downloaded image is limited-resolution and includes a visible watermark.",
-        "If the user is entitled to HD export, the downloaded image is 1080×1080 (or higher if already supported) and contains no watermark.",
-        "If the user is anonymous/demo, downloading still requires sign-in (existing behavior preserved).",
-        "Premium gating uses the existing plan entitlements (no new auth system)."
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Add UI placeholders for \"Video invitation option\" and \"Voice message card option\" in the premium area as Coming Soon items gated behind premium (do not implement real video/voice capture or playback).",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Premium users:\n• Video invitation option\n• Voice message card option"
-        ]
-      },
-      "acceptanceCriteria": [
-        "The UI shows \"Video invitation\" and \"Voice message\" as premium/coming-soon capabilities without broken links or dead-end flows.",
-        "Clicking these items explains they are coming soon and does not attempt to access microphone/camera or upload media."
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "text": "Update the Output section copy and structure for Prompt Mode so it is not birthday-pack specific (e.g., replace headings like \"Your Birthday Pack\" with a neutral multi-event label when Prompt Mode is used), while preserving the existing birthday-pack presentation for Quick Form Mode.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Allow users to type natural language prompts and automatically generate professional invitation and wish cards for multiple event types."
-        ]
-      },
-      "acceptanceCriteria": [
-        "When outputs are generated via Prompt Mode, the Output section uses neutral language (e.g., \"Your Card\" / \"Your Invitation\") and does not label the result as birthday-only.",
-        "When outputs are generated via Quick Form Mode, the Output section continues to display the existing birthday pack labels and behavior.",
-        "Switching modes and generating in each mode shows the correct corresponding output framing without stale text from the other mode."
+        "All main sections targeted by sidebar navigation have a consistent scroll margin (e.g., Tailwind scroll-mt-16 or equivalent) so their headings/content are visible below the sticky header after navigation.",
+        "smoothScrollToAnchor offsets scroll position by the sticky header height (or uses an equivalent robust approach) so the section content is not covered by the navbar."
       ]
     }
   ],
   "constraints": [
-    "Frontend must not edit files under frontend/src/components/ui or any paths listed as immutable in SYSTEM_CONTEXT.",
-    "Backend must remain a single Motoko actor in backend/main.mo; only add migration.mo if persistent state schema must change.",
-    "Do not integrate external AI/LLM services (no OpenAI/Anthropic/etc.); implement prompt analysis and content generation locally/rule-based.",
-    "Use English for any user-facing text."
+    "Do not edit files under frontend/src/components/ui (read-only).",
+    "Do not modify frontend/src/hooks/useInternetIdentity.ts(x), frontend/src/hooks/useActor.ts, frontend/src/main.tsx (immutable paths)."
   ],
   "nonGoals": [
-    "Building or integrating a real AI image generator (e.g., DALL·E-style) for card artwork.",
-    "Implementing real-time collaboration, chat, or WebSocket-based features.",
-    "Implementing actual video invitation rendering/export, or voice recording/storage/playback (only Coming Soon UI in this iteration).",
-    "Adding third-party authentication providers beyond Internet Identity."
+    "Add new pages or multi-route navigation for these sections.",
+    "Change the visual design of the sidebar beyond what is required to fix click behavior and closing behavior.",
+    "Backend/canister changes (this is a frontend-only navigation fix)."
   ],
   "imageRequirements": {
     "required": [],

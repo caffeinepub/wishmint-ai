@@ -2,6 +2,8 @@
  * Type definitions for Prompt Studio mode
  */
 
+import type { CardVariation } from './generateCardFromPrompt';
+
 export type EventType = 
   | 'birthday'
   | 'wedding'
@@ -62,6 +64,8 @@ export interface PromptStudioState {
   content: CardContent | null;
   selectedTone: ToneType | null;
   regenerateCounter: number;
+  aiVariations: CardVariation[] | null;
+  selectedVariationIndex: number;
 }
 
 export const EXAMPLE_PROMPTS = [

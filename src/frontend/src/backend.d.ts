@@ -14,10 +14,19 @@ export class ExternalBlob {
     static fromBytes(blob: Uint8Array<ArrayBuffer>): ExternalBlob;
     withUploadProgress(onProgress: (percentage: number) => void): ExternalBlob;
 }
+export interface UserProfile {
+    bio: string;
+    name: string;
+}
 export interface UserAuth {
     provider: string;
     lastLoginAt: bigint;
     createdAt: bigint;
+}
+export interface TransformationOutput {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
 }
 export interface CreatorEarnings {
     totalRevenue: bigint;
@@ -25,10 +34,14 @@ export interface CreatorEarnings {
 }
 export type TemplateId = bigint;
 export type PostId = bigint;
-export interface DownloadRecord {
-    contentId: bigint;
-    contentType: string;
-    timestamp: bigint;
+export interface http_header {
+    value: string;
+    name: string;
+}
+export interface http_request_result {
+    status: bigint;
+    body: Uint8Array;
+    headers: Array<http_header>;
 }
 export interface Subscription {
     status: SubscriptionState;
@@ -56,6 +69,15 @@ export interface MarketplaceListing {
     price: bigint;
 }
 export type ListingId = bigint;
+export interface DownloadRecord {
+    contentId: bigint;
+    contentType: string;
+    timestamp: bigint;
+}
+export interface TransformationInput {
+    context: Uint8Array;
+    response: http_request_result;
+}
 export interface CommunityPost {
     id: PostId;
     title: string;
@@ -88,10 +110,6 @@ export interface SubscriptionStatus {
     plan: PlanType;
     updatedAt: bigint;
     state: SubscriptionState;
-}
-export interface UserProfile {
-    bio: string;
-    name: string;
 }
 export interface SurprisePayload {
     id: string;
@@ -175,6 +193,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     saveTemplate(templateId: bigint): Promise<void>;
     subscribeToCreator(creator: Principal): Promise<void>;
+    transform(input: TransformationInput): Promise<TransformationOutput>;
     updatePaymentRequestStatus(paymentId: string, newStatus: PaymentStatus): Promise<void>;
     updatePaymentStatus(paymentId: string, newStatus: PaymentStatus): Promise<void>;
     updateSubscriptionStatus(user: Principal, plan: PlanType, state: SubscriptionState, expiresAt: bigint | null): Promise<void>;

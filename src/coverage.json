@@ -1,171 +1,84 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T20:43:04.629Z",
+  "generatedAt": "2026-02-12T21:41:54.772Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 11,
-    "implemented": 11,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Add a new creation mode called \"Create Card With AI Prompt\" that lets users enter a freeform natural-language prompt to generate a card/invitation, while keeping the existing quick form-based birthday generator as a separate \"Quick Form Mode\".",
+        "summary": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/App.tsx",
+          "frontend/src/sections/HeroSection.tsx",
           "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/features/promptStudio/types.ts"
+          "frontend/src/sections/TemplatesSection.tsx",
+          "frontend/src/sections/MarketplaceSection.tsx",
+          "frontend/src/sections/PricingSection.tsx",
+          "frontend/src/sections/DashboardSection.tsx",
+          "frontend/src/sections/FaqSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/features/promptStudio/types.ts"
-        ]
-      },
-      {
-        "id": "REQ-10",
-        "summary": "Add UI placeholders for \"Video invitation option\" and \"Voice message card option\" in the premium area as Coming Soon items gated behind premium (do not implement real video/voice capture or playback).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/premiumCardDesigner/ComingSoonTiles.tsx",
-          "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
-          "frontend/src/sections/OutputSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
-          "frontend/src/sections/OutputSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-11",
-        "summary": "Update the Output section copy and structure for Prompt Mode so it is not birthday-pack specific (e.g., replace headings like \"Your Birthday Pack\" with a neutral multi-event label when Prompt Mode is used), while preserving the existing birthday-pack presentation for Quick Form Mode.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/sections/TemplatesSection.tsx",
+          "frontend/src/sections/MarketplaceSection.tsx",
+          "frontend/src/sections/PricingSection.tsx",
+          "frontend/src/sections/DashboardSection.tsx",
+          "frontend/src/sections/FaqSection.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Implement a Prompt Mode input UI with a main textbox placeholder \"Describe your card or invitation idea...\" and a row/grid of clickable example prompts that prefill the textbox.",
+        "summary": "Update the sidebar/mobile navigation click handling so clicking any menu item performs in-page smooth scrolling to the target section and does not trigger route navigation, full page reload, or redirect to Home.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/promptStudio/components/PromptModeInput.tsx",
-          "frontend/src/sections/GeneratorSection.tsx"
+          "frontend/src/components/navigation/StickyNavbar.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/features/promptStudio/components/PromptModeInput.tsx",
-          "frontend/src/sections/GeneratorSection.tsx"
+          "frontend/src/components/navigation/StickyNavbar.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Create a prompt analysis step (rule-based, deterministic) that extracts and stores: event type, tone, visual theme keywords, and layout style from the user prompt, and display the detected values in the UI before/with the results.",
+        "summary": "Implement/standardize smooth scrolling for sidebar navigation using the existing smoothScrollToAnchor utility and ensure it is the single mechanism used by sidebar navigation for section scrolling.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/promptStudio/promptAnalysis.ts",
-          "frontend/src/features/promptStudio/components/PromptAnalysisSummary.tsx",
-          "frontend/src/sections/GeneratorSection.tsx"
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/lib/scroll.ts"
         ],
         "matchedFiles": [
-          "frontend/src/features/promptStudio/promptAnalysis.ts",
-          "frontend/src/features/promptStudio/components/PromptAnalysisSummary.tsx",
-          "frontend/src/sections/GeneratorSection.tsx"
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/lib/scroll.ts"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Generate smart, structured card content from the prompt analysis output, including: (1) title/headline, (2) short readable main message, (3) signature/footer text, and ensure the content is sanitized to avoid instruction-like text.",
+        "summary": "Fix sticky-header offset so scrolled-to sections are not hidden behind the sticky header by applying a consistent safe scroll margin to all main sections and ensuring the scroll utility offsets by the sticky header height.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/promptStudio/promptContentGeneration.ts",
-          "frontend/src/features/cardExport/cardTextRules.ts",
-          "frontend/src/sections/GeneratorSection.tsx"
+          "frontend/src/lib/scroll.ts",
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/sections/HeroSection.tsx",
+          "frontend/src/sections/GeneratorSection.tsx",
+          "frontend/src/sections/TemplatesSection.tsx",
+          "frontend/src/sections/MarketplaceSection.tsx",
+          "frontend/src/sections/PricingSection.tsx",
+          "frontend/src/sections/DashboardSection.tsx",
+          "frontend/src/sections/FaqSection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/features/promptStudio/promptContentGeneration.ts",
-          "frontend/src/features/cardExport/cardTextRules.ts",
-          "frontend/src/sections/GeneratorSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Update the card export/preview text formatting logic so it is not hardcoded to birthdays (e.g., remove forced \"Happy Birthday …\" title) and instead uses the analyzed event type + tone to produce an appropriate title/headline and footer for multiple event types (Birthday, Wedding, Anniversary, Party, Corporate, Festival, Graduation, Baby Shower, Love cards).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/cardExport/cardTextRules.ts",
-          "frontend/src/features/cardExport/canvasExport.ts",
-          "frontend/src/sections/OutputSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/cardExport/cardTextRules.ts",
-          "frontend/src/features/cardExport/canvasExport.ts",
-          "frontend/src/sections/OutputSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Ensure Prompt Mode renders 3 unique card design variations per generation, with different layout compositions and different typography/color treatments, while obeying strict layout rules: Title section, decorative focus element, short message, footer branding; prevent text overlap/clutter.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/cardExport/generateCardVariations.ts",
-          "frontend/src/features/cardExport/canvasExport.ts",
-          "frontend/src/sections/OutputSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/cardExport/generateCardVariations.ts",
-          "frontend/src/features/cardExport/canvasExport.ts",
-          "frontend/src/sections/OutputSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Add event-adaptive visual theming so decorations and background/ornament choices change based on detected event type (Birthday → balloons/confetti/cake feel; Wedding → floral/gold/elegant ornaments; Corporate → minimal/modern; Baby Shower → cute/pastel).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/promptStudio/eventThemeMapping.ts",
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/features/cardExport/cardThemes.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/promptStudio/eventThemeMapping.ts",
-          "frontend/src/sections/OutputSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-8",
-        "summary": "Add user edit controls for Prompt Mode results: edit generated text fields (title/message/footer), switch theme, change tone, and regenerate designs (keeping the prompt visible/editable).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/promptStudio/components/PromptModeEditorPanel.tsx",
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/promptStudio/components/PromptModeEditorPanel.tsx",
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-9",
-        "summary": "Apply premium export rules to Prompt Mode downloads: Free users get limited-resolution export and/or watermark; Premium users get HD export and watermark removal, reusing the existing entitlements model.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/features/cardExport/canvasExport.ts",
-          "frontend/src/features/subscription/useEntitlements.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/features/cardExport/canvasExport.ts"
+          "frontend/src/lib/scroll.ts",
+          "frontend/src/components/navigation/StickyNavbar.tsx",
+          "frontend/src/sections/TemplatesSection.tsx",
+          "frontend/src/sections/MarketplaceSection.tsx",
+          "frontend/src/sections/PricingSection.tsx",
+          "frontend/src/sections/DashboardSection.tsx",
+          "frontend/src/sections/FaqSection.tsx"
         ]
       }
     ]
@@ -175,20 +88,14 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/features/cardExport/canvasExport.ts",
-    "frontend/src/features/cardExport/cardTextRules.ts",
-    "frontend/src/features/cardExport/generateCardVariations.ts",
-    "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
-    "frontend/src/features/promptStudio/components/PromptAnalysisSummary.tsx",
-    "frontend/src/features/promptStudio/components/PromptModeEditorPanel.tsx",
-    "frontend/src/features/promptStudio/components/PromptModeInput.tsx",
-    "frontend/src/features/promptStudio/eventThemeMapping.ts",
-    "frontend/src/features/promptStudio/promptAnalysis.ts",
-    "frontend/src/features/promptStudio/promptContentGeneration.ts",
-    "frontend/src/features/promptStudio/types.ts",
-    "frontend/src/sections/GeneratorSection.tsx",
-    "frontend/src/sections/OutputSection.tsx",
+    "frontend/src/components/navigation/StickyNavbar.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/lib/scroll.ts",
+    "frontend/src/sections/DashboardSection.tsx",
+    "frontend/src/sections/FaqSection.tsx",
+    "frontend/src/sections/MarketplaceSection.tsx",
+    "frontend/src/sections/PricingSection.tsx",
+    "frontend/src/sections/TemplatesSection.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

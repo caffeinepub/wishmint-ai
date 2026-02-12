@@ -1,35 +1,29 @@
-import { Button } from '@/components/ui/button';
 import { Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useAppContext } from '../../App';
 
 interface PremiumLockProps {
-  feature?: string;
+  feature: string;
 }
 
-export function PremiumLock({ feature = 'This feature' }: PremiumLockProps) {
+export function PremiumLock({ feature }: PremiumLockProps) {
   const { openPricingModal } = useAppContext();
 
-  const handleUnlock = () => {
-    console.log('Premium lock unlock clicked');
-    openPricingModal('pro');
-  };
-
   return (
-    <div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center z-10 rounded-lg">
+    <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/80 backdrop-blur-sm rounded-lg">
       <div className="text-center space-y-4 p-6">
-        <div className="w-16 h-16 rounded-full bg-neon-purple/10 flex items-center justify-center mx-auto">
-          <Lock className="w-8 h-8 text-neon-purple" />
+        <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-brand-purple/10 border-2 border-brand-purple/30">
+          <Lock className="w-8 h-8 text-brand-purple" />
         </div>
-        <div>
-          <h3 className="text-xl font-bold mb-2">{feature} is Premium</h3>
-          <p className="text-muted-foreground text-sm">
-            Upgrade to Pro or Creator plan to unlock this feature
+        <div className="space-y-2">
+          <h3 className="text-xl font-bold">Premium Feature</h3>
+          <p className="text-sm text-muted-foreground max-w-xs">
+            Unlock {feature} with a Pro or Creator plan
           </p>
         </div>
         <Button
-          type="button"
-          onClick={handleUnlock}
-          className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold relative z-20 pointer-events-auto"
+          onClick={() => openPricingModal()}
+          className="premium-button"
         >
           Unlock Premium
         </Button>

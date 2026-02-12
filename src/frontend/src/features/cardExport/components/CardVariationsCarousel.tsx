@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -15,9 +15,10 @@ export function CardVariationsCarousel({
   onVariationSelect,
   selectedIndex,
 }: CardVariationsCarouselProps) {
-  const [touchStart, setTouchStart] = useState<number | null>(null);
-  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+  const [touchStart, setTouchStart] = useState<{ x: number; y: number } | null>(null);
+  const [touchEnd, setTouchEnd] = useState<{ x: number; y: number } | null>(null);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const minSwipeDistance = 50;
 
@@ -33,43 +34,68 @@ export function CardVariationsCarousel({
 
   const onTouchStart = (e: React.TouchEvent) => {
     setTouchEnd(null);
-    setTouchStart(e.targetTouches[0].clientX);
+    setTouchStart({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
   };
 
   const onTouchMove = (e: React.TouchEvent) => {
-    setTouchEnd(e.targetTouches[0].clientX);
+    setTouchEnd({
+      x: e.targetTouches[0].clientX,
+      y: e.targetTouches[0].clientY,
+    });
   };
 
   const onTouchEnd = () => {
     if (!touchStart || !touchEnd) return;
     
-    const distance = touchStart - touchEnd;
-    const isLeftSwipe = distance > minSwipeDistance;
-    const isRightSwipe = distance < -minSwipeDistance;
+    const dx = touchStart.x - touchEnd.x;
+    const dy = touchStart.y - touchEnd.y;
+    
+    // Only treat as swipe if horizontal movement dominates vertical movement
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > minSwipeDistance) {
+      const isLeftSwipe = dx > 0;
+      const isRightSwipe = dx < 0;
 
-    if (isLeftSwipe) {
-      handleNext();
-    } else if (isRightSwipe) {
-      handlePrevious();
+      if (isLeftSwipe) {
+        handleNext();
+      } else if (isRightSwipe) {
+        handlePrevious();
+      }
     }
   };
 
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        handlePrevious();
-      } else if (e.key === 'ArrowRight') {
-        handleNext();
-      }
-    };
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    // Ignore if focus is in an input, textarea, or contenteditable
+    const target = e.target as HTMLElement;
+    if (
+      target.tagName === 'INPUT' ||
+      target.tagName === 'TEXTAREA' ||
+      target.isContentEditable
+    ) {
+      return;
+    }
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedIndex, variations.length]);
+    if (e.key === 'ArrowLeft') {
+      e.preventDefault();
+      handlePrevious();
+    } else if (e.key === 'ArrowRight') {
+      e.preventDefault();
+      handleNext();
+    }
+  };
 
   return (
     <div className="w-full max-w-2xl mx-auto">
-      <div className="relative">
+      <div
+        ref={carouselRef}
+        className="relative focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg"
+        tabIndex={0}
+        onKeyDown={handleKeyDown}
+        role="region"
+        aria-label="Card variations carousel"
+      >
         {/* Main card display */}
         <div
           className="relative overflow-hidden rounded-lg"
@@ -95,16 +121,18 @@ export function CardVariationsCarousel({
           <Button
             variant="outline"
             size="icon"
-            className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+            className="absolute left-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             onClick={handlePrevious}
+            aria-label="Previous variation"
           >
             <ChevronLeft className="w-5 h-5" />
           </Button>
           <Button
             variant="outline"
             size="icon"
-            className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background/90"
+            className="absolute right-2 top-1/2 -translate-y-1/2 bg-background/80 backdrop-blur-sm hover:bg-background/90 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             onClick={handleNext}
+            aria-label="Next variation"
           >
             <ChevronRight className="w-5 h-5" />
           </Button>
@@ -116,13 +144,15 @@ export function CardVariationsCarousel({
         {variations.map((_, index) => (
           <button
             key={index}
+            type="button"
             onClick={() => onVariationSelect(index)}
-            className={`w-2 h-2 rounded-full transition-all ${
+            className={`h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ${
               index === selectedIndex
                 ? 'bg-neon-purple w-6'
-                : 'bg-muted-foreground/30 hover:bg-muted-foreground/50'
+                : 'bg-muted-foreground/30 hover:bg-muted-foreground/50 w-2'
             }`}
             aria-label={`View variation ${index + 1}`}
+            aria-current={index === selectedIndex ? 'true' : undefined}
           />
         ))}
       </div>

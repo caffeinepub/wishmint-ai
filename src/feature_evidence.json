@@ -2,12 +2,14 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-new-creation-mode-called-create-card-with-ai-prompt-that-lets-users-enter-a-freeform-natural-language-prompt-to-generate-a-card-invitation-while-keeping-the-existing-quick-form-based-birthday-generator-as-a-separate-quick-form-mode",
-      "featureTitle": "Add a new creation mode called \"Create Card With AI Prompt\" that lets users enter a freeform natural-language prompt to generate a card/invitation, while keeping the existing quick form-based birthday generator as a separate \"Quick Form Mode\".",
+      "featureId": "feature-ensure-the-landing-page-contains-a-single-set-of-in-page-sections-with-the-exact-ids-used-by-sidebar-navigation-home-create-wish-templates-marketplace-pricing-dashboard-faq",
+      "featureTitle": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/features/promptStudio/types.ts",
-        "frontend/src/sections/GeneratorSection.tsx"
+        "frontend/src/sections/DashboardSection.tsx",
+        "frontend/src/sections/FaqSection.tsx",
+        "frontend/src/sections/MarketplaceSection.tsx",
+        "frontend/src/sections/PricingSection.tsx",
+        "frontend/src/sections/TemplatesSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -16,7 +18,8 @@
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
         "authorization@4.0.0",
-        "blob-storage@4.0.0"
+        "blob-storage@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
         "REQ-1"
@@ -24,11 +27,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-a-prompt-mode-input-ui-with-a-main-textbox-placeholder-describe-your-card-or-invitation-idea-and-a-row-grid-of-clickable-example-prompts-that-prefill-the-textbox",
-      "featureTitle": "Implement a Prompt Mode input UI with a main textbox placeholder \"Describe your card or invitation idea...\" and a row/grid of clickable example prompts that prefill the textbox.",
+      "featureId": "feature-update-the-sidebar-mobile-navigation-click-handling-so-clicking-any-menu-item-performs-in-page-smooth-scrolling-to-the-target-section-and-does-not-trigger-route-navigation-full-page-reload-or-redirect-to-home",
+      "featureTitle": "Update the sidebar/mobile navigation click handling so clicking any menu item performs in-page smooth scrolling to the target section and does not trigger route navigation, full page reload, or redirect to Home.",
       "files": [
-        "frontend/src/features/promptStudio/components/PromptModeInput.tsx",
-        "frontend/src/sections/GeneratorSection.tsx"
+        "frontend/src/components/navigation/StickyNavbar.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -37,7 +39,8 @@
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
         "authorization@4.0.0",
-        "blob-storage@4.0.0"
+        "blob-storage@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
         "REQ-2"
@@ -45,12 +48,11 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-create-a-prompt-analysis-step-rule-based-deterministic-that-extracts-and-stores-event-type-tone-visual-theme-keywords-and-layout-style-from-the-user-prompt-and-display-the-detected-values-in-the-ui-before-with-the-results",
-      "featureTitle": "Create a prompt analysis step (rule-based, deterministic) that extracts and stores: event type, tone, visual theme keywords, and layout style from the user prompt, and display the detected values in the UI before/with the results.",
+      "featureId": "feature-implement-standardize-smooth-scrolling-for-sidebar-navigation-using-the-existing-smoothscrolltoanchor-utility-and-ensure-it-is-the-single-mechanism-used-by-sidebar-navigation-for-section-scrolling",
+      "featureTitle": "Implement/standardize smooth scrolling for sidebar navigation using the existing smoothScrollToAnchor utility and ensure it is the single mechanism used by sidebar navigation for section scrolling.",
       "files": [
-        "frontend/src/features/promptStudio/components/PromptAnalysisSummary.tsx",
-        "frontend/src/features/promptStudio/promptAnalysis.ts",
-        "frontend/src/sections/GeneratorSection.tsx"
+        "frontend/src/components/navigation/StickyNavbar.tsx",
+        "frontend/src/lib/scroll.ts"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -59,7 +61,8 @@
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
         "authorization@4.0.0",
-        "blob-storage@4.0.0"
+        "blob-storage@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
         "REQ-3"
@@ -67,12 +70,16 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-generate-smart-structured-card-content-from-the-prompt-analysis-output-including-1-title-headline-2-short-readable-main-message-3-signature-footer-text-and-ensure-the-content-is-sanitized-to-avoid-instruction-like-text",
-      "featureTitle": "Generate smart, structured card content from the prompt analysis output, including: (1) title/headline, (2) short readable main message, (3) signature/footer text, and ensure the content is sanitized to avoid instruction-like text.",
+      "featureId": "feature-fix-sticky-header-offset-so-scrolled-to-sections-are-not-hidden-behind-the-sticky-header-by-applying-a-consistent-safe-scroll-margin-to-all-main-sections-and-ensuring-the-scroll-utility-offsets-by-the-sticky-header-height",
+      "featureTitle": "Fix sticky-header offset so scrolled-to sections are not hidden behind the sticky header by applying a consistent safe scroll margin to all main sections and ensuring the scroll utility offsets by the sticky header height.",
       "files": [
-        "frontend/src/features/cardExport/cardTextRules.ts",
-        "frontend/src/features/promptStudio/promptContentGeneration.ts",
-        "frontend/src/sections/GeneratorSection.tsx"
+        "frontend/src/components/navigation/StickyNavbar.tsx",
+        "frontend/src/lib/scroll.ts",
+        "frontend/src/sections/DashboardSection.tsx",
+        "frontend/src/sections/FaqSection.tsx",
+        "frontend/src/sections/MarketplaceSection.tsx",
+        "frontend/src/sections/PricingSection.tsx",
+        "frontend/src/sections/TemplatesSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -81,160 +88,11 @@
         "initial-app@1.0.0",
         "github-export-icp-cli@1.0.0",
         "authorization@4.0.0",
-        "blob-storage@4.0.0"
+        "blob-storage@4.0.0",
+        "http-outcalls@3.0.0"
       ],
       "testIds": [
         "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-card-export-preview-text-formatting-logic-so-it-is-not-hardcoded-to-birthdays-e-g-remove-forced-happy-birthday-title-and-instead-uses-the-analyzed-event-type-tone-to-produce-an-appropriate-title-headline-and-footer-for-multiple-event-types-birthday-wedding-anniversary-party-corporate-festival-graduation-baby-shower-love-cards",
-      "featureTitle": "Update the card export/preview text formatting logic so it is not hardcoded to birthdays (e.g., remove forced \"Happy Birthday …\" title) and instead uses the analyzed event type + tone to produce an appropriate title/headline and footer for multiple event types (Birthday, Wedding, Anniversary, Party, Corporate, Festival, Graduation, Baby Shower, Love cards).",
-      "files": [
-        "frontend/src/features/cardExport/canvasExport.ts",
-        "frontend/src/features/cardExport/cardTextRules.ts",
-        "frontend/src/sections/OutputSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-ensure-prompt-mode-renders-3-unique-card-design-variations-per-generation-with-different-layout-compositions-and-different-typography-color-treatments-while-obeying-strict-layout-rules-title-section-decorative-focus-element-short-message-footer-branding-prevent-text-overlap-clutter",
-      "featureTitle": "Ensure Prompt Mode renders 3 unique card design variations per generation, with different layout compositions and different typography/color treatments, while obeying strict layout rules: Title section, decorative focus element, short message, footer branding; prevent text overlap/clutter.",
-      "files": [
-        "frontend/src/features/cardExport/canvasExport.ts",
-        "frontend/src/features/cardExport/generateCardVariations.ts",
-        "frontend/src/sections/OutputSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-event-adaptive-visual-theming-so-decorations-and-background-ornament-choices-change-based-on-detected-event-type-birthday-balloons-confetti-cake-feel-wedding-floral-gold-elegant-ornaments-corporate-minimal-modern-baby-shower-cute-pastel",
-      "featureTitle": "Add event-adaptive visual theming so decorations and background/ornament choices change based on detected event type (Birthday → balloons/confetti/cake feel; Wedding → floral/gold/elegant ornaments; Corporate → minimal/modern; Baby Shower → cute/pastel).",
-      "files": [
-        "frontend/src/features/promptStudio/eventThemeMapping.ts",
-        "frontend/src/sections/OutputSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-user-edit-controls-for-prompt-mode-results-edit-generated-text-fields-title-message-footer-switch-theme-change-tone-and-regenerate-designs-keeping-the-prompt-visible-editable",
-      "featureTitle": "Add user edit controls for Prompt Mode results: edit generated text fields (title/message/footer), switch theme, change tone, and regenerate designs (keeping the prompt visible/editable).",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/features/promptStudio/components/PromptModeEditorPanel.tsx",
-        "frontend/src/sections/OutputSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-8"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-apply-premium-export-rules-to-prompt-mode-downloads-free-users-get-limited-resolution-export-and-or-watermark-premium-users-get-hd-export-and-watermark-removal-reusing-the-existing-entitlements-model",
-      "featureTitle": "Apply premium export rules to Prompt Mode downloads: Free users get limited-resolution export and/or watermark; Premium users get HD export and watermark removal, reusing the existing entitlements model.",
-      "files": [
-        "frontend/src/features/cardExport/canvasExport.ts",
-        "frontend/src/sections/OutputSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-9"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-ui-placeholders-for-video-invitation-option-and-voice-message-card-option-in-the-premium-area-as-coming-soon-items-gated-behind-premium-do-not-implement-real-video-voice-capture-or-playback",
-      "featureTitle": "Add UI placeholders for \"Video invitation option\" and \"Voice message card option\" in the premium area as Coming Soon items gated behind premium (do not implement real video/voice capture or playback).",
-      "files": [
-        "frontend/src/features/promptStudio/components/PremiumComingSoonActions.tsx",
-        "frontend/src/sections/OutputSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-10"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-output-section-copy-and-structure-for-prompt-mode-so-it-is-not-birthday-pack-specific-e-g-replace-headings-like-your-birthday-pack-with-a-neutral-multi-event-label-when-prompt-mode-is-used-while-preserving-the-existing-birthday-pack-presentation-for-quick-form-mode",
-      "featureTitle": "Update the Output section copy and structure for Prompt Mode so it is not birthday-pack specific (e.g., replace headings like \"Your Birthday Pack\" with a neutral multi-event label when Prompt Mode is used), while preserving the existing birthday-pack presentation for Quick Form Mode.",
-      "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/sections/OutputSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0",
-        "blob-storage@4.0.0"
-      ],
-      "testIds": [
-        "REQ-11"
       ],
       "confidence": "high"
     }

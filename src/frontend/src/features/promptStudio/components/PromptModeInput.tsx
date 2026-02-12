@@ -2,10 +2,9 @@
  * Prompt Mode input UI with example prompts
  */
 
-import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Sparkles } from 'lucide-react';
+import { Sparkles, Loader2 } from 'lucide-react';
 import { EXAMPLE_PROMPTS } from '../types';
 
 interface PromptModeInputProps {
@@ -21,7 +20,7 @@ export function PromptModeInput({
   onGenerate,
   isGenerating,
 }: PromptModeInputProps) {
-  const isValid = value.trim().length > 0;
+  const isValid = value.trim().length >= 10;
 
   const handleExampleClick = (example: string) => {
     onChange(example);
@@ -36,9 +35,10 @@ export function PromptModeInput({
           onChange={(e) => onChange(e.target.value)}
           rows={4}
           className="bg-background/50 border-border/40 resize-none text-base"
+          disabled={isGenerating}
         />
         <p className="text-xs text-muted-foreground">
-          Describe the type of card, tone, theme, and any specific details you want
+          Describe the type of card, tone, theme, and any specific details you want (min 10 characters)
         </p>
       </div>
 
@@ -48,8 +48,10 @@ export function PromptModeInput({
           {EXAMPLE_PROMPTS.map((example, index) => (
             <button
               key={index}
+              type="button"
               onClick={() => handleExampleClick(example)}
-              className="text-left text-sm px-3 py-2 rounded-lg border border-border/40 bg-background/30 hover:bg-background/50 hover:border-brand-purple/40 transition-colors"
+              disabled={isGenerating}
+              className="text-left text-sm px-3 py-2 rounded-lg border border-border/40 bg-background/30 hover:bg-background/50 hover:border-brand-purple/40 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {example}
             </button>
@@ -58,12 +60,22 @@ export function PromptModeInput({
       </div>
 
       <Button
+        type="submit"
         onClick={onGenerate}
         disabled={!isValid || isGenerating}
         className="w-full premium-button"
       >
-        <Sparkles className="w-4 h-4 mr-2" />
-        {isGenerating ? 'Generating...' : 'Generate Card'}
+        {isGenerating ? (
+          <>
+            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            Generating…
+          </>
+        ) : (
+          <>
+            <Sparkles className="w-4 h-4 mr-2" />
+            Generate Card
+          </>
+        )}
       </Button>
     </div>
   );

@@ -84,6 +84,15 @@ export interface SurprisePayload {
   'recipientName' : string,
 }
 export type TemplateId = bigint;
+export interface TransformationInput {
+  'context' : Uint8Array,
+  'response' : http_request_result,
+}
+export interface TransformationOutput {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export interface UserAuth {
   'provider' : string,
   'lastLoginAt' : bigint,
@@ -103,6 +112,12 @@ export interface _CaffeineStorageRefillInformation {
 export interface _CaffeineStorageRefillResult {
   'success' : [] | [boolean],
   'topped_up_amount' : [] | [bigint],
+}
+export interface http_header { 'value' : string, 'name' : string }
+export interface http_request_result {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
 }
 export interface _SERVICE {
   '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
@@ -181,6 +196,7 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'saveTemplate' : ActorMethod<[bigint], undefined>,
   'subscribeToCreator' : ActorMethod<[Principal], undefined>,
+  'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   'updatePaymentRequestStatus' : ActorMethod<
     [string, PaymentStatus],
     undefined

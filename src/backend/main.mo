@@ -11,8 +11,7 @@ import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-
-
+import OutCall "http-outcalls/outcall";
 
 actor {
   // Initialize the access control system (Not persisted)
@@ -138,6 +137,15 @@ actor {
     plan : PlanType;
     premiumUntil : ?Int;
     status : SubscriptionState;
+  };
+
+  type CardVariation = {
+    frontText : Text;
+    backText : Text;
+  };
+
+  type CardGenerationResponse = {
+    variations : [CardVariation];
   };
 
   // State variables
@@ -835,5 +843,10 @@ actor {
 
   public query ({ caller }) func isAdmin() : async Bool {
     AccessControl.isAdmin(accessControlState, caller);
+  };
+
+  // Outcall capabilities to trigger calling transform on the canister
+  public query ({ caller }) func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
+    OutCall.transform(input);
   };
 };

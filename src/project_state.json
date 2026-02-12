@@ -1,101 +1,45 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "WishMint is evolving from a form-based birthday generator into an AI Creative Card Studio: users can enter freeform prompts to generate professional multi-event invitation/greeting cards (message + layout + style + visual theme), with editable outputs, multiple variations, and optional premium upgrades while retaining a quick form mode.",
+  "summary": "WishMint AI website: fix sidebar navigation so menu items smoothly scroll to in-page sections (with header offset) instead of redirecting to Home.",
   "architectural_notes": [
-    "Design UX to avoid confusion between Quick Form Mode and Prompt Mode (clear entry points and naming).",
-    "Card renderer must enforce layout constraints to avoid text overlap/clutter (defined sections and safe text areas).",
-    "Generation pipeline: prompt -> attribute detection (event/tone/theme/layout) -> content generation -> design generation -> 3 variations -> user edit/export.",
-    "Event-adaptive theme assets/decorations should be selected based on detected event type."
+    "Use in-page section IDs (home, create-wish, templates, marketplace, pricing, dashboard, faq) and scroll-to-section behavior instead of router navigation/href='/' or href='#'.",
+    "Apply smooth scrolling and account for sticky header via scroll margin/offset so target sections are not hidden."
   ],
-  "known_issues": [],
-  "isFixRequest": false,
+  "known_issues": [
+    "Sidebar menu item clicks redirect/reload to Home instead of scrolling to the selected section."
+  ],
+  "isFixRequest": true,
   "existing_features": [
     {
-      "id": "feature-add-a-new-creation-mode-called-create-card-with-ai-prompt-that-lets-users-enter-a-freeform-natural-language-prompt-to-generate-a-card-invitation-while-keeping-the-existing-quick-form-based-birthday-generator-as-a-separate-quick-form-mode",
-      "title": "Add a new creation mode called \"Create Card With AI Prompt\" that lets users enter a freeform natural-language prompt to generate a card/invitation, while keeping the existing quick form-based birthday generator as a separate \"Quick Form Mode\".",
+      "id": "feature-ensure-the-landing-page-contains-a-single-set-of-in-page-sections-with-the-exact-ids-used-by-sidebar-navigation-home-create-wish-templates-marketplace-pricing-dashboard-faq",
+      "title": "Ensure the landing page contains a single set of in-page sections with the exact IDs used by sidebar navigation: home, create-wish, templates, marketplace, pricing, dashboard, faq.",
       "reqIds": [
         "REQ-1"
       ],
       "version": 1
     },
     {
-      "id": "feature-implement-a-prompt-mode-input-ui-with-a-main-textbox-placeholder-describe-your-card-or-invitation-idea-and-a-row-grid-of-clickable-example-prompts-that-prefill-the-textbox",
-      "title": "Implement a Prompt Mode input UI with a main textbox placeholder \"Describe your card or invitation idea...\" and a row/grid of clickable example prompts that prefill the textbox.",
+      "id": "feature-update-the-sidebar-mobile-navigation-click-handling-so-clicking-any-menu-item-performs-in-page-smooth-scrolling-to-the-target-section-and-does-not-trigger-route-navigation-full-page-reload-or-redirect-to-home",
+      "title": "Update the sidebar/mobile navigation click handling so clicking any menu item performs in-page smooth scrolling to the target section and does not trigger route navigation, full page reload, or redirect to Home.",
       "reqIds": [
         "REQ-2"
       ],
       "version": 1
     },
     {
-      "id": "feature-create-a-prompt-analysis-step-rule-based-deterministic-that-extracts-and-stores-event-type-tone-visual-theme-keywords-and-layout-style-from-the-user-prompt-and-display-the-detected-values-in-the-ui-before-with-the-results",
-      "title": "Create a prompt analysis step (rule-based, deterministic) that extracts and stores: event type, tone, visual theme keywords, and layout style from the user prompt, and display the detected values in the UI before/with the results.",
+      "id": "feature-implement-standardize-smooth-scrolling-for-sidebar-navigation-using-the-existing-smoothscrolltoanchor-utility-and-ensure-it-is-the-single-mechanism-used-by-sidebar-navigation-for-section-scrolling",
+      "title": "Implement/standardize smooth scrolling for sidebar navigation using the existing smoothScrollToAnchor utility and ensure it is the single mechanism used by sidebar navigation for section scrolling.",
       "reqIds": [
         "REQ-3"
       ],
       "version": 1
     },
     {
-      "id": "feature-generate-smart-structured-card-content-from-the-prompt-analysis-output-including-1-title-headline-2-short-readable-main-message-3-signature-footer-text-and-ensure-the-content-is-sanitized-to-avoid-instruction-like-text",
-      "title": "Generate smart, structured card content from the prompt analysis output, including: (1) title/headline, (2) short readable main message, (3) signature/footer text, and ensure the content is sanitized to avoid instruction-like text.",
+      "id": "feature-fix-sticky-header-offset-so-scrolled-to-sections-are-not-hidden-behind-the-sticky-header-by-applying-a-consistent-safe-scroll-margin-to-all-main-sections-and-ensuring-the-scroll-utility-offsets-by-the-sticky-header-height",
+      "title": "Fix sticky-header offset so scrolled-to sections are not hidden behind the sticky header by applying a consistent safe scroll margin to all main sections and ensuring the scroll utility offsets by the sticky header height.",
       "reqIds": [
         "REQ-4"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-card-export-preview-text-formatting-logic-so-it-is-not-hardcoded-to-birthdays-e-g-remove-forced-happy-birthday-title-and-instead-uses-the-analyzed-event-type-tone-to-produce-an-appropriate-title-headline-and-footer-for-multiple-event-types-birthday-wedding-anniversary-party-corporate-festival-graduation-baby-shower-love-cards",
-      "title": "Update the card export/preview text formatting logic so it is not hardcoded to birthdays (e.g., remove forced \"Happy Birthday …\" title) and instead uses the analyzed event type + tone to produce an appropriate title/headline and footer for multiple event types (Birthday, Wedding, Anniversary, Party, Corporate, Festival, Graduation, Baby Shower, Love cards).",
-      "reqIds": [
-        "REQ-5"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-ensure-prompt-mode-renders-3-unique-card-design-variations-per-generation-with-different-layout-compositions-and-different-typography-color-treatments-while-obeying-strict-layout-rules-title-section-decorative-focus-element-short-message-footer-branding-prevent-text-overlap-clutter",
-      "title": "Ensure Prompt Mode renders 3 unique card design variations per generation, with different layout compositions and different typography/color treatments, while obeying strict layout rules: Title section, decorative focus element, short message, footer branding; prevent text overlap/clutter.",
-      "reqIds": [
-        "REQ-6"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-event-adaptive-visual-theming-so-decorations-and-background-ornament-choices-change-based-on-detected-event-type-birthday-balloons-confetti-cake-feel-wedding-floral-gold-elegant-ornaments-corporate-minimal-modern-baby-shower-cute-pastel",
-      "title": "Add event-adaptive visual theming so decorations and background/ornament choices change based on detected event type (Birthday → balloons/confetti/cake feel; Wedding → floral/gold/elegant ornaments; Corporate → minimal/modern; Baby Shower → cute/pastel).",
-      "reqIds": [
-        "REQ-7"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-user-edit-controls-for-prompt-mode-results-edit-generated-text-fields-title-message-footer-switch-theme-change-tone-and-regenerate-designs-keeping-the-prompt-visible-editable",
-      "title": "Add user edit controls for Prompt Mode results: edit generated text fields (title/message/footer), switch theme, change tone, and regenerate designs (keeping the prompt visible/editable).",
-      "reqIds": [
-        "REQ-8"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-apply-premium-export-rules-to-prompt-mode-downloads-free-users-get-limited-resolution-export-and-or-watermark-premium-users-get-hd-export-and-watermark-removal-reusing-the-existing-entitlements-model",
-      "title": "Apply premium export rules to Prompt Mode downloads: Free users get limited-resolution export and/or watermark; Premium users get HD export and watermark removal, reusing the existing entitlements model.",
-      "reqIds": [
-        "REQ-9"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-add-ui-placeholders-for-video-invitation-option-and-voice-message-card-option-in-the-premium-area-as-coming-soon-items-gated-behind-premium-do-not-implement-real-video-voice-capture-or-playback",
-      "title": "Add UI placeholders for \"Video invitation option\" and \"Voice message card option\" in the premium area as Coming Soon items gated behind premium (do not implement real video/voice capture or playback).",
-      "reqIds": [
-        "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-the-output-section-copy-and-structure-for-prompt-mode-so-it-is-not-birthday-pack-specific-e-g-replace-headings-like-your-birthday-pack-with-a-neutral-multi-event-label-when-prompt-mode-is-used-while-preserving-the-existing-birthday-pack-presentation-for-quick-form-mode",
-      "title": "Update the Output section copy and structure for Prompt Mode so it is not birthday-pack specific (e.g., replace headings like \"Your Birthday Pack\" with a neutral multi-event label when Prompt Mode is used), while preserving the existing birthday-pack presentation for Quick Form Mode.",
-      "reqIds": [
-        "REQ-11"
       ],
       "version": 1
     }
@@ -103,61 +47,12 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Add prompt-based card creation mode with a main natural-language prompt input (\"Describe your card or invitation idea...\") and example prompts",
+      "summary": "Fix sidebar navigation to close menu and smoothly scroll to correct in-page sections (no reload/redirect), with correct section IDs and sticky-header offset.",
       "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-2",
-      "summary": "Implement AI prompt analysis to auto-detect event type, tone, visual theme, layout style, and message format",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-3",
-      "summary": "Generate smart card content: professional message, structured text hierarchy, short readable message, and signature/footer",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-4",
-      "summary": "Generate professional card designs following strict layout rules (title, decorative focus element, short emotional message, footer branding) and prevent text overlap/clutter",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-5",
-      "summary": "Output 3 unique design variations per prompt with different compositions, typography, and color treatments",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-6",
-      "summary": "Support multiple card types/events beyond birthdays (wedding, anniversary, party, baby shower, corporate, festival, etc.) with event-adaptive themes/decorations",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-7",
-      "summary": "Add user edit controls: edit generated text, switch themes, change tone, and regenerate design",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-8",
-      "summary": "Add premium upgrade system: free vs premium exports (watermark/limited resolution vs HD export), plus extra templates and optional video invitation/voice message card options",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-9",
-      "summary": "Keep both creation modes: Quick Form Mode and Prompt Mode, with UI labeling like \"Create Card With AI Prompt\"",
-      "reqIds": [],
-      "status": "pending"
+      "status": "in_progress"
     }
   ],
-  "gameProjectType": "none",
-  "projectName": "WishMint",
+  "projectName": "WishMint AI Website",
   "clarification_mode": "instant",
   "clarification_rounds": 0
 }
