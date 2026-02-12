@@ -89,6 +89,11 @@ export class ExternalBlob {
         return this;
     }
 }
+export interface UserAuth {
+    provider: string;
+    lastLoginAt: bigint;
+    createdAt: bigint;
+}
 export interface CreatorEarnings {
     totalRevenue: bigint;
     totalDownloads: bigint;
@@ -184,6 +189,7 @@ export interface backendInterface {
         __kind__: "sticker";
         sticker: bigint;
     }): Promise<ListingId>;
+    createOrUpdateUserAuth(provider: string): Promise<void>;
     createSurpriseLink(recipientName: string, message: string): Promise<string>;
     getAllCommunityPosts(): Promise<Array<CommunityPost>>;
     getAllMarketplaceListings(): Promise<Array<MarketplaceListing>>;
@@ -204,6 +210,7 @@ export interface backendInterface {
         remaining: bigint;
     }>;
     getSurprisePayload(surpriseId: string): Promise<SurprisePayload | null>;
+    getUserAuth(): Promise<UserAuth | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     recordDownload(contentType: string, contentId: bigint): Promise<void>;
@@ -214,7 +221,7 @@ export interface backendInterface {
     subscribeToCreator(creator: Principal): Promise<void>;
     updateSubscriptionStatus(user: Principal, plan: PlanType, state: SubscriptionState, expiresAt: bigint | null): Promise<void>;
 }
-import type { CommunityPost as _CommunityPost, ListingId as _ListingId, MarketplaceListing as _MarketplaceListing, PlanType as _PlanType, PostId as _PostId, SubscriptionState as _SubscriptionState, SubscriptionStatus as _SubscriptionStatus, SurprisePayload as _SurprisePayload, TemplateId as _TemplateId, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { CommunityPost as _CommunityPost, ListingId as _ListingId, MarketplaceListing as _MarketplaceListing, PlanType as _PlanType, PostId as _PostId, SubscriptionState as _SubscriptionState, SubscriptionStatus as _SubscriptionStatus, SurprisePayload as _SurprisePayload, TemplateId as _TemplateId, UserAuth as _UserAuth, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -282,6 +289,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.createMarketplaceListing(arg0, arg1, arg2, to_candid_variant_n3(this._uploadFile, this._downloadFile, arg3));
+            return result;
+        }
+    }
+    async createOrUpdateUserAuth(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createOrUpdateUserAuth(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createOrUpdateUserAuth(arg0);
             return result;
         }
     }
@@ -526,6 +547,20 @@ export class Backend implements backendInterface {
             return from_candid_opt_n23(this._uploadFile, this._downloadFile, result);
         }
     }
+    async getUserAuth(): Promise<UserAuth | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getUserAuth();
+                return from_candid_opt_n24(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getUserAuth();
+            return from_candid_opt_n24(this._uploadFile, this._downloadFile, result);
+        }
+    }
     async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
         if (this.processError) {
             try {
@@ -641,14 +676,14 @@ export class Backend implements backendInterface {
     async updateSubscriptionStatus(arg0: Principal, arg1: PlanType, arg2: SubscriptionState, arg3: bigint | null): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.updateSubscriptionStatus(arg0, to_candid_PlanType_n24(this._uploadFile, this._downloadFile, arg1), to_candid_SubscriptionState_n26(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n28(this._uploadFile, this._downloadFile, arg3));
+                const result = await this.actor.updateSubscriptionStatus(arg0, to_candid_PlanType_n25(this._uploadFile, this._downloadFile, arg1), to_candid_SubscriptionState_n27(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n29(this._uploadFile, this._downloadFile, arg3));
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.updateSubscriptionStatus(arg0, to_candid_PlanType_n24(this._uploadFile, this._downloadFile, arg1), to_candid_SubscriptionState_n26(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n28(this._uploadFile, this._downloadFile, arg3));
+            const result = await this.actor.updateSubscriptionStatus(arg0, to_candid_PlanType_n25(this._uploadFile, this._downloadFile, arg1), to_candid_SubscriptionState_n27(this._uploadFile, this._downloadFile, arg2), to_candid_opt_n29(this._uploadFile, this._downloadFile, arg3));
             return result;
         }
     }
@@ -684,6 +719,9 @@ function from_candid_opt_n22(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
     return value.length === 0 ? null : from_candid_MarketplaceListing_n9(_uploadFile, _downloadFile, value[0]);
 }
 function from_candid_opt_n23(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_SurprisePayload]): SurprisePayload | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserAuth]): UserAuth | null {
     return value.length === 0 ? null : value[0];
 }
 function from_candid_record_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
@@ -830,16 +868,16 @@ function from_candid_vec_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Ar
 function from_candid_vec_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_MarketplaceListing>): Array<MarketplaceListing> {
     return value.map((x)=>from_candid_MarketplaceListing_n9(_uploadFile, _downloadFile, x));
 }
-function to_candid_PlanType_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PlanType): _PlanType {
-    return to_candid_variant_n25(_uploadFile, _downloadFile, value);
+function to_candid_PlanType_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PlanType): _PlanType {
+    return to_candid_variant_n26(_uploadFile, _downloadFile, value);
 }
-function to_candid_SubscriptionState_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SubscriptionState): _SubscriptionState {
-    return to_candid_variant_n27(_uploadFile, _downloadFile, value);
+function to_candid_SubscriptionState_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SubscriptionState): _SubscriptionState {
+    return to_candid_variant_n28(_uploadFile, _downloadFile, value);
 }
 function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
     return to_candid_variant_n2(_uploadFile, _downloadFile, value);
 }
-function to_candid_opt_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
+function to_candid_opt_n29(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: bigint | null): [] | [bigint] {
     return value === null ? candid_none() : candid_some(value);
 }
 function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
@@ -857,7 +895,7 @@ function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8
         guest: null
     } : value;
 }
-function to_candid_variant_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PlanType): {
+function to_candid_variant_n26(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: PlanType): {
     pro: null;
 } | {
     creator: null;
@@ -872,7 +910,7 @@ function to_candid_variant_n25(_uploadFile: (file: ExternalBlob) => Promise<Uint
         free: null
     } : value;
 }
-function to_candid_variant_n27(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SubscriptionState): {
+function to_candid_variant_n28(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: SubscriptionState): {
     active: null;
 } | {
     canceled: null;

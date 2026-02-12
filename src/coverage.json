@@ -1,235 +1,98 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T12:33:14.703Z",
+  "generatedAt": "2026-02-12T13:34:04.796Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 12,
-    "implemented": 11,
+    "total": 5,
+    "implemented": 5,
     "items": [
       {
-        "id": "REQ-64",
-        "summary": "Update the plan model used by the app to support three plans (Free, Pro, Creator) and plan entitlements required for feature locking: Free (3 messages/day, watermark on downloads, limited templates, no HD export), Pro (₹49/month: unlimited messages, no watermark, HD export 1080x1080 + 9:16, premium templates, Hindi + Romantic tone access, Surprise Link generation), Creator (₹149/month: everything in Pro + creator marketplace selling features, analytics dashboard placeholder). All user-facing text must be in English.",
+        "id": "REQ-82",
+        "summary": "Update the site viewport configuration by replacing the existing viewport meta tag in `frontend/index.html` with exactly: `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />`.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/hooks/usePlanSelection.ts",
-          "frontend/src/features/subscription/plans.ts",
-          "frontend/src/features/subscription/useEntitlements.ts",
-          "frontend/src/components/PlanStatus.tsx",
-          "frontend/src/sections/PricingSection.tsx"
+          "frontend/index.html"
         ],
         "matchedFiles": [
-          "frontend/src/features/subscription/plans.ts",
-          "frontend/src/features/subscription/useEntitlements.ts",
-          "frontend/src/components/PlanStatus.tsx",
-          "frontend/src/sections/PricingSection.tsx"
+          "frontend/index.html"
         ]
       },
       {
-        "id": "REQ-65",
-        "summary": "Implement message quota enforcement for the Free plan: limit to 3 message generations per calendar day. For anonymous users, enforce using localStorage per-device; for authenticated users, enforce using backend storage keyed by principal. When the limit is reached, block generation actions and show a clear English prompt to upgrade.",
+        "id": "REQ-83",
+        "summary": "Add a global, mobile-safe overflow prevention baseline in `frontend/src/index.css` to fully eliminate horizontal scrolling: apply `width: 100%`, `margin: 0`, and `overflow-x: hidden` to `html, body`, and ensure `#root` is `width: 100%` with `min-height: 100vh`.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/quota/quotaStorage.ts",
-          "frontend/src/features/quota/useMessageQuota.ts",
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/features/quota/quotaStorage.ts",
-          "frontend/src/features/quota/useMessageQuota.ts",
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/App.tsx"
+          "frontend/src/index.css"
         ]
       },
       {
-        "id": "REQ-66",
-        "summary": "Add subscription status storage and retrieval in the backend for authenticated users, including: current plan, subscription state (e.g., active/canceled/expired), and timestamps. Expose query methods for the frontend to fetch the caller’s subscription status and update methods intended to be called after payment verification.",
-        "status": "unknown",
-        "plannedFiles": [],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-67",
-        "summary": "Add a Razorpay upgrade entry-point in the Pricing section UI for Pro and Creator plans that starts a client-side payment flow (placeholder/stub if full Razorpay verification cannot be completed in this environment). The UI must clearly indicate that payments are processed via Razorpay and must not break offline core generation.",
+        "id": "REQ-84",
+        "summary": "Ensure the premium dark gradient background covers the full screen width/height on mobile by applying the background to either `body` or a single full-width top-level wrapper (e.g., the `App` root) using `width: 100vw` (or `w-full`) and `min-height: 100vh`, without introducing horizontal overflow.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/payments/razorpay.ts",
-          "frontend/src/sections/PricingSection.tsx",
-          "frontend/src/features/subscription/PricingComparisonModal.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/payments/razorpay.ts",
-          "frontend/src/sections/PricingSection.tsx",
-          "frontend/src/features/subscription/PricingComparisonModal.tsx"
-        ]
-      },
-      {
-        "id": "REQ-68",
-        "summary": "Implement entitlement-based feature locking UX across the app: if a feature is not included in the user’s current plan, render it blurred/disabled, show a “Unlock Premium” button, and open a pricing comparison modal when clicked. Include the upgrade CTA text exactly: “Create Something She Will Never Forget 💖”.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/subscription/PremiumLock.tsx",
-          "frontend/src/features/subscription/PricingComparisonModal.tsx",
           "frontend/src/App.tsx",
           "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/features/subscription/PremiumLock.tsx",
-          "frontend/src/features/subscription/PricingComparisonModal.tsx",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-69",
-        "summary": "Update the download/export system to support plan-based behavior: Free users can download with a watermark; Pro/Creator users can download without a watermark and in HD (1080x1080) and 9:16. Keep the existing canvas-based export behavior intact and extend it to apply watermarking and size selection where applicable.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/cardExport/canvasExport.ts",
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/features/premiumCardDesigner/ExportActions.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/sections/OutputSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-70",
-        "summary": "Add PDF download option for generated content (at minimum: the Main Wish plus WishMint AI branding). Gate PDF HD/no-watermark variants behind Pro/Creator where applicable, and apply watermarking for Free.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/package.json",
-          "frontend/src/features/cardExport/pdfExport.ts",
-          "frontend/src/sections/OutputSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/cardExport/pdfExport.ts",
-          "frontend/src/sections/OutputSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-71",
-        "summary": "Implement “Surprise Mode” (Pro/Creator only) that generates a private link to a dedicated Surprise view. When opened, the page plays: animated confetti, a name reveal animation, romantic background music (toggleable/mutable), and a message fade-in animation. Store the surprise payload so the link can render without requiring the generator form on open.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/surprise/useSurpriseLinks.ts",
-          "frontend/src/features/surprise/SurpriseView.tsx",
           "frontend/src/App.tsx",
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/public/assets/romantic-music.mp3"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/surprise/useSurpriseLinks.ts",
-          "frontend/src/features/surprise/SurpriseView.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/sections/OutputSection.tsx"
+          "frontend/src/index.css"
         ]
       },
       {
-        "id": "REQ-72",
-        "summary": "Improve the homepage for conversion: change the Hero primary CTA label from “Try Demo” to exactly “✨ Create Magic Now”; add a social proof counter reading exactly “3,000+ Wishes Generated Today”; add a premium badge UI element; and add a pricing comparison table section (can be integrated into the pricing modal and/or pricing section).",
+        "id": "REQ-85",
+        "summary": "Audit and fix layout containers and section components to remove any non-responsive fixed width constraints that can force overflow (e.g., `w-[400px]`, `w-[420px]`, `w-[450px]`, or problematic `max-w-[500px]`). Replace them with mobile-first responsive patterns (`w-full`, optional `max-w-[480px]`, `mx-auto`, and `px-4` / `p-4` / `p-6`) so content stretches correctly on small screens.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/features/subscription/PricingComparisonTable.tsx",
-          "frontend/src/features/subscription/PricingComparisonModal.tsx",
+          "frontend/src/sections/GeneratorSection.tsx",
+          "frontend/src/sections/TemplatesSection.tsx",
+          "frontend/src/sections/OutputSection.tsx",
           "frontend/src/sections/PricingSection.tsx"
         ],
         "matchedFiles": [
           "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/features/subscription/PricingComparisonTable.tsx",
-          "frontend/src/features/subscription/PricingComparisonModal.tsx",
+          "frontend/src/sections/GeneratorSection.tsx",
+          "frontend/src/sections/TemplatesSection.tsx",
+          "frontend/src/sections/OutputSection.tsx",
           "frontend/src/sections/PricingSection.tsx"
         ]
       },
       {
-        "id": "REQ-73",
-        "summary": "Add an authenticated user dashboard section accessible after login that displays: subscription status/plan, remaining free credits (if on Free), download history, saved templates, and (if on Creator) an earnings panel (placeholder if full payouts are not implemented).",
+        "id": "REQ-86",
+        "summary": "Identify and eliminate the specific DOM element(s) causing right-side overflow (e.g., oversized absolutely positioned layers, transforms, fixed alignment, or any element wider than 100%). Adjust the offending styles/classes so no element exceeds the viewport width on mobile while keeping existing UI behavior intact.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/subscription/useSubscriptionStatus.ts",
-          "frontend/src/features/account/useAccountData.ts",
-          "frontend/src/sections/DashboardSection.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/sections/FooterSection.tsx"
+          "frontend/src/features/surprise/SurpriseView.tsx",
+          "frontend/src/index.css"
         ],
         "matchedFiles": [
-          "frontend/src/features/subscription/useSubscriptionStatus.ts",
-          "frontend/src/features/account/useAccountData.ts",
-          "frontend/src/sections/DashboardSection.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/sections/FooterSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-74",
-        "summary": "Upgrade Marketplace capabilities for Creator plan: restrict creation of marketplace listings to Creator users (Free/Pro users can browse), and add creator-facing tracking of listing downloads (or expresses-interest interactions if downloads are not implemented) in the dashboard.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/marketplace/components/CreateListingDialog.tsx",
-          "frontend/src/sections/MarketplaceSection.tsx",
-          "frontend/src/features/marketplace/useListingInteractions.ts",
-          "frontend/src/sections/DashboardSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/features/marketplace/components/CreateListingDialog.tsx",
-          "frontend/src/sections/DashboardSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-75",
-        "summary": "Add/expand legal and trust content sections to include Terms & Conditions and Refund Policy in addition to existing Privacy Policy and Contact. Ensure all user-facing text is in English and matches the site’s premium dark gradient style.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/sections/LegalSections.tsx",
-          "frontend/src/sections/FooterSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/sections/LegalSections.tsx",
-          "frontend/src/sections/FooterSection.tsx"
+          "frontend/src/features/surprise/SurpriseView.tsx",
+          "frontend/src/index.css"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
+    "frontend/index.html",
     "frontend/src/App.tsx",
-    "frontend/src/backend.d.ts",
-    "frontend/src/backend.ts",
-    "frontend/src/components/PlanStatus.tsx",
-    "frontend/src/declarations/backend.did.d.ts",
-    "frontend/src/declarations/backend.did.js",
-    "frontend/src/features/account/useAccountData.ts",
-    "frontend/src/features/cardExport/pdfExport.ts",
-    "frontend/src/features/marketplace/components/CreateListingDialog.tsx",
-    "frontend/src/features/marketplace/hooks/useExpressInterest.ts",
-    "frontend/src/features/marketplace/hooks/useListingInteractions.ts",
-    "frontend/src/features/payments/razorpay.ts",
-    "frontend/src/features/quota/quotaStorage.ts",
-    "frontend/src/features/quota/useMessageQuota.ts",
-    "frontend/src/features/subscription/PremiumLock.tsx",
-    "frontend/src/features/subscription/PricingComparisonModal.tsx",
-    "frontend/src/features/subscription/PricingComparisonTable.tsx",
-    "frontend/src/features/subscription/plans.ts",
-    "frontend/src/features/subscription/useEntitlements.ts",
-    "frontend/src/features/subscription/useSubscriptionStatus.ts",
     "frontend/src/features/surprise/SurpriseView.tsx",
-    "frontend/src/features/surprise/useSurpriseLinks.ts",
-    "frontend/src/sections/DashboardSection.tsx",
-    "frontend/src/sections/FooterSection.tsx",
+    "frontend/src/index.css",
     "frontend/src/sections/GeneratorSection.tsx",
     "frontend/src/sections/HeroSection.tsx",
-    "frontend/src/sections/LegalSections.tsx",
     "frontend/src/sections/OutputSection.tsx",
     "frontend/src/sections/PricingSection.tsx",
+    "frontend/src/sections/TemplatesSection.tsx",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

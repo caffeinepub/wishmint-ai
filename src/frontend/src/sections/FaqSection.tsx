@@ -33,6 +33,11 @@ export function FaqSection() {
       answer:
         'Each Birthday Pack includes 5 components: a Main Wish (detailed and heartfelt), WhatsApp Short (perfect for quick messages), Instagram Caption (social media ready), Mini Speech (10-15 seconds when spoken), and Hashtags (for social posts).',
     },
+    {
+      question: 'How does authentication work? (Developer Note)',
+      answer:
+        'The "Continue with Google" button is a UX label for Internet Identity authentication on the Internet Computer. This project does not use Google OAuth 2.0, NextAuth, or traditional JWT sessions. Authentication is handled by Internet Identity (configured via II_URL environment variable). For production deployment on the Internet Computer, ensure your canister is properly configured with the correct Internet Identity URL for the IC mainnet.',
+    },
   ];
 
   return (
@@ -60,7 +65,7 @@ export function FaqSection() {
                 <AccordionTrigger className="text-left hover:no-underline py-4">
                   <span className="font-semibold text-base">{faq.question}</span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground text-sm pb-4 leading-relaxed">
+                <AccordionContent className="text-muted-foreground leading-relaxed pb-4">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>

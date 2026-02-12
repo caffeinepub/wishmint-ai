@@ -1,71 +1,88 @@
-import { forwardRef } from 'react';
+import { forwardRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { shortenPrincipal } from '../lib/principal';
-import { LogIn, LogOut, Loader2 } from 'lucide-react';
+import { LogOut, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { AuthEntryDialog } from './auth/AuthEntryDialog';
 
 /**
  * Authentication controls component that provides sign-in/sign-out functionality
- * using Internet Identity. Displays user principal when authenticated.
+ * using Internet Identity with "Continue with Google" branding. Displays user principal when authenticated.
  * Supports forwarding ref to the sign-in button for focus management.
  */
 export const AuthControls = forwardRef<HTMLButtonElement>((props, ref) => {
-  const { login, clear, loginStatus, identity, isLoggingIn, isLoginError, loginError } = useInternetIdentity();
+  const { clear, identity, isLoggingIn, isLoginError, loginError } = useInternetIdentity();
+  const [authDialogOpen, setAuthDialogOpen] = useState(false);
 
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
   const principalString = identity?.getPrincipal().toString();
 
-  return (
-    <div className="flex items-center gap-3">
-      {isLoginError && loginError && (
-        <Alert variant="destructive" className="max-w-xs">
-          <AlertDescription className="text-sm">
-            {loginError.message}
-          </AlertDescription>
-        </Alert>
-      )}
+  const handleSignOut = async () => {
+    await clear();
+  };
 
-      {isAuthenticated ? (
-        <div className="flex items-center gap-3">
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="text-xs text-muted-foreground">Signed in</span>
-            <span className="text-sm font-mono text-foreground">
-              {principalString ? shortenPrincipal(principalString) : '...'}
-            </span>
+  return (
+    <>
+      <div className="flex items-center gap-3">
+        {isLoginError && loginError && !authDialogOpen && (
+          <Alert variant="destructive" className="max-w-xs">
+            <AlertDescription className="text-sm">
+              {loginError.message}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {isAuthenticated ? (
+          <div className="flex items-center gap-3">
+            <div className="hidden sm:flex flex-col items-end">
+              <span className="text-xs text-muted-foreground">Signed in</span>
+              <span className="text-sm font-mono text-foreground">
+                {principalString ? shortenPrincipal(principalString) : '...'}
+              </span>
+            </div>
+            <Button
+              onClick={handleSignOut}
+              variant="outline"
+              size="sm"
+              className="border-neon-purple/50 hover:bg-neon-purple/10"
+            >
+              <LogOut className="w-4 h-4 mr-2" />
+              Sign out
+            </Button>
           </div>
+        ) : (
           <Button
-            onClick={clear}
-            variant="outline"
+            ref={ref}
+            onClick={() => setAuthDialogOpen(true)}
+            disabled={isLoggingIn}
             size="sm"
-            className="border-neon-purple/50 hover:bg-neon-purple/10"
+            className="bg-white hover:bg-gray-50 text-gray-900 border border-gray-300 font-medium"
           >
-            <LogOut className="w-4 h-4 mr-2" />
-            Sign out
+            {isLoggingIn ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              <>
+                <img
+                  src="/assets/generated/google-g-logo.dim_24x24.png"
+                  alt="Google"
+                  className="w-4 h-4 mr-2"
+                />
+                Continue with Google
+              </>
+            )}
           </Button>
-        </div>
-      ) : (
-        <Button
-          ref={ref}
-          onClick={login}
-          disabled={isLoggingIn || loginStatus === 'initializing'}
-          size="sm"
-          className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold"
-        >
-          {isLoggingIn ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Signing in...
-            </>
-          ) : (
-            <>
-              <LogIn className="w-4 h-4 mr-2" />
-              Sign in
-            </>
-          )}
-        </Button>
-      )}
-    </div>
+        )}
+      </div>
+
+      <AuthEntryDialog
+        open={authDialogOpen}
+        onOpenChange={setAuthDialogOpen}
+      />
+    </>
   );
 });
 

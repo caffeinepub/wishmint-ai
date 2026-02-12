@@ -162,7 +162,7 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
     };
 
     return (
-      <section ref={ref} className="section-padding px-4 sm:px-6 lg:px-8">
+      <section ref={ref} className="w-full section-padding px-4 sm:px-6 lg:px-8">
         <div className="section-container max-w-5xl">
           <Reveal>
             <Card className="bg-card/60 backdrop-blur-sm border-neon-purple/20 shadow-card">

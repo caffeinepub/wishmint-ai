@@ -16,12 +16,16 @@ function triggerConfetti() {
   for (let i = 0; i < confettiCount; i++) {
     const confetti = document.createElement('div');
     confetti.className = 'confetti-piece';
+    
+    // Use percentage-based positioning that stays within viewport
+    const leftPosition = Math.random() * 90 + 5; // 5% to 95%
+    
     confetti.style.cssText = `
       position: fixed;
       width: 10px;
       height: 10px;
       background-color: ${colors[Math.floor(Math.random() * colors.length)]};
-      left: ${Math.random() * 100}vw;
+      left: ${leftPosition}%;
       top: -10px;
       opacity: ${Math.random() * 0.7 + 0.3};
       transform: rotate(${Math.random() * 360}deg);
@@ -101,7 +105,7 @@ export function SurpriseView({ surpriseId, onBackHome }: SurpriseViewProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-neon-purple/20 via-background to-neon-green/20">
+      <div className="w-full min-h-screen flex items-center justify-center bg-gradient-to-br from-neon-purple/20 via-background to-neon-green/20">
         <Loader2 className="w-12 h-12 animate-spin text-neon-purple" />
       </div>
     );
@@ -109,8 +113,8 @@ export function SurpriseView({ surpriseId, onBackHome }: SurpriseViewProps) {
 
   if (error || !payload) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-neon-purple/20 via-background to-neon-green/20 px-4">
-        <div className="text-center space-y-4">
+      <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-neon-purple/20 via-background to-neon-green/20 px-4">
+        <div className="text-center space-y-4 max-w-md">
           <h1 className="text-3xl font-bold text-destructive">Surprise Not Found</h1>
           <p className="text-muted-foreground">
             This surprise link is invalid, expired, or has been removed.
@@ -125,7 +129,7 @@ export function SurpriseView({ surpriseId, onBackHome }: SurpriseViewProps) {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-neon-purple/20 via-background to-neon-green/20 px-4 relative overflow-hidden">
+    <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gradient-to-br from-neon-purple/20 via-background to-neon-green/20 px-4 relative overflow-hidden">
       {/* Animated background */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.1),transparent_50%)] animate-pulse" />
 
@@ -139,7 +143,7 @@ export function SurpriseView({ surpriseId, onBackHome }: SurpriseViewProps) {
         {isMusicPlaying ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4" />}
       </Button>
 
-      <div className="relative z-10 max-w-2xl mx-auto text-center space-y-8">
+      <div className="relative z-10 w-full max-w-2xl mx-auto text-center space-y-8 px-4">
         {/* Name reveal */}
         <div
           className={`transition-all duration-1000 ${
@@ -161,7 +165,7 @@ export function SurpriseView({ surpriseId, onBackHome }: SurpriseViewProps) {
           }`}
         >
           <div className="bg-card/60 backdrop-blur-sm border border-neon-purple/30 rounded-2xl p-8 shadow-neon">
-            <p className="text-lg sm:text-xl leading-relaxed whitespace-pre-wrap">
+            <p className="text-lg sm:text-xl leading-relaxed whitespace-pre-wrap break-words">
               {payload.message}
             </p>
           </div>

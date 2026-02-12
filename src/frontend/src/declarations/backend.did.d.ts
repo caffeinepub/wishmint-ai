@@ -62,6 +62,11 @@ export interface SurprisePayload {
   'recipientName' : string,
 }
 export type TemplateId = bigint;
+export interface UserAuth {
+  'provider' : string,
+  'lastLoginAt' : bigint,
+  'createdAt' : bigint,
+}
 export interface UserProfile { 'bio' : string, 'name' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
@@ -83,6 +88,7 @@ export interface _SERVICE {
     ],
     ListingId
   >,
+  'createOrUpdateUserAuth' : ActorMethod<[string], undefined>,
   'createSurpriseLink' : ActorMethod<[string, string], string>,
   'getAllCommunityPosts' : ActorMethod<[], Array<CommunityPost>>,
   'getAllMarketplaceListings' : ActorMethod<[], Array<MarketplaceListing>>,
@@ -103,6 +109,7 @@ export interface _SERVICE {
     { 'total' : bigint, 'remaining' : bigint }
   >,
   'getSurprisePayload' : ActorMethod<[string], [] | [SurprisePayload]>,
+  'getUserAuth' : ActorMethod<[], [] | [UserAuth]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
   'recordDownload' : ActorMethod<[string, bigint], undefined>,

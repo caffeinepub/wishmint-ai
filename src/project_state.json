@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 29,
-  "summary": "Shift WishMint AI toward a production-ready, scalable premium monetized birthday/emotional message platform with Razorpay subscriptions (India payments), tiered plans (Free/Pro/Creator) with automatic feature locking, enhanced export formats (PNG/PDF/MP4), Surprise Link experiences, voice + reel generation, conversion-focused homepage updates, user dashboard, and creator marketplace upgrades including payouts/analytics—potentially requiring an online backend stack beyond the current offline-first IC-only approach.",
+  "projectStateVersion": 33,
+  "summary": "WishMint AI now needs an upgraded authentication system that adds Google OAuth 2.0 “Continue with Google” for both Sign Up and Sign In, with automatic account creation/login, user-provider linking rules, and a secure session approach (JWT + refresh or httpOnly cookies), potentially implying a React/Next.js frontend and Node/Express backend beyond the current Internet Computer offline-first stack.",
   "architectural_notes": [
     "Single-file offline-first implementation: all HTML/CSS/JS in one index.html; template-based text generation (no external APIs/keys).",
     "Use wa.me URL with encodeURIComponent for WhatsApp sharing.",
@@ -15,9 +15,10 @@
     "Razorpay subscriptions require online backend components: subscription creation, webhook verification, and secure server-side signature checks; cannot be fully offline-first."
   ],
   "known_issues": [
-    "Deployment/build error encountered when attempting to push/deploy the app to the network."
+    "Deployment/build error encountered when attempting to push/deploy the app to the network.",
+    "Mobile layout bug: unintended right-side black empty space/horizontal overflow; content not stretching full width on small screens."
   ],
-  "isFixRequest": false,
+  "isFixRequest": true,
   "existing_features": [
     {
       "id": "feature-create-a-single-page-react-ui-for-wishmint-ai-with-a-premium-dark-theme-and-neon-gradient-accents-purple-green-using-clean-typography-rounded-cards-subtle-shadows-smooth-spacing-and-mobile-first-responsive-layout-suitable-for-india-audiences-on-phones-and-desktop",
@@ -594,6 +595,86 @@
         "REQ-75"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-add-continue-with-google-entry-points-for-authentication-that-work-within-the-internet-computer-stack-by-re-labeling-the-existing-internet-identity-login-as-a-google-based-sign-in-alternative-and-expose-it-in-two-contexts-1-a-sign-in-ui-and-2-a-sign-up-ui-both-uis-must-show-a-white-button-with-a-google-icon-and-the-exact-label-continue-with-google-and-both-must-trigger-the-existing-internet-identity-login-flow",
+      "title": "Add “Continue with Google” entry points for authentication that work within the Internet Computer stack by re-labeling the existing Internet Identity login as a Google-based sign-in alternative, and expose it in two contexts: (1) a Sign In UI and (2) a Sign Up UI. Both UIs must show a white button with a Google icon and the exact label “Continue with Google”, and both must trigger the existing Internet Identity login flow.",
+      "reqIds": [
+        "REQ-76"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-after-a-successful-authentication-redirect-the-user-to-the-dashboard-experience-used-by-this-single-page-app-by-automatically-scrolling-focusing-to-the-dashboard-section-when-it-is-available-authenticated-only-and-provide-a-clear-success-state-in-the-auth-ui",
+      "title": "After a successful authentication, redirect the user to the Dashboard experience used by this single-page app by automatically scrolling/focusing to the Dashboard section when it is available (authenticated-only), and provide a clear success state in the auth UI.",
+      "reqIds": [
+        "REQ-77"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-backend-method-that-the-frontend-calls-immediately-after-login-to-ensure-the-user-record-exists-auto-create-on-first-login-and-to-update-lastloginat-mirroring-create-user-if-not-exists-else-log-them-in-behavior-within-the-internet-identity-model",
+      "title": "Add a backend method that the frontend calls immediately after login to ensure the user record exists (auto-create on first login) and to update `lastLoginAt`, mirroring “create user if not exists; else log them in” behavior within the Internet Identity model.",
+      "reqIds": [
+        "REQ-79"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-existing-authentication-ui-copy-to-be-consistent-with-the-new-continue-with-google-presentation-while-keeping-the-current-premium-dark-gradient-theme-and-avoiding-any-breaking-changes-to-frontend-src-hooks-useinternetidentity-ts-and-frontend-src-hooks-useactor-ts-immutable-hook-paths",
+      "title": "Update the existing authentication UI copy to be consistent with the new “Continue with Google” presentation while keeping the current premium dark gradient theme and avoiding any breaking changes to `frontend/src/hooks/useInternetIdentity.ts` and `frontend/src/hooks/useActor.ts` (immutable hook paths).",
+      "reqIds": [
+        "REQ-80"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-in-app-developer-facing-setup-note-in-a-small-non-intrusive-help-dialog-accordion-or-a-readme-like-on-page-section-that-explains-how-continue-with-google-is-implemented-via-internet-identity-in-this-project-including-which-environment-variable-controls-the-identity-provider-url-ii-url-and-what-to-configure-in-production-for-the-internet-computer-deployment",
+      "title": "Add an in-app developer-facing setup note (in a small, non-intrusive help dialog/accordion or a README-like on-page section) that explains how “Continue with Google” is implemented via Internet Identity in this project, including which environment variable controls the identity provider URL (`II_URL`) and what to configure in production for the Internet Computer deployment.",
+      "reqIds": [
+        "REQ-81"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-site-viewport-configuration-by-replacing-the-existing-viewport-meta-tag-in-frontend-index-html-with-exactly-meta-name-viewport-content-width-device-width-initial-scale-1-viewport-fit-cover",
+      "title": "Update the site viewport configuration by replacing the existing viewport meta tag in `frontend/index.html` with exactly: `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />`.",
+      "reqIds": [
+        "REQ-82"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-global-mobile-safe-overflow-prevention-baseline-in-frontend-src-index-css-to-fully-eliminate-horizontal-scrolling-apply-width-100-margin-0-and-overflow-x-hidden-to-html-body-and-ensure-root-is-width-100-with-min-height-100vh",
+      "title": "Add a global, mobile-safe overflow prevention baseline in `frontend/src/index.css` to fully eliminate horizontal scrolling: apply `width: 100%`, `margin: 0`, and `overflow-x: hidden` to `html, body`, and ensure `#root` is `width: 100%` with `min-height: 100vh`.",
+      "reqIds": [
+        "REQ-83"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-premium-dark-gradient-background-covers-the-full-screen-width-height-on-mobile-by-applying-the-background-to-either-body-or-a-single-full-width-top-level-wrapper-e-g-the-app-root-using-width-100vw-or-w-full-and-min-height-100vh-without-introducing-horizontal-overflow",
+      "title": "Ensure the premium dark gradient background covers the full screen width/height on mobile by applying the background to either `body` or a single full-width top-level wrapper (e.g., the `App` root) using `width: 100vw` (or `w-full`) and `min-height: 100vh`, without introducing horizontal overflow.",
+      "reqIds": [
+        "REQ-84"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-audit-and-fix-layout-containers-and-section-components-to-remove-any-non-responsive-fixed-width-constraints-that-can-force-overflow-e-g-w-400px-w-420px-w-450px-or-problematic-max-w-500px-replace-them-with-mobile-first-responsive-patterns-w-full-optional-max-w-480px-mx-auto-and-px-4-p-4-p-6-so-content-stretches-correctly-on-small-screens",
+      "title": "Audit and fix layout containers and section components to remove any non-responsive fixed width constraints that can force overflow (e.g., `w-[400px]`, `w-[420px]`, `w-[450px]`, or problematic `max-w-[500px]`). Replace them with mobile-first responsive patterns (`w-full`, optional `max-w-[480px]`, `mx-auto`, and `px-4` / `p-4` / `p-6`) so content stretches correctly on small screens.",
+      "reqIds": [
+        "REQ-85"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-identify-and-eliminate-the-specific-dom-element-s-causing-right-side-overflow-e-g-oversized-absolutely-positioned-layers-transforms-fixed-alignment-or-any-element-wider-than-100-adjust-the-offending-styles-classes-so-no-element-exceeds-the-viewport-width-on-mobile-while-keeping-existing-ui-behavior-intact",
+      "title": "Identify and eliminate the specific DOM element(s) causing right-side overflow (e.g., oversized absolutely positioned layers, transforms, fixed alignment, or any element wider than 100%). Adjust the offending styles/classes so no element exceeds the viewport width on mobile while keeping existing UI behavior intact.",
+      "reqIds": [
+        "REQ-86"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -889,6 +970,26 @@
       "reqIds": [
         "REQ-66"
       ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-54",
+      "summary": "Implement Google OAuth 2.0 authentication: add “Continue with Google” button on Sign Up/Sign In, verify Google token server-side, auto-create user if new or log in if existing, store (fullName, email, googleId, profilePhoto, provider, createdAt, lastLoginAt), handle account linking/duplicate email rules, secure sessions (JWT access+refresh or httpOnly cookies), rate-limit auth endpoints, redirect to Dashboard, and provide setup instructions (consent screen, redirect URIs, env vars)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-57",
+      "summary": "Implement backend persistence for basic authentication metadata for authenticated principals: create a user-auth record keyed by caller principal that stores `provider`, `createdAt`, and `lastLoginAt`, and update `lastLoginAt` on each successful login verification call from the frontend.",
+      "reqIds": [
+        "REQ-78"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-58",
+      "summary": "Fix mobile layout overflow causing black empty space on the right; add viewport meta tag, remove fixed-width constraints, ensure full-width wrappers/background gradient coverage, and prevent horizontal scrolling across 360/390/414px widths while maintaining dark premium gradient design",
+      "reqIds": [],
       "status": "pending"
     }
   ],

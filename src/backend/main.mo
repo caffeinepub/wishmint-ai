@@ -8,11 +8,20 @@ import Time "mo:core/Time";
 import Text "mo:core/Text";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
-  // Initialize the access control system
+  // User Auth Record
+  public type UserAuth = {
+    provider : Text;
+    createdAt : Int;
+    lastLoginAt : Int;
+  };
+
+  let userAuth = Map.empty<Principal, UserAuth>();
+
+  // Initialize the access control system (Not persisted)
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -118,6 +127,30 @@ actor {
   let downloadHistory = Map.empty<Principal, List.List<DownloadRecord>>();
   let savedTemplates = Map.empty<Principal, List.List<SavedTemplate>>();
   let listingInteractions = Map.empty<ListingId, List.List<ListingInteraction>>();
+
+  // Persistent login verification and create-if-not-exists
+  public shared ({ caller }) func createOrUpdateUserAuth(provider : Text) : async () {
+    let now = Time.now();
+    let newAuth : UserAuth = {
+      provider;
+      createdAt = now;
+      lastLoginAt = now;
+    };
+
+    switch (userAuth.get(caller)) {
+      case (null) {
+        userAuth.add(caller, newAuth);
+      };
+      case (?existing) {
+        let updatedAuth = { existing with lastLoginAt = now };
+        userAuth.add(caller, updatedAuth);
+      };
+    };
+  };
+
+  public query ({ caller }) func getUserAuth() : async ?UserAuth {
+    userAuth.get(caller);
+  };
 
   // Helper function to get current date string
   private func getCurrentDateString() : Text {

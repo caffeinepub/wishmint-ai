@@ -7,6 +7,11 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface UserAuth {
+    provider: string;
+    lastLoginAt: bigint;
+    createdAt: bigint;
+}
 export interface CreatorEarnings {
     totalRevenue: bigint;
     totalDownloads: bigint;
@@ -101,6 +106,7 @@ export interface backendInterface {
         __kind__: "sticker";
         sticker: bigint;
     }): Promise<ListingId>;
+    createOrUpdateUserAuth(provider: string): Promise<void>;
     createSurpriseLink(recipientName: string, message: string): Promise<string>;
     getAllCommunityPosts(): Promise<Array<CommunityPost>>;
     getAllMarketplaceListings(): Promise<Array<MarketplaceListing>>;
@@ -121,6 +127,7 @@ export interface backendInterface {
         remaining: bigint;
     }>;
     getSurprisePayload(surpriseId: string): Promise<SurprisePayload | null>;
+    getUserAuth(): Promise<UserAuth | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     recordDownload(contentType: string, contentId: bigint): Promise<void>;

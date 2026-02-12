@@ -1,105 +1,119 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T12:33:14.694Z",
-  "summary": "Diff implements core subscription scaffolding (plans/entitlements hooks + pricing modal/table), free-plan daily quota (localStorage + backend APIs referenced), Surprise links + Surprise view experience, dashboard data hooks/section, marketplace Creator gating + interaction tracking hooks, Razorpay upgrade stub, and legal sections/footer anchors. However, several acceptance criteria remain unmet (notably export/watermark/HD behavior, hero CTA text, and plan persistence/selection), and some unrequested/non-goal features are advertised in plan copy (MP4/voice/custom branding).",
+  "generatedAt": "2026-02-12T13:34:04.790Z",
+  "summary": "REQ-82 and REQ-83 are clearly implemented (viewport meta tag updated; global overflow-x prevention + #root sizing added). The diff also includes some layout-related class changes in sections, but the requested full-screen premium gradient coverage (REQ-84) and the comprehensive audit/elimination of fixed-width/overflow-causing elements (REQ-85/REQ-86) are not fully verifiable from the provided diff summary. Several unrelated product/behavior changes were introduced (demo/anon capability changes, auth-related behavior, new UI/sections/content, confetti/music, new hooks/components).",
   "missing_requirements": [
     {
-      "id": "REQ-64",
-      "requirement": "App supports selecting and persisting one of: Free, Pro, Creator (alongside any existing plan selection state).",
-      "reason": "The diff adds plan definitions and reads effective plan from backend subscription status, but does not show any UI/state for selecting a plan nor persistence of a selection (especially for anonymous users).",
+      "id": "REQ-84",
+      "requirement": "Ensure the premium dark gradient background covers the full screen width/height on mobile by applying the background to either body or a single full-width top-level wrapper (min-height: 100vh), without introducing horizontal overflow.",
+      "reason": "The diff shows body uses `bg-background` (solid) and individual sections (e.g., Hero/SurpriseView) apply their own gradients, but it does not clearly show a single global/top-level wrapper or body-level gradient that guarantees full-screen coverage across the entire app on mobile (especially outside the Hero/Surprise routes). App.tsx is truncated, so the presence of a global background wrapper cannot be confirmed.",
       "evidence": [
-        "frontend/src/features/subscription/useEntitlements.ts",
-        "frontend/src/features/subscription/plans.ts",
-        "frontend/src/sections/PricingSection.tsx",
-        "frontend/src/features/subscription/PricingComparisonModal.tsx"
-      ]
-    },
-    {
-      "id": "REQ-65",
-      "requirement": "Quota resets automatically on the next local calendar day (authenticated users enforced by backend principal-based tracking; anonymous users per-device).",
-      "reason": "Anonymous quota uses ISO date (OK), but backend helper uses `days.toText()` derived from `Time.now()` rather than a local-calendar date string, so the reset mechanism as specified (local calendar day) is not evidenced for authenticated users.",
-      "evidence": [
-        "frontend/src/features/quota/quotaStorage.ts",
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-69",
-      "requirement": "Update download/export system to support plan-based behavior: Free users download with a visible watermark; Pro/Creator no watermark and allow choosing 1080x1080 and 9:16; premium-only export on Free is blocked and routes to Unlock Premium modal.",
-      "reason": "OutputSection calls `exportCardImage(...)` without any plan-based size selection or watermark parameter, and no UI is shown for choosing 1080x1080 vs 9:16. Also, downloads are gated behind authentication/demo checks rather than Free-vs-Pro-vs-Creator plan behavior, and there is no evidence of routing Free users attempting premium export to the pricing modal.",
-      "evidence": [
-        "frontend/src/sections/OutputSection.tsx"
-      ]
-    },
-    {
-      "id": "REQ-70",
-      "requirement": "Add PDF download option gated by plan rules (Free watermarked; Pro/Creator no watermark; gate HD/no-watermark variants where applicable).",
-      "reason": "A PDF export function is added and includes an `includeWatermark` flag; however, it is not shown that Pro/Creator get a no-watermark/HD variant choice, nor that Free attempting premium variants is blocked via the premium lock modal. Additionally, the UI gates PDF download behind authentication/demo rather than plan-tier behavior.",
-      "evidence": [
-        "frontend/src/features/cardExport/pdfExport.ts",
-        "frontend/src/sections/OutputSection.tsx"
-      ]
-    },
-    {
-      "id": "REQ-72",
-      "requirement": "Change the Hero primary CTA label from “Try Demo” to exactly “✨ Create Magic Now”; add a premium badge UI element; add pricing comparison table section accessible from upgrade flow.",
-      "reason": "Hero still shows a primary button labeled “Try Demo” (not updated to the required exact text). Social proof text is present and a comparison table exists, but a distinct “premium badge UI element” in the landing flow is not clearly evidenced beyond the social proof badge.",
-      "evidence": [
+        "frontend/src/index.css",
         "frontend/src/sections/HeroSection.tsx",
-        "frontend/src/features/subscription/PricingComparisonTable.tsx",
-        "frontend/src/sections/PricingSection.tsx"
+        "frontend/src/features/surprise/SurpriseView.tsx",
+        "frontend/src/App.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-85",
+      "requirement": "Audit and fix layout containers/sections to remove non-responsive fixed width constraints (e.g., w-[400px]/w-[420px]/w-[450px]/problematic max-w) and replace with responsive patterns so mobile does not overflow.",
+      "reason": "Some sections show `w-full`/responsive padding updates, but the diff summary does not provide evidence of a full audit or that no fixed-width Tailwind classes remain across the main layout/sections. Many relevant files are not shown or are truncated.",
+      "evidence": [
+        "frontend-file-summaries.txt (multiple sections mention 'w-full added' but no proof fixed widths removed everywhere)",
+        "frontend/src/App.tsx (truncated)",
+        "frontend/src/sections/HeroSection.tsx (truncated)",
+        "frontend/src/sections/GeneratorSection.tsx (truncated)",
+        "frontend/src/sections/OutputSection.tsx (truncated)",
+        "frontend/src/sections/PricingSection.tsx (truncated)"
+      ]
+    },
+    {
+      "id": "REQ-86",
+      "requirement": "Identify and eliminate the specific DOM element(s) causing right-side overflow so no element exceeds viewport width on mobile, preserving existing behavior.",
+      "reason": "While global `overflow-x: hidden` and some defensive CSS (max-width for media) are added, the diff does not clearly document or show a targeted fix to the specific overflow-causing element(s) in the main app flow. The only explicit 'overflow' fix visible is in the Surprise confetti positioning; that may not address the original right-side black space issue across the rest of the app.",
+      "evidence": [
+        "frontend/src/index.css",
+        "frontend/src/features/surprise/SurpriseView.tsx",
+        "frontend/src/App.tsx (truncated)",
+        "frontend-file-summaries.txt"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Creator plan marketing includes MP4 reel export, voice message generation, and custom branding as plan features.",
-      "reason": "These are explicitly listed in the Creator plan feature list, but are non-goals/constraints in the BuildRequest (MP4 export and true voice synthesis were not to be implemented unless supported), and were not requested as part of the plan entitlements/features to ship now.",
+      "description": "Changed generator access/behavior to allow anonymous users to use generator features in demo mode and added/modified quota gating flows and related UI messaging/toasts.",
+      "reason": "The BuildRequest is strictly about mobile horizontal overflow/right-side black space and viewport/CSS/layout fixes; it explicitly lists non-goals including no new product features/behavior changes.",
       "evidence": [
-        "frontend/src/features/subscription/plans.ts"
+        "frontend/src/sections/GeneratorSection.tsx (truncated)",
+        "frontend-file-summaries.txt (GeneratorSection summary)"
       ]
     },
     {
-      "description": "Backend migration adds multiple new stable-state maps (download history, saved templates, listing interactions, surprise payloads, message quotas, subscription status) beyond what is strictly required for subscriptions/quota/surprise link storage.",
-      "reason": "REQ-66 requires subscription storage; REQ-65 requires quota tracking; REQ-71 requires surprise payload storage; REQ-73/74 mention download history/saved templates/interaction tracking, but the migration introduces all these at once without clear evidence all corresponding backend APIs are implemented/used in full in the diff summary (diff is truncated).",
+      "description": "Added/modified authentication-related behaviors including automatic auth record upsert on login and post-login dashboard scroll, plus auth dialog integration changes.",
+      "reason": "Non-goal: 'Do not add new product features, sections, or authentication changes as part of this task.'",
       "evidence": [
-        "backend/migration.mo",
-        "backend/main.mo",
-        "frontend/src/features/account/useAccountData.ts"
+        "frontend/src/App.tsx (truncated)",
+        "frontend/src/sections/HeroSection.tsx (truncated)",
+        "frontend-file-summaries.txt (App.tsx and HeroSection summaries)"
+      ]
+    },
+    {
+      "description": "Introduced/expanded Surprise mode presentation effects including a DOM-injecting confetti effect and romantic music playback.",
+      "reason": "Not requested for a layout/overflow fix; constitutes new user-facing behavior and assets usage.",
+      "evidence": [
+        "frontend/src/features/surprise/SurpriseView.tsx (truncated)"
+      ]
+    },
+    {
+      "description": "Added a responsive feature comparison table with horizontal scroll support in the Pricing section.",
+      "reason": "Not requested; BuildRequest forbids adding new product features/sections as part of this task.",
+      "evidence": [
+        "frontend-file-summaries.txt (PricingSection summary)",
+        "frontend/src/sections/PricingSection.tsx (truncated)"
+      ]
+    },
+    {
+      "description": "Added new hooks and components for scroll-based reveal animations and reduced-motion support (Reveal wrapper, useInView, usePrefersReducedMotion).",
+      "reason": "Not requested; goes beyond the specified overflow/viewport/layout requirements.",
+      "evidence": [
+        "frontend-file-summaries.txt (Reveal/useInView/usePrefersReducedMotion entries)"
+      ]
+    },
+    {
+      "description": "Modified FAQ content to include a new developer-facing entry about 'Continue with Google' and Internet Identity configuration notes.",
+      "reason": "Not requested; also conflicts with the non-goal of avoiding authentication-related changes/content as part of this task.",
+      "evidence": [
+        "frontend-file-summaries.txt (FaqSection summary)"
+      ]
+    },
+    {
+      "description": "Footer changes adding new anchor links (Community/Marketplace) and attribution with UTM tracking.",
+      "reason": "Not requested; constitutes new navigation/content changes unrelated to overflow fix.",
+      "evidence": [
+        "frontend-file-summaries.txt (FooterSection summary)"
+      ]
+    },
+    {
+      "description": "Added/expanded on-page Legal sections (Privacy Policy/Terms/Contact) with refined layouts.",
+      "reason": "Not requested; new/expanded content sections are out of scope.",
+      "evidence": [
+        "frontend-file-summaries.txt (LegalSections summary)"
       ]
     }
   ],
-  "confidence": 0.68,
+  "confidence": 0.74,
   "changed_files": [
-    "backend/main.mo",
-    "backend/migration.mo",
     "frontend-file-summaries.txt",
+    "frontend/index.html",
     "frontend/src/App.tsx",
-    "frontend/src/components/PlanStatus.tsx",
-    "frontend/src/features/account/useAccountData.ts",
-    "frontend/src/features/cardExport/pdfExport.ts",
-    "frontend/src/features/marketplace/components/CreateListingDialog.tsx",
-    "frontend/src/features/marketplace/hooks/useExpressInterest.ts",
-    "frontend/src/features/marketplace/hooks/useListingInteractions.ts",
-    "frontend/src/features/payments/razorpay.ts",
-    "frontend/src/features/quota/quotaStorage.ts",
-    "frontend/src/features/quota/useMessageQuota.ts",
-    "frontend/src/features/subscription/PremiumLock.tsx",
-    "frontend/src/features/subscription/PricingComparisonModal.tsx",
-    "frontend/src/features/subscription/PricingComparisonTable.tsx",
-    "frontend/src/features/subscription/plans.ts",
-    "frontend/src/features/subscription/useEntitlements.ts",
-    "frontend/src/features/subscription/useSubscriptionStatus.ts",
     "frontend/src/features/surprise/SurpriseView.tsx",
-    "frontend/src/features/surprise/useSurpriseLinks.ts",
-    "frontend/src/sections/DashboardSection.tsx",
-    "frontend/src/sections/FooterSection.tsx",
+    "frontend/src/index.css",
     "frontend/src/sections/GeneratorSection.tsx",
     "frontend/src/sections/HeroSection.tsx",
-    "frontend/src/sections/LegalSections.tsx",
     "frontend/src/sections/OutputSection.tsx",
     "frontend/src/sections/PricingSection.tsx",
+    "frontend/src/sections/TemplatesSection.tsx",
     "project_state.json"
   ]
 }

@@ -71,6 +71,11 @@ export const SurprisePayload = IDL.Record({
   'message' : IDL.Text,
   'recipientName' : IDL.Text,
 });
+export const UserAuth = IDL.Record({
+  'provider' : IDL.Text,
+  'lastLoginAt' : IDL.Int,
+  'createdAt' : IDL.Int,
+});
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -94,6 +99,7 @@ export const idlService = IDL.Service({
       [ListingId],
       [],
     ),
+  'createOrUpdateUserAuth' : IDL.Func([IDL.Text], [], []),
   'createSurpriseLink' : IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
   'getAllCommunityPosts' : IDL.Func([], [IDL.Vec(CommunityPost)], ['query']),
   'getAllMarketplaceListings' : IDL.Func(
@@ -143,6 +149,7 @@ export const idlService = IDL.Service({
       [IDL.Opt(SurprisePayload)],
       ['query'],
     ),
+  'getUserAuth' : IDL.Func([], [IDL.Opt(UserAuth)], ['query']),
   'getUserProfile' : IDL.Func(
       [IDL.Principal],
       [IDL.Opt(UserProfile)],
@@ -234,6 +241,11 @@ export const idlFactory = ({ IDL }) => {
     'message' : IDL.Text,
     'recipientName' : IDL.Text,
   });
+  const UserAuth = IDL.Record({
+    'provider' : IDL.Text,
+    'lastLoginAt' : IDL.Int,
+    'createdAt' : IDL.Int,
+  });
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
@@ -257,6 +269,7 @@ export const idlFactory = ({ IDL }) => {
         [ListingId],
         [],
       ),
+    'createOrUpdateUserAuth' : IDL.Func([IDL.Text], [], []),
     'createSurpriseLink' : IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
     'getAllCommunityPosts' : IDL.Func([], [IDL.Vec(CommunityPost)], ['query']),
     'getAllMarketplaceListings' : IDL.Func(
@@ -318,6 +331,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(SurprisePayload)],
         ['query'],
       ),
+    'getUserAuth' : IDL.Func([], [IDL.Opt(UserAuth)], ['query']),
     'getUserProfile' : IDL.Func(
         [IDL.Principal],
         [IDL.Opt(UserProfile)],

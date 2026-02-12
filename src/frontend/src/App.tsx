@@ -1,4 +1,4 @@
-import { useState, useRef, createContext, useContext } from 'react';
+import { useState, useRef, createContext, useContext, useEffect } from 'react';
 import { HeroSection } from './sections/HeroSection';
 import { GeneratorSection } from './sections/GeneratorSection';
 import { OutputSection } from './sections/OutputSection';
@@ -16,6 +16,7 @@ import { PremiumCardDesignerModule } from './features/premiumCardDesigner/Premiu
 import { SurpriseView } from './features/surprise/SurpriseView';
 import { PricingComparisonModal } from './features/subscription/PricingComparisonModal';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
+import { useUserAuthUpsert } from './features/auth/useUserAuthUpsert';
 import { generateBirthdayPack } from './features/generator/generateBirthdayPack';
 import type { GeneratorFormData, BirthdayPack, TemplateId } from './features/generator/types';
 import type { PlanType } from './backend';
@@ -66,9 +67,11 @@ function App() {
   const [pricingModalOpen, setPricingModalOpen] = useState(false);
   const [highlightPlan, setHighlightPlan] = useState<'pro' | 'creator' | undefined>(undefined);
   const [surpriseMode, setSurpriseMode] = useState<string | null>(null);
+  const [hasTriggeredAuthUpsert, setHasTriggeredAuthUpsert] = useState(false);
 
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
+  const { mutate: upsertUserAuth } = useUserAuthUpsert();
 
   const generatorRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
@@ -87,6 +90,29 @@ function App() {
       setSurpriseMode(surpriseId);
     }
   });
+
+  // Upsert user auth record after successful login (only once per session)
+  useEffect(() => {
+    if (isAuthenticated && !hasTriggeredAuthUpsert) {
+      upsertUserAuth();
+      setHasTriggeredAuthUpsert(true);
+    }
+    
+    // Reset flag when user logs out
+    if (!isAuthenticated && hasTriggeredAuthUpsert) {
+      setHasTriggeredAuthUpsert(false);
+    }
+  }, [isAuthenticated, hasTriggeredAuthUpsert, upsertUserAuth]);
+
+  // Scroll to dashboard after successful authentication (only on transition)
+  useEffect(() => {
+    if (isAuthenticated && dashboardRef.current) {
+      const timer = setTimeout(() => {
+        dashboardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [isAuthenticated]);
 
   const scrollToGenerator = () => {
     generatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -181,7 +207,7 @@ function App() {
 
   return (
     <AppContext.Provider value={contextValue}>
-      <div className="min-h-screen bg-background text-foreground">
+      <div className="w-full min-h-screen bg-background text-foreground">
         <DeployDiagnosticsBanner />
         {surpriseMode ? (
           <SurpriseView surpriseId={surpriseMode} onBackHome={handleBackFromSurprise} />

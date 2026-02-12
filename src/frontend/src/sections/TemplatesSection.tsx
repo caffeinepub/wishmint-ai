@@ -9,7 +9,7 @@ export function TemplatesSection() {
   const { selectedTemplate, setSelectedTemplate, outputs, formData } = useAppContext();
 
   return (
-    <section className="section-padding px-4 sm:px-6 lg:px-8">
+    <section className="w-full section-padding px-4 sm:px-6 lg:px-8">
       <div className="section-container max-w-6xl">
         <Reveal>
           <div className="text-center mb-12 space-y-3">
@@ -58,18 +58,16 @@ export function TemplatesSection() {
                 <div
                   className={`aspect-square ${applyTemplateClasses(selectedTemplate)} flex flex-col items-center justify-center p-8 sm:p-12 text-center`}
                 >
-                  <div className="space-y-4 sm:space-y-6 max-w-2xl">
-                    <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
-                      Happy Birthday, {formData.name}!
+                  <div className="space-y-6 max-w-md">
+                    <h3 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+                      Happy Birthday
                     </h3>
-                    <p className="text-sm sm:text-base md:text-lg text-white/95 leading-relaxed drop-shadow-md">
+                    <p className="text-3xl sm:text-4xl md:text-5xl font-bold text-white drop-shadow-lg">
+                      {formData.name}! 🎉
+                    </p>
+                    <p className="text-base sm:text-lg text-white/90 leading-relaxed drop-shadow-md">
                       {outputs.mainWish}
                     </p>
-                    {formData.yourName && (
-                      <p className="text-sm sm:text-base text-white/90 font-medium drop-shadow-md">
-                        — {formData.yourName}
-                      </p>
-                    )}
                   </div>
                 </div>
               </CardContent>
