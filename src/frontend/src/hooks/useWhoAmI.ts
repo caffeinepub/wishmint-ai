@@ -14,14 +14,22 @@ export function useWhoAmI() {
   return useQuery<Principal | null>({
     queryKey: ['whoami', identity?.getPrincipal().toString()],
     queryFn: async () => {
-      if (!actor) return null;
+      if (!actor) {
+        console.warn('[useWhoAmI] Backend actor not available. Ensure canisters are deployed.');
+        return null;
+      }
       
       try {
         const principal = await actor.testAuthenticatedCaller();
         return principal;
       } catch (error) {
         // If the backend traps (anonymous caller), return null gracefully
-        console.log('Backend call failed (likely anonymous):', error);
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        if (errorMessage.includes('Caller must be authenticated')) {
+          // Expected error for anonymous users
+          return null;
+        }
+        console.error('[useWhoAmI] Backend call to testAuthenticatedCaller failed:', errorMessage);
         return null;
       }
     },

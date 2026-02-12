@@ -6,7 +6,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Wand2, Shuffle, Copy, Share2, Lock } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Wand2, Shuffle, Copy, Share2, Sparkles } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { PlanStatus } from '../components/PlanStatus';
 import { useAppContext } from '../App';
@@ -24,10 +25,11 @@ interface GeneratorSectionProps {
 
 export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps>(
   ({ nameInputRef }, ref) => {
-    const { formData, setFormData, setOutputs, isAuthenticated, selectedPlan } = useAppContext();
+    const { formData, setFormData, setOutputs, isAuthenticated, selectedPlan, demoMode } = useAppContext();
     const [nameError, setNameError] = useState('');
 
-    const isGeneratorEnabled = isAuthenticated && !!selectedPlan;
+    // Generator is enabled if user is authenticated with a plan OR in demo mode
+    const isGeneratorEnabled = (isAuthenticated && !!selectedPlan) || demoMode;
 
     const handleGenerate = () => {
       if (!isGeneratorEnabled) return;
@@ -109,17 +111,33 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                       Fill in the details to generate a personalized birthday wish
                     </CardDescription>
                   </div>
-                  {selectedPlan && <PlanStatus plan={selectedPlan} />}
+                  {demoMode ? (
+                    <Badge variant="outline" className="border-neon-purple/50 text-neon-purple">
+                      <Sparkles className="w-3 h-3 mr-1" />
+                      Demo Mode
+                    </Badge>
+                  ) : (
+                    selectedPlan && <PlanStatus plan={selectedPlan} />
+                  )}
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
-                {/* Gating alert */}
+                {/* Demo mode info */}
+                {demoMode && (
+                  <Alert className="border-neon-purple/30 bg-neon-purple/5">
+                    <Sparkles className="h-4 w-4" />
+                    <AlertDescription className="text-sm">
+                      You're in Demo mode. Sign in to unlock all features including card downloads.
+                    </AlertDescription>
+                  </Alert>
+                )}
+
+                {/* Gating alert for non-demo users */}
                 {!isGeneratorEnabled && (
                   <Alert className="border-neon-purple/30 bg-neon-purple/5">
-                    <Lock className="h-4 w-4" />
                     <AlertDescription className="text-sm">
                       {!isAuthenticated
-                        ? 'Please sign in to generate wishes.'
+                        ? 'Try the demo or sign in to generate wishes.'
                         : 'Select a plan to continue.'}
                     </AlertDescription>
                   </Alert>
@@ -250,56 +268,58 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
 
                 <div className="space-y-2">
                   <Label htmlFor="memory" className="text-sm font-medium">
-                    Add 1 personal memory line (optional)
+                    Special Memory (optional)
                   </Label>
                   <Textarea
                     id="memory"
-                    placeholder="E.g., Remember that time we laughed until we cried at the beach?"
+                    placeholder="Share a special memory to make it more personal..."
                     value={formData.memory}
                     onChange={(e) => setFormData({ ...formData, memory: e.target.value })}
-                    className="min-h-20 resize-none"
+                    className="min-h-[100px] resize-none"
                     disabled={!isGeneratorEnabled}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 pt-2">
+                <div className="flex flex-wrap gap-3 pt-2">
                   <Button
                     onClick={handleGenerate}
+                    size="lg"
+                    className="flex-1 min-w-[200px] bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 h-11"
                     disabled={!isGeneratorEnabled}
-                    className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold h-11 rounded-lg shadow-neon disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     <Wand2 className="w-4 h-4 mr-2" />
                     Generate
                   </Button>
-
                   <Button
                     onClick={handleSurpriseMe}
-                    disabled={!isGeneratorEnabled}
+                    size="lg"
                     variant="outline"
-                    className="border-neon-green/50 hover:bg-neon-green/10 h-11 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 min-w-[200px] h-11"
+                    disabled={!isGeneratorEnabled}
                   >
                     <Shuffle className="w-4 h-4 mr-2" />
                     Surprise Me
                   </Button>
+                </div>
 
+                <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={handleCopyAll}
-                    disabled={!isGeneratorEnabled}
                     variant="outline"
-                    className="border-neon-purple/50 hover:bg-neon-purple/10 h-11 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 min-w-[150px] h-10"
+                    disabled={!isGeneratorEnabled}
                   >
                     <Copy className="w-4 h-4 mr-2" />
                     Copy All
                   </Button>
-
                   <Button
                     onClick={handleShareWhatsApp}
-                    disabled={!isGeneratorEnabled}
                     variant="outline"
-                    className="border-neon-green/50 hover:bg-neon-green/10 h-11 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex-1 min-w-[150px] h-10"
+                    disabled={!isGeneratorEnabled}
                   >
                     <Share2 className="w-4 h-4 mr-2" />
-                    WhatsApp
+                    Share on WhatsApp
                   </Button>
                 </div>
               </CardContent>

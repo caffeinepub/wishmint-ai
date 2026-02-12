@@ -1,5 +1,5 @@
 import { Button } from '@/components/ui/button';
-import { Sparkles, Gift } from 'lucide-react';
+import { Sparkles, Gift, Zap } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { AuthControls } from '../components/AuthControls';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -7,6 +7,7 @@ import type { Plan } from '../hooks/usePlanSelection';
 
 interface HeroSectionProps {
   onGenerateClick: () => void;
+  onTryDemo: () => void;
   onExamplesClick: () => void;
   isAuthenticated: boolean;
   selectedPlan: Plan;
@@ -15,6 +16,7 @@ interface HeroSectionProps {
 
 export function HeroSection({
   onGenerateClick,
+  onTryDemo,
   onExamplesClick,
   isAuthenticated,
   selectedPlan,
@@ -22,6 +24,7 @@ export function HeroSection({
 }: HeroSectionProps) {
   const showAuthPrompt = !isAuthenticated;
   const showPlanPrompt = isAuthenticated && !selectedPlan;
+  const canGenerate = isAuthenticated && !!selectedPlan;
 
   return (
     <section className="relative min-h-screen flex flex-col px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
@@ -59,7 +62,7 @@ export function HeroSection({
           {showAuthPrompt && (
             <Alert className="max-w-md mx-auto border-neon-purple/30 bg-neon-purple/5">
               <AlertDescription className="text-center text-sm">
-                Please sign in to generate wishes
+                Try the demo or sign in to unlock all features
               </AlertDescription>
             </Alert>
           )}
@@ -73,23 +76,45 @@ export function HeroSection({
           )}
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center items-center pt-4">
-            <Button
-              size="lg"
-              onClick={onGenerateClick}
-              className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold px-8 py-6 text-base sm:text-lg rounded-xl shadow-neon transition-all hover:scale-105"
-            >
-              <Gift className="w-5 h-5 mr-2" />
-              Generate Wish
-            </Button>
-            
-            <Button
-              size="lg"
-              variant="outline"
-              onClick={onExamplesClick}
-              className="border-neon-purple/50 hover:bg-neon-purple/10 px-8 py-6 text-base sm:text-lg rounded-xl transition-all"
-            >
-              See Examples
-            </Button>
+            {!isAuthenticated ? (
+              <>
+                <Button
+                  size="lg"
+                  onClick={onTryDemo}
+                  className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold px-8 py-6 text-base sm:text-lg rounded-xl shadow-neon transition-all hover:scale-105"
+                >
+                  <Zap className="w-5 h-5 mr-2" />
+                  Try Demo
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={onExamplesClick}
+                  className="border-neon-purple/50 hover:bg-neon-purple/10 px-8 py-6 text-base sm:text-lg rounded-xl transition-all"
+                >
+                  See Examples
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  size="lg"
+                  onClick={onGenerateClick}
+                  className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold px-8 py-6 text-base sm:text-lg rounded-xl shadow-neon transition-all hover:scale-105"
+                >
+                  <Gift className="w-5 h-5 mr-2" />
+                  {canGenerate ? 'Generate Wish' : 'Get Started'}
+                </Button>
+                <Button
+                  size="lg"
+                  variant="outline"
+                  onClick={onExamplesClick}
+                  className="border-neon-purple/50 hover:bg-neon-purple/10 px-8 py-6 text-base sm:text-lg rounded-xl transition-all"
+                >
+                  See Examples
+                </Button>
+              </>
+            )}
           </div>
         </Reveal>
       </div>

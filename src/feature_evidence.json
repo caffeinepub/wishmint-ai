@@ -2,10 +2,11 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-add-a-top-left-corner-credit-label-that-reads-exactly-created-by-arion-zi-in-the-top-bar-of-the-hero-section-aligned-opposite-the-existing-authentication-controls",
-      "featureTitle": "Add a top-left corner credit label that reads exactly \"Created By Arion Zi\" in the top bar of the Hero section, aligned opposite the existing authentication controls.",
+      "featureId": "feature-implement-a-pre-login-demo-mode-so-anonymous-users-can-try-generating-a-birthday-pack-without-signing-in-or-selecting-a-plan",
+      "featureTitle": "Implement a pre-login “Demo mode” so anonymous users can try generating a Birthday Pack without signing in or selecting a plan.",
       "files": [
-        "frontend/src/index.css",
+        "frontend/src/App.tsx",
+        "frontend/src/sections/GeneratorSection.tsx",
         "frontend/src/sections/HeroSection.tsx"
       ],
       "components": [
@@ -16,24 +17,17 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-26"
+        "REQ-42"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-apply-a-ui-polish-pass-to-make-the-website-look-more-professional-by-improving-consistency-of-spacing-typography-hierarchy-and-alignment-across-major-sections-hero-generator-templates-pricing-examples-faq-legal-footer-without-changing-any-existing-feature-behavior-or-gated-flow-logic",
-      "featureTitle": "Apply a UI polish pass to make the website look more professional by improving consistency of spacing, typography hierarchy, and alignment across major sections (Hero, Generator, Templates, Pricing, Examples, FAQ, Legal, Footer) without changing any existing feature behavior or gated-flow logic.",
+      "featureId": "feature-update-generator-gating-logic-so-authentication-plan-gating-does-not-block-demo-mode-while-keeping-existing-authenticated-flows-intact",
+      "featureTitle": "Update generator gating logic so authentication/plan gating does not block Demo mode, while keeping existing authenticated flows intact.",
       "files": [
-        "frontend/src/index.css",
-        "frontend/src/sections/ExamplesSection.tsx",
-        "frontend/src/sections/FaqSection.tsx",
-        "frontend/src/sections/FooterSection.tsx",
+        "frontend/src/App.tsx",
         "frontend/src/sections/GeneratorSection.tsx",
-        "frontend/src/sections/HeroSection.tsx",
-        "frontend/src/sections/LegalSections.tsx",
-        "frontend/src/sections/OutputSection.tsx",
-        "frontend/src/sections/PricingSection.tsx",
-        "frontend/src/sections/TemplatesSection.tsx"
+        "frontend/src/sections/HeroSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -43,7 +37,64 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-27"
+        "REQ-43"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-a-demo-friendly-onboarding-experience-that-pre-fills-the-generator-with-a-realistic-example-and-generates-outputs-automatically-when-demo-mode-is-started",
+      "featureTitle": "Add a demo-friendly onboarding experience that pre-fills the generator with a realistic example and generates outputs automatically when Demo mode is started.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/sections/HeroSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-44"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-gate-advanced-auth-only-actions-appropriately-during-demo-mode-and-show-clear-english-prompts-when-an-action-requires-sign-in",
+      "featureTitle": "Gate advanced/auth-only actions appropriately during Demo mode and show clear English prompts when an action requires sign-in.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/sections/OutputSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-45"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-ensure-the-hero-section-s-prompts-and-ctas-support-the-pre-login-demo-flow-in-addition-to-sign-in",
+      "featureTitle": "Ensure the Hero section’s prompts and CTAs support the pre-login demo flow in addition to sign-in.",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/sections/HeroSection.tsx"
+      ],
+      "components": [
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-46"
       ],
       "confidence": "high"
     }

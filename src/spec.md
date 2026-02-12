@@ -1,10 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Add a top-left creator credit in the Hero top bar and apply a light UI polish pass to make the site feel more professional while keeping all existing behaviors intact.
+**Goal:** Add a pre-login “Demo mode” so anonymous users can try generating a Birthday Pack locally without signing in or selecting a plan.
 
 **Planned changes:**
-- Add a top-left text label in the Hero top bar that reads exactly “Created By Arion Zi”, aligned opposite the existing authentication controls on the right.
-- Polish UI consistency across major sections (Hero, Generator, Templates, Pricing, Examples, FAQ, Legal, Footer) by refining spacing, typography hierarchy, alignment, and shared component styling (e.g., cards/buttons/links) without changing any feature behavior or gated-flow logic.
+- Add a clear pre-login entry point to start Demo mode (e.g., “Try Demo” CTA in the Hero and/or Generator sections) with English demo-labeled messaging.
+- Implement Demo mode onboarding that pre-fills the generator with realistic example data and auto-generates a Birthday Pack, then scrolls the user to the generator/outputs.
+- Update generator gating so Demo mode bypasses authentication/plan requirements for core actions (at minimum: Generate and Surprise Me) while keeping existing authenticated flows unchanged.
+- Keep advanced/auth-only actions disabled for anonymous Demo mode users and show clear English prompts indicating sign-in is required when those actions are unavailable.
 
-**User-visible outcome:** The landing page shows “Created By Arion Zi” in the top-left of the Hero header while auth controls remain in the top-right, and the overall page layout/typography feels more consistent and professional across sections.
+**User-visible outcome:** Signed-out users can start a Demo mode from the landing experience, immediately see a generated Birthday Pack using pre-filled sample data, and use core generator actions offline; advanced features remain sign-in gated with clear English prompts.

@@ -1,15 +1,19 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 11,
-  "summary": "Build “WishMint AI”: an offline-friendly, single-file (index.html) mobile-first premium dark/neon web app that generates a shareable Birthday Pack (5 outputs) with template-based generation, copying, WhatsApp sharing, examples gallery, templates, pricing, FAQ, and footer links, plus a login system and a gated flow requiring users to log in and select a plan before generating wishes.",
+  "projectStateVersion": 17,
+  "summary": "Upgrade “WishMint AI” into a premium, viral, emotional birthday wish generator with a professional startup SaaS feel: improved hero UX (animated tagline, demo preview, trust badges), richer generator controls (wish length + emoji level), enhanced output cards (copy + share), template studio with downloadable posters, examples by category, feature-explanation + testimonials sections, social viral tools (WhatsApp, Instagram story format, QR codes), SEO meta tags, and a relaxed auth model where users can generate their first wish without login (login only for saving and premium/advanced features).",
   "architectural_notes": [
     "Single-file offline-first implementation: all HTML/CSS/JS in one index.html; template-based text generation (no external APIs/keys).",
     "Use wa.me URL with encodeURIComponent for WhatsApp sharing.",
     "Use HTML canvas rendering for downloadable share card images.",
     "Google Sign-In/OAuth requires external network access and third-party integration; this may conflict with fully offline-first/no-external-dependency goals and needs an explicit decision on allowed online-only features.",
-    "Implement a gated UX flow: generator actions and outputs remain disabled/locked until (1) user is authenticated and (2) a plan is selected; pricing section should act as the plan selector state."
+    "Relax gated UX flow: generation is allowed without login; only saving, premium template exports, and advanced features require authentication.",
+    "Add QR code generation locally (client-side) with no external API dependencies to preserve offline-friendly behavior.",
+    "Add SEO meta tags (title/description) directly in index.html head."
   ],
-  "known_issues": [],
+  "known_issues": [
+    "Deployment/build error encountered when attempting to push/deploy the app to the network."
+  ],
   "isFixRequest": false,
   "existing_features": [
     {
@@ -227,6 +231,158 @@
         "REQ-27"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-remove-the-login-plan-gating-barrier-for-core-wish-generation-so-that-anonymous-users-can-generate-and-use-generator-actions-generate-wish-surprise-me-copy-all-share-on-whatsapp-without-signing-in-or-selecting-a-plan-while-keeping-the-app-functional-for-authenticated-users",
+      "title": "Remove the login/plan gating barrier for core wish generation so that anonymous users can generate and use generator actions (Generate Wish, Surprise Me, Copy All, Share on WhatsApp) without signing in or selecting a plan, while keeping the app functional for authenticated users.",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-the-hero-section-to-include-1-an-animated-emotional-tagline-that-reads-exactly-create-birthday-wishes-that-feel-handwritten-and-personal-2-a-small-demo-preview-card-showing-a-sample-generated-wish-under-the-hero-content-and-3-trust-badges-for-free-ai-generator-instant-results-and-multi-language-support-while-keeping-the-existing-wishmint-ai-title-and-premium-dark-gradient-look",
+      "title": "Upgrade the Hero section to include (1) an animated emotional tagline that reads exactly “Create birthday wishes that feel handwritten and personal.”, (2) a small demo preview card showing a sample generated wish under the hero content, and (3) trust badges for “Free AI Generator”, “Instant Results”, and “Multi Language Support”, while keeping the existing “WishMint AI” title and premium dark gradient look.",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-two-new-generator-controls-a-wish-length-slider-and-an-emoji-level-slider-and-incorporate-them-into-local-template-based-generation-so-the-generated-outputs-vary-based-on-these-settings-longer-shorter-content-and-more-fewer-emojis",
+      "title": "Add two new generator controls: a Wish Length slider and an Emoji Level slider, and incorporate them into local template-based generation so the generated outputs vary based on these settings (longer/shorter content and more/fewer emojis).",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-the-output-section-so-each-of-the-5-output-cards-includes-both-a-copy-button-and-a-share-button-and-add-smooth-subtle-interaction-animations-for-output-cards-and-actions",
+      "title": "Enhance the Output section so each of the 5 output cards includes both a Copy button and a Share button, and add smooth, subtle interaction animations for output cards and actions.",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-instagram-story-export-format-option-for-card-downloads-in-addition-to-the-existing-square-export-and-gate-card-image-download-export-behind-authentication-as-a-premium-advanced-feature-anonymous-users-can-still-generate-and-share-text",
+      "title": "Add an “Instagram Story” export format option for card downloads in addition to the existing square export, and gate card image download/export behind authentication as a premium/advanced feature (anonymous users can still generate and share text).",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-local-offline-qr-code-generator-feature-as-a-social-viral-tool-allowing-users-to-generate-a-qr-code-from-shareable-content-derived-from-the-generated-wish-pack-no-external-qr-apis",
+      "title": "Implement a local, offline QR code generator feature as a social/viral tool, allowing users to generate a QR code from shareable content derived from the generated wish pack (no external QR APIs).",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-features-feature-explanation-section-that-uses-icons-and-short-english-descriptions-for-ai-emotional-writing-memory-based-wishes-instant-share-tools-multi-language-support-and-personal-tone-customization",
+      "title": "Add a new “Features” (feature explanation) section that uses icons and short English descriptions for: AI Emotional Writing, Memory Based Wishes, Instant Share Tools, Multi Language Support, and Personal Tone Customization.",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-testimonials-section-with-clearly-labeled-demo-fake-testimonials-english-to-improve-trust-styled-consistently-with-the-existing-premium-theme",
+      "title": "Add a Testimonials section with clearly labeled demo/fake testimonials (English) to improve trust, styled consistently with the existing premium theme.",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-seo-improvements-by-setting-the-document-meta-title-to-wishmint-ai-ai-birthday-wish-generator-and-meta-description-to-generate-emotional-funny-romantic-ai-birthday-wishes-instantly",
+      "title": "Apply SEO improvements by setting the document meta title to \"WishMint AI – AI Birthday Wish Generator\" and meta description to \"Generate emotional, funny, romantic AI birthday wishes instantly.\".",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-footer-and-on-page-link-targets-to-include-an-about-wishmint-ai-link-section-alongside-privacy-policy-terms-and-contact-with-all-user-facing-text-in-english",
+      "title": "Update the footer and on-page link targets to include an “About WishMint AI” link/section alongside Privacy Policy, Terms, and Contact, with all user-facing text in English.",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-save-wish-capability-as-a-logged-in-advanced-feature-authenticated-users-can-save-a-generated-birthday-pack-and-view-a-list-of-their-saved-wishes-anonymous-users-cannot-save-and-are-prompted-to-sign-in-when-they-try",
+      "title": "Add a “Save Wish” capability as a logged-in advanced feature: authenticated users can save a generated Birthday Pack and view a list of their saved wishes; anonymous users cannot save and are prompted to sign in when they try.",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-identify-and-fix-the-root-cause-of-the-current-deployment-error-so-the-project-can-successfully-build-and-deploy-to-the-internet-computer-network",
+      "title": "Identify and fix the root cause of the current deployment error so the project can successfully build and deploy to the Internet Computer network.",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-or-repair-missing-incorrect-internet-computer-project-configuration-required-for-deployment-for-example-canister-configuration-and-frontend-asset-build-integration-so-the-deployment-pipeline-has-all-required-files-and-settings",
+      "title": "Add or repair missing/incorrect Internet Computer project configuration required for deployment (for example: canister configuration and frontend asset build integration) so the deployment pipeline has all required files and settings.",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-any-user-facing-error-messaging-shown-during-build-deploy-troubleshooting-if-surfaced-in-the-app-ui-or-logs-is-in-english-and-is-actionable-states-what-failed-and-what-to-try-next",
+      "title": "Ensure any user-facing error messaging shown during build/deploy troubleshooting (if surfaced in the app UI or logs) is in English and is actionable (states what failed and what to try next).",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-pre-login-demo-mode-so-anonymous-users-can-try-generating-a-birthday-pack-without-signing-in-or-selecting-a-plan",
+      "title": "Implement a pre-login “Demo mode” so anonymous users can try generating a Birthday Pack without signing in or selecting a plan.",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-generator-gating-logic-so-authentication-plan-gating-does-not-block-demo-mode-while-keeping-existing-authenticated-flows-intact",
+      "title": "Update generator gating logic so authentication/plan gating does not block Demo mode, while keeping existing authenticated flows intact.",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-demo-friendly-onboarding-experience-that-pre-fills-the-generator-with-a-realistic-example-and-generates-outputs-automatically-when-demo-mode-is-started",
+      "title": "Add a demo-friendly onboarding experience that pre-fills the generator with a realistic example and generates outputs automatically when Demo mode is started.",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-gate-advanced-auth-only-actions-appropriately-during-demo-mode-and-show-clear-english-prompts-when-an-action-requires-sign-in",
+      "title": "Gate advanced/auth-only actions appropriately during Demo mode and show clear English prompts when an action requires sign-in.",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-hero-section-s-prompts-and-ctas-support-the-pre-login-demo-flow-in-addition-to-sign-in",
+      "title": "Ensure the Hero section’s prompts and CTAs support the pre-login demo flow in addition to sign-in.",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -327,12 +483,6 @@
       "status": "pending"
     },
     {
-      "id": "AR-17",
-      "summary": "Gate wish generation behind an auth + plan-selection flow: require user to log in first, then select a plan (Free/Pro) before enabling birthday wish generation",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
       "id": "AR-18",
       "summary": "Improve overall UI polish to make the website look more professional (refine typography, spacing, alignment, consistency)",
       "reqIds": [],
@@ -341,6 +491,78 @@
     {
       "id": "AR-19",
       "summary": "Add a top-left corner credit label/text: “Created By Arion Zi”",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Remove login barrier for initial generation: allow users to generate the first wish without signing in; require login only for saving wishes, premium template exports, and other advanced features",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Hero improvements: animated emotional tagline, mini demo preview of a generated wish under hero, and trust badges (Free AI Generator, Instant Results, Multi Language Support)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Enhance generator inputs with Wish Length slider and Emoji Level slider (in addition to name/relationship/tone/language/personality/memory)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Output cards: add per-card Share button (alongside Copy) and smooth animations for card interactions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-24",
+      "summary": "Card Template Studio: selectable styles (Cute, Luxury, Minimal, Anime, Aesthetic, Neon) and generate downloadable shareable birthday poster/image using selected style",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-25",
+      "summary": "Add Feature Explanation section with icons and short descriptions (AI Emotional Writing, Memory Based Wishes, Instant Share Tools, Multi Language Support, Personal Tone Customization)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-26",
+      "summary": "Add social/viral features: Instagram Story download format and QR code generator for sharing",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-27",
+      "summary": "Add Testimonials section (demo/fake testimonials for now) to increase trust",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-28",
+      "summary": "SEO improvements: add meta title \"WishMint AI – AI Birthday Wish Generator\" and meta description \"Generate emotional, funny, romantic AI birthday wishes instantly.\"",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-29",
+      "summary": "Footer update: include About WishMint AI link/section in addition to Privacy Policy, Terms, and Contact",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Add ability to save generated wishes for logged-in users (as a gated advanced feature)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-31",
+      "summary": "Add a pre-login demo system so users can try the app (demo generation/preview) before authentication is required for advanced features",
       "reqIds": [],
       "status": "pending"
     }

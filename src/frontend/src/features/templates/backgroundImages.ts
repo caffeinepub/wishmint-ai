@@ -1,4 +1,5 @@
 // Central registry of static background image paths for templates
+// These paths reference assets in frontend/public/assets/generated/
 export const BACKGROUND_IMAGES: Record<string, string> = {
   'confetti-dark': '/assets/generated/card-bg-confetti-dark.dim_1080x1080.png',
   'neon-balloons': '/assets/generated/card-bg-neon-balloons.dim_1080x1080.png',

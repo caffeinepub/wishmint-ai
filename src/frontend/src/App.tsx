@@ -8,8 +8,10 @@ import { PricingSection } from './sections/PricingSection';
 import { FaqSection } from './sections/FaqSection';
 import { FooterSection } from './sections/FooterSection';
 import { LegalSections } from './sections/LegalSections';
+import { DeployDiagnosticsBanner } from './components/DeployDiagnosticsBanner';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { usePlanSelection, type Plan } from './hooks/usePlanSelection';
+import { generateBirthdayPack } from './features/generator/generateBirthdayPack';
 import type { GeneratorFormData, BirthdayPack, TemplateId } from './features/generator/types';
 
 interface AppContextValue {
@@ -22,6 +24,9 @@ interface AppContextValue {
   isAuthenticated: boolean;
   selectedPlan: Plan;
   selectPlan: (plan: Plan) => void;
+  demoMode: boolean;
+  startDemo: () => void;
+  exitDemo: () => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -47,6 +52,7 @@ function App() {
 
   const [outputs, setOutputs] = useState<BirthdayPack | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('minimal');
+  const [demoMode, setDemoMode] = useState(false);
 
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
@@ -74,6 +80,35 @@ function App() {
     examplesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  const startDemo = () => {
+    // Pre-fill form with demo data
+    const demoFormData: GeneratorFormData = {
+      name: 'Sarah',
+      yourName: '',
+      relationship: 'best friend',
+      tone: 'emotional',
+      language: 'English',
+      personality: 'kind',
+      memory: '',
+    };
+    
+    setFormData(demoFormData);
+    setDemoMode(true);
+    
+    // Generate outputs immediately
+    const pack = generateBirthdayPack(demoFormData);
+    setOutputs(pack);
+    
+    // Scroll to generator section
+    setTimeout(() => {
+      generatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  };
+
+  const exitDemo = () => {
+    setDemoMode(false);
+  };
+
   const handleHeroCTA = () => {
     if (!isAuthenticated) {
       // Focus sign-in button
@@ -90,6 +125,10 @@ function App() {
 
   const handlePlanSelect = (plan: Plan) => {
     selectPlan(plan);
+    // Exit demo mode when user selects a plan
+    if (demoMode) {
+      exitDemo();
+    }
     // After selecting plan, scroll to generator
     setTimeout(() => {
       scrollToGenerator();
@@ -106,13 +145,18 @@ function App() {
     isAuthenticated,
     selectedPlan,
     selectPlan: handlePlanSelect,
+    demoMode,
+    startDemo,
+    exitDemo,
   };
 
   return (
     <AppContext.Provider value={contextValue}>
       <div className="min-h-screen bg-background text-foreground">
+        <DeployDiagnosticsBanner />
         <HeroSection
           onGenerateClick={handleHeroCTA}
+          onTryDemo={startDemo}
           onExamplesClick={scrollToExamples}
           isAuthenticated={isAuthenticated}
           selectedPlan={selectedPlan}
