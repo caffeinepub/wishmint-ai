@@ -4,32 +4,32 @@
 
 @layer base {
   :root {
-    --radius: 1rem;
+    --radius: 0.75rem;
     
-    /* Premium dark theme with neon accents */
+    /* Professional dark theme with refined neon accents */
     --background: 0.12 0 0;
     --foreground: 0.98 0 0;
-    --card: 0.16 0 0;
+    --card: 0.18 0 0;
     --card-foreground: 0.98 0 0;
-    --popover: 0.16 0 0;
+    --popover: 0.18 0 0;
     --popover-foreground: 0.98 0 0;
-    --primary: 0.65 0.25 280;
+    --primary: 0.65 0.22 280;
     --primary-foreground: 0.98 0 0;
-    --secondary: 0.22 0 0;
+    --secondary: 0.24 0 0;
     --secondary-foreground: 0.98 0 0;
-    --muted: 0.22 0 0;
-    --muted-foreground: 0.65 0 0;
-    --accent: 0.28 0 0;
+    --muted: 0.24 0 0;
+    --muted-foreground: 0.62 0 0;
+    --accent: 0.30 0 0;
     --accent-foreground: 0.98 0 0;
     --destructive: 0.60 0.25 25;
     --destructive-foreground: 0.98 0 0;
-    --border: 0.28 0 0;
-    --input: 0.28 0 0;
-    --ring: 0.65 0.25 280;
+    --border: 0.30 0 0;
+    --input: 0.30 0 0;
+    --ring: 0.65 0.22 280;
     
-    /* Neon colors */
-    --neon-purple: 0.65 0.25 280;
-    --neon-green: 0.70 0.22 150;
+    /* Refined neon colors for professional look */
+    --neon-purple: 0.65 0.22 280;
+    --neon-green: 0.70 0.20 150;
   }
 
   * {
@@ -39,6 +39,35 @@
   body {
     @apply bg-background text-foreground;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    font-feature-settings: 'cv11', 'ss01';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  /* Shared section container */
+  .section-container {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+  
+  /* Consistent section padding */
+  .section-padding {
+    @apply py-16 sm:py-20 lg:py-24;
+  }
+  
+  /* Section heading styles */
+  .section-heading {
+    @apply text-3xl sm:text-4xl lg:text-5xl font-bold tracking-tight;
+  }
+  
+  .section-subheading {
+    @apply text-base sm:text-lg lg:text-xl text-muted-foreground;
+  }
+  
+  /* Creator credit styling */
+  .creator-credit {
+    @apply text-xs sm:text-sm text-muted-foreground/80 tracking-wide font-medium;
   }
 }
 
@@ -72,10 +101,17 @@
     fill: oklch(var(--neon-purple));
   }
   
-  /* Neon glow shadow */
+  /* Refined neon glow shadow */
   .shadow-neon {
-    box-shadow: 0 0 20px oklch(var(--neon-purple) / 0.5),
-                0 0 40px oklch(var(--neon-green) / 0.3);
+    box-shadow: 0 0 24px oklch(var(--neon-purple) / 0.4),
+                0 0 48px oklch(var(--neon-green) / 0.2);
+  }
+  
+  /* Professional card shadow */
+  .shadow-card {
+    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1),
+                0 2px 4px -2px rgb(0 0 0 / 0.1),
+                0 0 0 1px oklch(var(--neon-purple) / 0.1);
   }
   
   /* Animated gradient background */

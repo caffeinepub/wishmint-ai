@@ -8,6 +8,8 @@ import { PricingSection } from './sections/PricingSection';
 import { FaqSection } from './sections/FaqSection';
 import { FooterSection } from './sections/FooterSection';
 import { LegalSections } from './sections/LegalSections';
+import { useInternetIdentity } from './hooks/useInternetIdentity';
+import { usePlanSelection, type Plan } from './hooks/usePlanSelection';
 import type { GeneratorFormData, BirthdayPack, TemplateId } from './features/generator/types';
 
 interface AppContextValue {
@@ -17,6 +19,9 @@ interface AppContextValue {
   setOutputs: (outputs: BirthdayPack | null) => void;
   selectedTemplate: TemplateId;
   setSelectedTemplate: (template: TemplateId) => void;
+  isAuthenticated: boolean;
+  selectedPlan: Plan;
+  selectPlan: (plan: Plan) => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -43,9 +48,16 @@ function App() {
   const [outputs, setOutputs] = useState<BirthdayPack | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('minimal');
 
+  const { identity } = useInternetIdentity();
+  const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
+  const principal = isAuthenticated ? identity.getPrincipal().toString() : null;
+  const { selectedPlan, selectPlan } = usePlanSelection(principal);
+
   const generatorRef = useRef<HTMLDivElement>(null);
+  const pricingRef = useRef<HTMLDivElement>(null);
   const examplesRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
+  const authControlsRef = useRef<HTMLButtonElement>(null);
 
   const scrollToGenerator = () => {
     generatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -54,8 +66,34 @@ function App() {
     }, 500);
   };
 
+  const scrollToPricing = () => {
+    pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
   const scrollToExamples = () => {
     examplesRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const handleHeroCTA = () => {
+    if (!isAuthenticated) {
+      // Focus sign-in button
+      authControlsRef.current?.focus();
+      authControlsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    } else if (!selectedPlan) {
+      // Scroll to pricing
+      scrollToPricing();
+    } else {
+      // Scroll to generator
+      scrollToGenerator();
+    }
+  };
+
+  const handlePlanSelect = (plan: Plan) => {
+    selectPlan(plan);
+    // After selecting plan, scroll to generator
+    setTimeout(() => {
+      scrollToGenerator();
+    }, 300);
   };
 
   const contextValue: AppContextValue = {
@@ -65,17 +103,26 @@ function App() {
     setOutputs,
     selectedTemplate,
     setSelectedTemplate,
+    isAuthenticated,
+    selectedPlan,
+    selectPlan: handlePlanSelect,
   };
 
   return (
     <AppContext.Provider value={contextValue}>
       <div className="min-h-screen bg-background text-foreground">
-        <HeroSection onGenerateClick={scrollToGenerator} onExamplesClick={scrollToExamples} />
+        <HeroSection
+          onGenerateClick={handleHeroCTA}
+          onExamplesClick={scrollToExamples}
+          isAuthenticated={isAuthenticated}
+          selectedPlan={selectedPlan}
+          authControlsRef={authControlsRef}
+        />
         <GeneratorSection ref={generatorRef} nameInputRef={nameInputRef as React.RefObject<HTMLInputElement>} />
         {outputs && <OutputSection />}
         <TemplatesSection />
         <ExamplesSection ref={examplesRef} />
-        <PricingSection />
+        <PricingSection ref={pricingRef} />
         <FaqSection />
         <LegalSections />
         <FooterSection />

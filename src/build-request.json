@@ -1,77 +1,70 @@
 {
   "kind": "build_request",
-  "title": "Add Google login (via Internet Identity)",
+  "title": "Add top-left creator credit and improve overall UI professionalism",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-19",
-      "text": "Implement a user login/logout UI using the existing Internet Identity authentication hook, and present it to users as the app’s Google-based login alternative (since direct Google OAuth is not supported in this stack).",
+      "id": "REQ-26",
+      "text": "Add a top-left corner credit label that reads exactly \"Created By Arion Zi\" in the top bar of the Hero section, aligned opposite the existing authentication controls.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-user-last"
         ],
         "quotes": [
-          "Add login system with google"
+          "Make this website more professional and in Top left corner Add Created By Arion Zi"
         ]
       },
       "acceptanceCriteria": [
-        "A visible sign-in control exists on the landing experience (e.g., in the Hero section area or a simple top bar) with English text such as “Sign in”.",
-        "Clicking “Sign in” triggers the existing Internet Identity login flow via `useInternetIdentity().login()` (no direct Google OAuth implementation).",
-        "When signed in, the UI changes to show an authenticated state and provides a “Sign out” action wired to `useInternetIdentity().clear()`.",
-        "If login fails, an English error message is shown (using the existing `loginError` from `useInternetIdentity`)."
+        "On the landing (Hero) section, a visible text label \"Created By Arion Zi\" appears in the top-left area of the page.",
+        "The existing AuthControls remain accessible in the top-right area and keep their current behavior (sign in/out, focus management).",
+        "The credit label is readable on mobile and desktop, does not overlap other UI elements, and maintains the site’s existing dark/neon theme styling (subtle, professional)."
       ]
     },
     {
-      "id": "REQ-20",
-      "text": "Display basic authenticated user info in the UI after login, using the active identity principal as the user identifier, and keep the app usable when not logged in.",
+      "id": "REQ-27",
+      "text": "Apply a UI polish pass to make the website look more professional by improving consistency of spacing, typography hierarchy, and alignment across major sections (Hero, Generator, Templates, Pricing, Examples, FAQ, Legal, Footer) without changing any existing feature behavior or gated-flow logic.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-user-1"
+          "msg-user-last"
         ],
         "quotes": [
-          "Add login system with google"
+          "Make this website more professional"
         ]
       },
       "acceptanceCriteria": [
-        "When authenticated, the UI displays the user’s Principal (or a safely shortened version) somewhere near the auth controls.",
-        "When not authenticated, the app continues to function for generating/copying/sharing wishes as it does today.",
-        "Auth UI does not block core offline functionality after the app is loaded (no dependency on external APIs for generation)."
-      ]
-    },
-    {
-      "id": "REQ-21",
-      "text": "Add a minimal backend method to verify authentication wiring by returning the caller principal, and ensure the frontend can call it using the authenticated actor when logged in.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-user-1"
-        ],
-        "quotes": [
-          "Add login system with google"
-        ]
-      },
-      "acceptanceCriteria": [
-        "`backend/main.mo` exposes a query method that returns the caller’s principal (e.g., for a “Who am I” check).",
-        "When logged in, frontend calls the method using the identity-bound actor from the existing `useActor` hook and displays the returned principal (or logs it in a non-intrusive way).",
-        "When not logged in, calling the method returns the anonymous principal (or behaves consistently with anonymous identity), and the UI handles this gracefully."
+        "Section layouts use consistent max-widths and horizontal padding so content aligns cleanly between sections on desktop and mobile.",
+        "Headings/subheadings/body text have a more consistent hierarchy (sizes/weights/line-height), and the overall readability is improved without changing the meaning of existing user-facing text.",
+        "Cards, buttons, and link styles look consistent across sections (e.g., consistent radii, shadows, border treatments), while preserving the existing premium dark/neon visual identity.",
+        "No changes break existing flows: login/logout, plan selection, gated generator actions, generation outputs, copy/share, template selection, and card export all still work as before."
       ]
     }
   ],
   "constraints": [
-    "Do not implement direct Google OAuth / Google Sign-In SDK integration; only Internet Identity authentication is supported in this platform.",
-    "Do not edit files under `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, or anything under `frontend/src/components/ui` (compose new components instead).",
-    "Keep all Motoko backend logic in the single actor at `backend/main.mo`; do not introduce additional backend services.",
-    "Use English for any new user-facing text."
+    "Frontend immutable paths must not be modified: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, and anything under frontend/src/components/ui.",
+    "Do not introduce external API calls or dependencies that would reduce offline-friendliness.",
+    "Keep the current single-page structure and existing gated-flow logic intact."
   ],
   "nonGoals": [
-    "Building role-based access control, user profiles, or storing user data.",
-    "Restricting WishMint AI generation features to logged-in users (unless explicitly requested later).",
-    "Integrating third-party auth providers beyond Internet Identity."
+    "Implementing monetization (payments, ads, subscriptions)",
+    "Adding new generator features or changing the wish-generation logic/templates",
+    "Changing authentication provider (Internet Identity remains the only supported auth)"
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
+  },
+  "userProfileUpdate": {
+    "goalsToAdd": [],
+    "goalsToRemove": [],
+    "preferencesToAdd": [
+      "Prefer a more professional visual polish across the site and a visible top-left creator credit: \"Created By Arion Zi\"."
+    ],
+    "preferencesToRemove": [],
+    "miscToAdd": [],
+    "miscToRemove": [],
+    "fieldsToSet": {},
+    "fieldsToDelete": []
   }
 }

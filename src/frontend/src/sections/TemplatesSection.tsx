@@ -6,18 +6,18 @@ import { applyTemplateClasses } from '../features/templates/applyTemplateClasses
 import { Check } from 'lucide-react';
 
 export function TemplatesSection() {
-  const { selectedTemplate, setSelectedTemplate, outputs } = useAppContext();
+  const { selectedTemplate, setSelectedTemplate, outputs, formData } = useAppContext();
 
   return (
-    <section className="py-20 px-4">
-      <div className="max-w-6xl mx-auto">
+    <section className="section-padding px-4 sm:px-6 lg:px-8">
+      <div className="section-container max-w-6xl">
         <Reveal>
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
+          <div className="text-center mb-12 space-y-3">
+            <h2 className="section-heading bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
               Choose Your Template
             </h2>
-            <p className="text-muted-foreground text-lg">
-              Select a style for your birthday card
+            <p className="section-subheading">
+              Select a design for your birthday card
             </p>
           </div>
         </Reveal>
@@ -27,37 +27,25 @@ export function TemplatesSection() {
             <Reveal key={template.id} delay={index * 0.05}>
               <button
                 onClick={() => setSelectedTemplate(template.id)}
-                className="relative group"
+                className={`relative group rounded-xl overflow-hidden transition-all ${
+                  selectedTemplate === template.id
+                    ? 'ring-2 ring-neon-purple ring-offset-2 ring-offset-background scale-105'
+                    : 'hover:scale-105'
+                }`}
                 aria-label={`Select ${template.name} template`}
-                aria-pressed={selectedTemplate === template.id}
               >
-                <Card
-                  className={`overflow-hidden transition-all cursor-pointer ${
-                    selectedTemplate === template.id
-                      ? 'border-neon-purple shadow-neon ring-2 ring-neon-purple/50'
-                      : 'border-border hover:border-neon-purple/50'
-                  }`}
+                <div
+                  className={`aspect-square ${applyTemplateClasses(template.id)} flex items-center justify-center`}
                 >
-                  <CardContent className="p-0 aspect-square relative">
-                    <div
-                      className="w-full h-full bg-cover bg-center flex items-center justify-center"
-                      style={{
-                        backgroundImage: `url(${template.backgroundImage})`,
-                      }}
-                    >
-                      <div className="absolute inset-0 bg-black/20" />
-                      <span className={`text-4xl relative z-10 ${template.previewIcon}`}>
-                        {template.icon}
-                      </span>
-                    </div>
-                    {selectedTemplate === template.id && (
-                      <div className="absolute top-2 right-2 bg-neon-purple rounded-full p-1 z-20">
-                        <Check className="w-4 h-4 text-white" />
-                      </div>
-                    )}
-                  </CardContent>
-                </Card>
-                <p className="mt-2 text-sm font-medium text-center">{template.name}</p>
+                  <span className="text-white font-semibold text-sm sm:text-base drop-shadow-lg px-2 text-center">
+                    {template.name}
+                  </span>
+                </div>
+                {selectedTemplate === template.id && (
+                  <div className="absolute top-2 right-2 bg-neon-purple rounded-full p-1.5">
+                    <Check className="w-4 h-4 text-white" />
+                  </div>
+                )}
               </button>
             </Reveal>
           ))}
@@ -65,19 +53,24 @@ export function TemplatesSection() {
 
         {outputs && (
           <Reveal delay={0.4}>
-            <Card className="bg-card/50 backdrop-blur-sm border-neon-purple/20 overflow-hidden">
+            <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 shadow-card overflow-hidden">
               <CardContent className="p-0">
-                <h3 className="text-xl font-semibold py-4 px-8 text-center">Preview</h3>
-                <div 
-                  className={applyTemplateClasses(selectedTemplate)}
-                  style={{
-                    backgroundImage: `url(${TEMPLATES.find(t => t.id === selectedTemplate)?.backgroundImage})`,
-                  }}
+                <div
+                  className={`aspect-square ${applyTemplateClasses(selectedTemplate)} flex flex-col items-center justify-center p-8 sm:p-12 text-center`}
                 >
-                  <div className="absolute inset-0 bg-black/30 rounded-2xl" />
-                  <p className="text-lg leading-relaxed whitespace-pre-wrap relative z-10 text-white text-center max-w-2xl">
-                    {outputs.mainWish}
-                  </p>
+                  <div className="space-y-4 sm:space-y-6 max-w-2xl">
+                    <h3 className="text-xl sm:text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
+                      Happy Birthday, {formData.name}!
+                    </h3>
+                    <p className="text-sm sm:text-base md:text-lg text-white/95 leading-relaxed drop-shadow-md">
+                      {outputs.mainWish}
+                    </p>
+                    {formData.yourName && (
+                      <p className="text-sm sm:text-base text-white/90 font-medium drop-shadow-md">
+                        — {formData.yourName}
+                      </p>
+                    )}
+                  </div>
                 </div>
               </CardContent>
             </Card>

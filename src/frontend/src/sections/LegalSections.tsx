@@ -2,83 +2,101 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 export function LegalSections() {
   return (
-    <div className="py-20 px-4 space-y-20">
-      <section id="privacy" className="max-w-4xl mx-auto">
-        <Card className="bg-card/50 backdrop-blur-sm border-neon-purple/20">
+    <div className="section-padding px-4 sm:px-6 lg:px-8 space-y-20">
+      <section id="privacy" className="section-container max-w-4xl">
+        <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 shadow-card">
           <CardHeader>
-            <CardTitle className="text-3xl">Privacy Policy</CardTitle>
+            <CardTitle className="text-3xl font-bold">Privacy Policy</CardTitle>
           </CardHeader>
-          <CardContent className="prose prose-invert max-w-none">
-            <p className="text-muted-foreground mb-4">
+          <CardContent className="prose prose-invert max-w-none space-y-6">
+            <p className="text-muted-foreground text-sm">
               <strong>Last updated:</strong> {new Date().toLocaleDateString()}
             </p>
-            <h3 className="text-xl font-semibold mb-3">Data Collection</h3>
-            <p className="text-muted-foreground mb-4">
-              WishMint AI is designed with privacy in mind. All wish generation happens locally in
-              your browser. We do not collect, store, or transmit any personal information you enter
-              into the generator form.
-            </p>
-            <h3 className="text-xl font-semibold mb-3">Local Processing</h3>
-            <p className="text-muted-foreground mb-4">
-              All data you input (names, relationships, memories, etc.) is processed entirely on your
-              device. No information is sent to our servers or any third-party services.
-            </p>
-            <h3 className="text-xl font-semibold mb-3">Analytics</h3>
-            <p className="text-muted-foreground">
-              We may use anonymous analytics to understand how users interact with our application,
-              but this data cannot be used to identify individual users.
-            </p>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Data Collection</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  WishMint AI is designed with privacy in mind. All wish generation happens locally in
+                  your browser. We do not collect, store, or transmit any personal information you enter
+                  into the generator form.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Local Processing</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  All data you input (names, relationships, memories, etc.) is processed entirely on your
+                  device. No information is sent to our servers or any third-party services.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Analytics</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  We may use anonymous analytics to understand how users interact with our application,
+                  but this data cannot be used to identify individual users.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </section>
 
-      <section id="terms" className="max-w-4xl mx-auto">
-        <Card className="bg-card/50 backdrop-blur-sm border-neon-purple/20">
+      <section id="terms" className="section-container max-w-4xl">
+        <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 shadow-card">
           <CardHeader>
-            <CardTitle className="text-3xl">Terms of Service</CardTitle>
+            <CardTitle className="text-3xl font-bold">Terms of Service</CardTitle>
           </CardHeader>
-          <CardContent className="prose prose-invert max-w-none">
-            <p className="text-muted-foreground mb-4">
+          <CardContent className="prose prose-invert max-w-none space-y-6">
+            <p className="text-muted-foreground text-sm">
               <strong>Last updated:</strong> {new Date().toLocaleDateString()}
             </p>
-            <h3 className="text-xl font-semibold mb-3">Acceptance of Terms</h3>
-            <p className="text-muted-foreground mb-4">
-              By using WishMint AI, you agree to these terms of service. If you do not agree, please
-              do not use our service.
-            </p>
-            <h3 className="text-xl font-semibold mb-3">Use of Service</h3>
-            <p className="text-muted-foreground mb-4">
-              WishMint AI is provided for personal, non-commercial use. You may generate wishes for
-              yourself and others, and share them freely. The generated content is yours to use as you
-              see fit.
-            </p>
-            <h3 className="text-xl font-semibold mb-3">Content Responsibility</h3>
-            <p className="text-muted-foreground mb-4">
-              While we strive to generate appropriate content, you are responsible for reviewing and
-              editing any generated wishes before sharing them. WishMint AI is not liable for any
-              consequences arising from the use of generated content.
-            </p>
-            <h3 className="text-xl font-semibold mb-3">Service Availability</h3>
-            <p className="text-muted-foreground">
-              We aim to provide reliable service but do not guarantee uninterrupted access. We reserve
-              the right to modify or discontinue features at any time.
-            </p>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Acceptance of Terms</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  By using WishMint AI, you agree to these terms of service. If you do not agree, please
+                  do not use our service.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Use of Service</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  WishMint AI is provided for personal, non-commercial use. You may generate wishes for
+                  yourself and others, and share them freely. The generated content is yours to use as you
+                  see fit.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Content Responsibility</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  While we strive to generate appropriate content, you are responsible for reviewing and
+                  editing any generated wishes before sharing them. WishMint AI is not liable for any
+                  consequences arising from the use of generated content.
+                </p>
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold mb-2 text-foreground">Service Availability</h3>
+                <p className="text-muted-foreground text-sm leading-relaxed">
+                  We aim to provide reliable service but do not guarantee uninterrupted access. We reserve
+                  the right to modify or discontinue features at any time.
+                </p>
+              </div>
+            </div>
           </CardContent>
         </Card>
       </section>
 
-      <section id="contact" className="max-w-4xl mx-auto">
-        <Card className="bg-card/50 backdrop-blur-sm border-neon-purple/20">
+      <section id="contact" className="section-container max-w-4xl">
+        <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 shadow-card">
           <CardHeader>
-            <CardTitle className="text-3xl">Contact Us</CardTitle>
+            <CardTitle className="text-3xl font-bold">Contact Us</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-muted-foreground mb-4">
+          <CardContent className="space-y-4">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Have questions, feedback, or suggestions? We'd love to hear from you!
             </p>
-            <div className="space-y-3 text-muted-foreground">
-              <p>
-                <strong>Email:</strong>{' '}
+            <div className="space-y-3 text-sm">
+              <p className="text-muted-foreground">
+                <strong className="text-foreground">Email:</strong>{' '}
                 <a
                   href="mailto:support@wishmint.ai"
                   className="text-neon-purple hover:text-neon-green transition-colors"
@@ -86,10 +104,10 @@ export function LegalSections() {
                   support@wishmint.ai
                 </a>
               </p>
-              <p>
-                <strong>Response Time:</strong> We typically respond within 24-48 hours
+              <p className="text-muted-foreground">
+                <strong className="text-foreground">Response Time:</strong> We typically respond within 24-48 hours
               </p>
-              <p className="pt-4">
+              <p className="text-muted-foreground pt-2 leading-relaxed">
                 For bug reports or feature requests, please include as much detail as possible to help
                 us assist you better.
               </p>

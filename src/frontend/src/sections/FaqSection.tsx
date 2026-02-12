@@ -36,31 +36,31 @@ export function FaqSection() {
   ];
 
   return (
-    <section className="py-20 px-4 bg-gradient-to-b from-background to-neon-purple/5">
-      <div className="max-w-4xl mx-auto">
+    <section className="section-padding px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-background to-neon-purple/5">
+      <div className="section-container max-w-4xl">
         <Reveal>
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
+          <div className="text-center mb-12 space-y-3">
+            <h2 className="section-heading bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
               Frequently Asked Questions
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="section-subheading">
               Everything you need to know about WishMint AI
             </p>
           </div>
         </Reveal>
 
         <Reveal delay={0.2}>
-          <Accordion type="single" collapsible className="space-y-4">
+          <Accordion type="single" collapsible className="space-y-3">
             {faqs.map((faq, index) => (
               <AccordionItem
                 key={index}
                 value={`item-${index}`}
-                className="bg-card/50 backdrop-blur-sm border border-neon-purple/20 rounded-xl px-6 data-[state=open]:border-neon-purple/40"
+                className="bg-card/70 backdrop-blur-sm border border-neon-purple/20 rounded-lg px-5 data-[state=open]:border-neon-purple/40 shadow-card"
               >
                 <AccordionTrigger className="text-left hover:no-underline py-4">
-                  <span className="font-semibold text-lg">{faq.question}</span>
+                  <span className="font-semibold text-base">{faq.question}</span>
                 </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-4">
+                <AccordionContent className="text-muted-foreground text-sm pb-4 leading-relaxed">
                   {faq.answer}
                 </AccordionContent>
               </AccordionItem>

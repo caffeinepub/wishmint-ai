@@ -1,14 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Add a Google-style sign-in experience by using the existing Internet Identity login flow, with basic authenticated state display and a simple backend “Who am I” verification.
+**Goal:** Add a top-left creator credit in the Hero top bar and apply a light UI polish pass to make the site feel more professional while keeping all existing behaviors intact.
 
 **Planned changes:**
-- Add a visible “Sign in” control on the landing experience that triggers `useInternetIdentity().login()` (presented as the app’s Google-based login alternative).
-- When authenticated, show an authenticated UI state with a “Sign out” action wired to `useInternetIdentity().clear()`, and display the user’s Principal (or shortened) near the auth controls.
-- Display an English login error message when login fails using the existing `loginError`.
-- Add a minimal Motoko query method in `backend/main.mo` that returns the caller’s principal.
-- When logged in, call the backend method from the frontend via the identity-bound actor from the existing `useActor` hook, and display or non-intrusively log the returned principal; handle anonymous/unauthenticated behavior gracefully.
-- Ensure the app remains usable when not logged in (no blocking of generating/copying/sharing wishes).
+- Add a top-left text label in the Hero top bar that reads exactly “Created By Arion Zi”, aligned opposite the existing authentication controls on the right.
+- Polish UI consistency across major sections (Hero, Generator, Templates, Pricing, Examples, FAQ, Legal, Footer) by refining spacing, typography hierarchy, alignment, and shared component styling (e.g., cards/buttons/links) without changing any feature behavior or gated-flow logic.
 
-**User-visible outcome:** Users can sign in and sign out via Internet Identity (as a Google-style login alternative), see their Principal when signed in, and the app continues to work normally without login.
+**User-visible outcome:** The landing page shows “Created By Arion Zi” in the top-left of the Hero header while auth controls remain in the top-right, and the overall page layout/typography feels more consistent and professional across sections.

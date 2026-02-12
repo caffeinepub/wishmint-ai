@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-implement-a-user-login-logout-ui-using-the-existing-internet-identity-authentication-hook-and-present-it-to-users-as-the-app-s-google-based-login-alternative-since-direct-google-oauth-is-not-supported-in-this-stack",
-      "featureTitle": "Implement a user login/logout UI using the existing Internet Identity authentication hook, and present it to users as the app’s Google-based login alternative (since direct Google OAuth is not supported in this stack).",
+      "featureId": "feature-add-a-top-left-corner-credit-label-that-reads-exactly-created-by-arion-zi-in-the-top-bar-of-the-hero-section-aligned-opposite-the-existing-authentication-controls",
+      "featureTitle": "Add a top-left corner credit label that reads exactly \"Created By Arion Zi\" in the top bar of the Hero section, aligned opposite the existing authentication controls.",
       "files": [
-        "frontend/src/components/AuthControls.tsx",
+        "frontend/src/index.css",
         "frontend/src/sections/HeroSection.tsx"
       ],
       "components": [
@@ -16,16 +16,24 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-19"
+        "REQ-26"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-display-basic-authenticated-user-info-in-the-ui-after-login-using-the-active-identity-principal-as-the-user-identifier-and-keep-the-app-usable-when-not-logged-in",
-      "featureTitle": "Display basic authenticated user info in the UI after login, using the active identity principal as the user identifier, and keep the app usable when not logged in.",
+      "featureId": "feature-apply-a-ui-polish-pass-to-make-the-website-look-more-professional-by-improving-consistency-of-spacing-typography-hierarchy-and-alignment-across-major-sections-hero-generator-templates-pricing-examples-faq-legal-footer-without-changing-any-existing-feature-behavior-or-gated-flow-logic",
+      "featureTitle": "Apply a UI polish pass to make the website look more professional by improving consistency of spacing, typography hierarchy, and alignment across major sections (Hero, Generator, Templates, Pricing, Examples, FAQ, Legal, Footer) without changing any existing feature behavior or gated-flow logic.",
       "files": [
-        "frontend/src/components/AuthControls.tsx",
-        "frontend/src/lib/principal.ts"
+        "frontend/src/index.css",
+        "frontend/src/sections/ExamplesSection.tsx",
+        "frontend/src/sections/FaqSection.tsx",
+        "frontend/src/sections/FooterSection.tsx",
+        "frontend/src/sections/GeneratorSection.tsx",
+        "frontend/src/sections/HeroSection.tsx",
+        "frontend/src/sections/LegalSections.tsx",
+        "frontend/src/sections/OutputSection.tsx",
+        "frontend/src/sections/PricingSection.tsx",
+        "frontend/src/sections/TemplatesSection.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -35,26 +43,7 @@
         "github-export-icp-cli@1.0.0"
       ],
       "testIds": [
-        "REQ-20"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-a-minimal-backend-method-to-verify-authentication-wiring-by-returning-the-caller-principal-and-ensure-the-frontend-can-call-it-using-the-authenticated-actor-when-logged-in",
-      "featureTitle": "Add a minimal backend method to verify authentication wiring by returning the caller principal, and ensure the frontend can call it using the authenticated actor when logged in.",
-      "files": [
-        "frontend/src/components/AuthControls.tsx",
-        "frontend/src/hooks/useWhoAmI.ts"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0"
-      ],
-      "testIds": [
-        "REQ-21"
+        "REQ-27"
       ],
       "confidence": "high"
     }

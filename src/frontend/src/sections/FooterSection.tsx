@@ -7,21 +7,21 @@ export function FooterSection() {
   );
 
   return (
-    <footer className="py-12 px-4 border-t border-neon-purple/20 bg-card/30 backdrop-blur-sm">
-      <div className="max-w-6xl mx-auto">
+    <footer className="py-12 px-4 sm:px-6 lg:px-8 border-t border-neon-purple/20 bg-card/30 backdrop-blur-sm">
+      <div className="section-container max-w-6xl">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          <div>
-            <h3 className="font-bold text-xl mb-4 bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
+          <div className="space-y-3">
+            <h3 className="font-bold text-xl bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
               WishMint AI
             </h3>
-            <p className="text-muted-foreground">
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Make birthdays feel personal in seconds with AI-powered wishes.
             </p>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-4">Quick Links</h4>
-            <ul className="space-y-2 text-muted-foreground">
+          <div className="space-y-3">
+            <h4 className="font-semibold text-base">Quick Links</h4>
+            <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
                 <a href="#privacy" className="hover:text-neon-purple transition-colors">
                   Privacy Policy
@@ -40,15 +40,15 @@ export function FooterSection() {
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-semibold mb-4">Connect</h4>
-            <p className="text-muted-foreground">
+          <div className="space-y-3">
+            <h4 className="font-semibold text-base">Connect</h4>
+            <p className="text-muted-foreground text-sm leading-relaxed">
               Have questions or feedback? We'd love to hear from you!
             </p>
           </div>
         </div>
 
-        <div className="pt-8 border-t border-neon-purple/20 text-center text-muted-foreground">
+        <div className="pt-8 border-t border-neon-purple/20 text-center text-muted-foreground text-sm">
           <p className="flex items-center justify-center gap-2 flex-wrap">
             <span>© {currentYear} WishMint AI. All rights reserved.</span>
             <span>•</span>

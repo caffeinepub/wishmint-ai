@@ -1,3 +1,4 @@
+import { forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useWhoAmI } from '../hooks/useWhoAmI';
@@ -8,8 +9,9 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 /**
  * Authentication controls component that provides sign-in/sign-out functionality
  * using Internet Identity. Displays user principal when authenticated.
+ * Supports forwarding ref to the sign-in button for focus management.
  */
-export function AuthControls() {
+export const AuthControls = forwardRef<HTMLButtonElement>((props, ref) => {
   const { login, clear, loginStatus, identity, isLoggingIn, isLoginError, loginError } = useInternetIdentity();
   const { data: backendPrincipal } = useWhoAmI();
 
@@ -51,6 +53,7 @@ export function AuthControls() {
         </div>
       ) : (
         <Button
+          ref={ref}
           onClick={login}
           disabled={isLoggingIn || loginStatus === 'initializing'}
           size="sm"
@@ -71,4 +74,6 @@ export function AuthControls() {
       )}
     </div>
   );
-}
+});
+
+AuthControls.displayName = 'AuthControls';

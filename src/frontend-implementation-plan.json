@@ -1,69 +1,88 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Internet Identity sign-in UI framed as Google alternative",
+  "title": "Professional UI polish + Hero top-left creator credit",
   "requirements": [
     {
-      "id": "REQ-19",
-      "summary": "Add sign-in/sign-out controls on the landing (Hero) that use the existing Internet Identity hook and present it as a Google-based alternative.",
+      "id": "REQ-26",
+      "summary": "Add a top-left \"Created By Arion Zi\" credit label to the Hero top bar opposite AuthControls without affecting auth behavior.",
       "acceptanceCriteria": [
-        "A visible sign-in control exists on the landing experience (e.g., in the Hero section area or a simple top bar) with English text such as “Sign in”.",
-        "Clicking “Sign in” triggers the existing Internet Identity login flow via `useInternetIdentity().login()` (no direct Google OAuth implementation).",
-        "When signed in, the UI changes to show an authenticated state and provides a “Sign out” action wired to `useInternetIdentity().clear()`.",
-        "If login fails, an English error message is shown (using the existing `loginError` from `useInternetIdentity`)."
+        "On the landing (Hero) section, a visible text label \"Created By Arion Zi\" appears in the top-left area of the page.",
+        "The existing AuthControls remain accessible in the top-right area and keep their current behavior (sign in/out, focus management).",
+        "The credit label is readable on mobile and desktop, does not overlap other UI elements, and maintains the site’s existing dark/neon theme styling (subtle, professional)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/AuthControls.tsx",
-          "operation": "create",
-          "description": "Create an auth controls component that uses `useInternetIdentity()` to render “Sign in” (calls `login()`) and, when authenticated, “Sign out” (calls `clear()`), plus an English error message bound to `loginError`. Use shadcn-ui Button for consistent styling (Verify the component's usage instructions before implementing)."
+          "path": "frontend/src/sections/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Update the Hero section top bar layout from right-aligned-only to a two-sided bar (left credit label + right AuthControls). Ensure responsive wrapping/spacing so the label never overlaps AuthControls and remains readable on small screens. Keep AuthControls ref wiring and behavior unchanged. Uses existing shadcn/ui-based AuthControls; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add a small, theme-consistent utility/style (e.g., a shared class for top-bar microcopy) to keep the credit label subtle (muted foreground, tracking, and spacing) while preserving the existing dark/neon identity. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-27",
+      "summary": "Polish UI consistency across major sections (spacing, typography hierarchy, alignment, and component styling consistency) without changing feature behavior or gated flows.",
+      "acceptanceCriteria": [
+        "Section layouts use consistent max-widths and horizontal padding so content aligns cleanly between sections on desktop and mobile.",
+        "Headings/subheadings/body text have a more consistent hierarchy (sizes/weights/line-height), and the overall readability is improved without changing the meaning of existing user-facing text.",
+        "Cards, buttons, and link styles look consistent across sections (e.g., consistent radii, shadows, border treatments), while preserving the existing premium dark/neon visual identity.",
+        "No changes break existing flows: login/logout, plan selection, gated generator actions, generation outputs, copy/share, template selection, and card export all still work as before."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Introduce shared layout/typography helper classes in Tailwind layers (e.g., consistent section padding, shared container widths, and standardized section heading/subheading styles) to align content across sections while preserving the neon/dark theme variables. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/sections/HeroSection.tsx",
           "operation": "modify",
-          "description": "Wire the new AuthControls into the landing Hero experience (e.g., a simple top bar area within the section) so the sign-in control is visible on load. Keep copy in English and position it without adding new routes/pages."
-        }
-      ]
-    },
-    {
-      "id": "REQ-20",
-      "summary": "Show basic authenticated user info (Principal) near auth controls while keeping the app fully usable when not logged in.",
-      "acceptanceCriteria": [
-        "When authenticated, the UI displays the user’s Principal (or a safely shortened version) somewhere near the auth controls.",
-        "When not authenticated, the app continues to function for generating/copying/sharing wishes as it does today.",
-        "Auth UI does not block core offline functionality after the app is loaded (no dependency on external APIs for generation)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/lib/principal.ts",
-          "operation": "create",
-          "description": "Add a small utility to safely format/shorten a Principal string for UI display (e.g., first/last characters with an ellipsis) to avoid layout overflow."
+          "description": "Align Hero spacing/typography with the new shared section/container styles (consistent max-width, improved heading/subheading rhythm) without altering CTA click behavior or auth prompt logic. Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/AuthControls.tsx",
+          "path": "frontend/src/sections/GeneratorSection.tsx",
           "operation": "modify",
-          "description": "Display the current identity Principal (or shortened form via the new util) near the auth buttons when authenticated. Ensure unauthenticated state does not block or gate any generator/copy/share interactions."
-        }
-      ]
-    },
-    {
-      "id": "REQ-21",
-      "summary": "Add a small “Who am I” verification call from the frontend using the identity-bound actor and handle anonymous vs authenticated results gracefully.",
-      "acceptanceCriteria": [
-        "`backend/main.mo` exposes a query method that returns the caller’s principal (e.g., for a “Who am I” check).",
-        "When logged in, frontend calls the method using the identity-bound actor from the existing `useActor` hook and displays the returned principal (or logs it in a non-intrusive way).",
-        "When not logged in, calling the method returns the anonymous principal (or behaves consistently with anonymous identity), and the UI handles this gracefully."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/hooks/useWhoAmI.ts",
-          "operation": "create",
-          "description": "Create a React hook that uses the existing `useActor()` to call `actor.testAuthenticatedCaller()` and returns the resolved Principal (and loading/error state). Keep the call non-blocking for the rest of the app."
+          "description": "Normalize section/container spacing and typography hierarchy (header block, descriptions, form spacing) to match the new shared styles without changing validation, gating, randomize, copy/share, or generation behavior. Uses existing shadcn/ui Card/Form controls; verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/components/AuthControls.tsx",
+          "path": "frontend/src/sections/OutputSection.tsx",
           "operation": "modify",
-          "description": "Use the new `useWhoAmI` hook to display (or non-intrusively log) the backend-returned caller Principal when authenticated, and gracefully handle anonymous results when not logged in (e.g., show nothing or an English hint without blocking the UI)."
+          "description": "Apply consistent section heading styles and card spacing/alignment (grid gaps, button alignment) to match the shared style system without changing copy/share/export behavior. Uses existing shadcn/ui Card/Button; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/TemplatesSection.tsx",
+          "operation": "modify",
+          "description": "Unify heading/subheading styling and grid spacing; ensure template cards and preview card align with the shared container widths and consistent card treatments, without changing template selection behavior. Uses existing shadcn/ui Card; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/PricingSection.tsx",
+          "operation": "modify",
+          "description": "Ensure pricing section alignment (container width, card spacing, heading hierarchy) matches other sections; keep plan selection logic and disabled states unchanged. Uses existing shadcn/ui Card/Button/Badge; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/ExamplesSection.tsx",
+          "operation": "modify",
+          "description": "Standardize section padding, heading styles, filter control alignment, and card typography to match the shared styles without changing filtering behavior. Uses existing shadcn/ui Select/Card/Badge; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/FaqSection.tsx",
+          "operation": "modify",
+          "description": "Bring FAQ section spacing, heading hierarchy, and accordion item layout into alignment with the shared style system without changing FAQ content or accordion behavior. Uses existing shadcn/ui Accordion; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/LegalSections.tsx",
+          "operation": "modify",
+          "description": "Normalize legal sections spacing and typography hierarchy (titles, subheads, prose spacing) to match other sections while keeping the same text/meaning and anchor IDs intact. Uses existing shadcn/ui Card; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/FooterSection.tsx",
+          "operation": "modify",
+          "description": "Align footer container width, link typography, and spacing with the shared layout system while preserving existing links and attribution behavior. Verify the component's usage instructions before implementing."
         }
       ]
     }

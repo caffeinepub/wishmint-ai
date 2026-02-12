@@ -14,21 +14,21 @@ export const ExamplesSection = forwardRef<HTMLDivElement>((_, ref) => {
       : SAMPLE_WISHES.filter((wish) => wish.tone === toneFilter);
 
   return (
-    <section ref={ref} className="py-20 px-4 bg-gradient-to-b from-neon-green/5 to-background">
-      <div className="max-w-6xl mx-auto">
+    <section ref={ref} className="section-padding px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-neon-green/5 to-background">
+      <div className="section-container max-w-6xl">
         <Reveal>
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
+          <div className="text-center mb-12 space-y-4">
+            <h2 className="section-heading bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
               Example Wishes
             </h2>
-            <p className="text-muted-foreground text-lg mb-6">
+            <p className="section-subheading mb-6">
               Get inspired by these sample birthday wishes
             </p>
 
             <div className="flex justify-center">
-              <div className="w-64">
+              <div className="w-full max-w-xs">
                 <Select value={toneFilter} onValueChange={setToneFilter}>
-                  <SelectTrigger className="h-12">
+                  <SelectTrigger className="h-11">
                     <SelectValue placeholder="Filter by tone" />
                   </SelectTrigger>
                   <SelectContent>
@@ -46,25 +46,25 @@ export const ExamplesSection = forwardRef<HTMLDivElement>((_, ref) => {
           </div>
         </Reveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
           {filteredWishes.map((wish, index) => (
             <Reveal key={index} delay={index * 0.1}>
-              <Card className="bg-card/50 backdrop-blur-sm border-neon-purple/20 hover:border-neon-purple/40 transition-all h-full">
-                <CardHeader>
-                  <CardTitle className="text-lg flex items-center justify-between">
+              <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 hover:border-neon-purple/40 transition-all shadow-card h-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg font-semibold flex items-center justify-between">
                     <span>{wish.name}</span>
                   </CardTitle>
-                  <div className="flex gap-2 flex-wrap">
-                    <Badge variant="outline" className="border-neon-purple/50">
+                  <div className="flex gap-2 flex-wrap pt-1">
+                    <Badge variant="outline" className="border-neon-purple/50 text-xs">
                       {wish.tone}
                     </Badge>
-                    <Badge variant="outline" className="border-neon-green/50">
+                    <Badge variant="outline" className="border-neon-green/50 text-xs">
                       {wish.relationship}
                     </Badge>
                   </div>
                 </CardHeader>
                 <CardContent>
-                  <p className="text-foreground/90 leading-relaxed">{wish.wish}</p>
+                  <p className="text-foreground/90 leading-relaxed text-sm">{wish.wish}</p>
                 </CardContent>
               </Card>
             </Reveal>

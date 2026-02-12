@@ -61,10 +61,19 @@ export default {
             },
             boxShadow: {
                 xs: '0 1px 2px 0 rgba(0,0,0,0.05)',
-                neon: '0 0 20px oklch(var(--neon-purple) / 0.5), 0 0 40px oklch(var(--neon-green) / 0.3)'
+                neon: '0 0 24px oklch(var(--neon-purple) / 0.4), 0 0 48px oklch(var(--neon-green) / 0.2)',
+                card: '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1), 0 0 0 1px oklch(var(--neon-purple) / 0.1)'
             },
             fontFamily: {
                 sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif']
+            },
+            letterSpacing: {
+                tighter: '-0.02em',
+                tight: '-0.01em',
+                normal: '0',
+                wide: '0.01em',
+                wider: '0.02em',
+                widest: '0.05em'
             },
             keyframes: {
                 'accordion-down': {

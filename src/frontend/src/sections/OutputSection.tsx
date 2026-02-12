@@ -60,40 +60,40 @@ export function OutputSection() {
   ];
 
   return (
-    <section className="py-20 px-4 bg-muted/30">
-      <div className="max-w-6xl mx-auto">
+    <section className="section-padding px-4 sm:px-6 lg:px-8 bg-muted/20">
+      <div className="section-container max-w-6xl">
         <Reveal>
-          <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
+          <div className="text-center mb-12 space-y-3">
+            <h2 className="section-heading bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
               Your Birthday Pack
             </h2>
-            <p className="text-muted-foreground text-lg">
+            <p className="section-subheading">
               5 perfect wishes ready to share
             </p>
           </div>
         </Reveal>
 
-        <div className="grid md:grid-cols-2 gap-6 mb-8">
+        <div className="grid md:grid-cols-2 gap-5 mb-8">
           {outputCards.map((card, index) => (
             <Reveal key={card.title} delay={index * 0.1}>
-              <Card className="bg-card/80 backdrop-blur-sm border-neon-purple/20 hover:border-neon-purple/40 transition-all">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-2 text-lg">
+              <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 hover:border-neon-purple/40 transition-all shadow-card h-full">
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg font-semibold">
                     <span className="text-2xl">{card.icon}</span>
                     {card.title}
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <p className="text-muted-foreground whitespace-pre-wrap leading-relaxed">
+                  <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed text-sm">
                     {card.content}
                   </p>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => handleCopy(card.content, card.title)}
-                    className="w-full"
+                    className="w-full h-9 text-sm"
                   >
-                    <Copy className="w-4 h-4 mr-2" />
+                    <Copy className="w-3.5 h-3.5 mr-2" />
                     Copy
                   </Button>
                 </CardContent>
@@ -103,32 +103,32 @@ export function OutputSection() {
         </div>
 
         <Reveal delay={0.5}>
-          <div className="flex flex-wrap gap-4 justify-center">
+          <div className="flex flex-wrap gap-3 justify-center">
             <Button
               onClick={handleCopyAll}
               size="lg"
               variant="outline"
-              className="gap-2"
+              className="gap-2 h-11"
             >
-              <Copy className="w-5 h-5" />
+              <Copy className="w-4 h-4" />
               Copy All
             </Button>
             <Button
               onClick={handleWhatsAppShare}
               size="lg"
               variant="outline"
-              className="gap-2"
+              className="gap-2 h-11"
             >
-              <MessageCircle className="w-5 h-5" />
+              <MessageCircle className="w-4 h-4" />
               Share on WhatsApp
             </Button>
             <Button
               onClick={handleDownloadCard}
               size="lg"
-              className="gap-2 bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90"
+              className="gap-2 h-11 bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90"
               disabled={isExporting}
             >
-              <Download className="w-5 h-5" />
+              <Download className="w-4 h-4" />
               {isExporting ? 'Exporting...' : 'Download Card Image'}
             </Button>
           </div>
