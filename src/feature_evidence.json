@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-update-the-site-viewport-configuration-by-replacing-the-existing-viewport-meta-tag-in-frontend-index-html-with-exactly-meta-name-viewport-content-width-device-width-initial-scale-1-viewport-fit-cover",
-      "featureTitle": "Update the site viewport configuration by replacing the existing viewport meta tag in `frontend/index.html` with exactly: `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />`.",
+      "featureId": "feature-change-all-upgrade-entry-points-e-g-upgrade-to-pro-upgrade-to-creator-unlock-premium-and-any-upgrade-plan-button-so-that-clicking-them-only-opens-the-in-app-pricingcomparisonmodal-and-does-not-immediately-open-or-navigate-to-an-external-full-payment-page",
+      "featureTitle": "Change all upgrade entry points (e.g., “Upgrade to Pro”, “Upgrade to Creator”, “Unlock Premium”, and any “Upgrade Plan” button) so that clicking them only opens the in-app PricingComparisonModal and does not immediately open or navigate to an external/full payment page.",
       "files": [
-        "frontend/index.html"
+        "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -16,15 +16,15 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-82"
+        "REQ-94"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-add-a-global-mobile-safe-overflow-prevention-baseline-in-frontend-src-index-css-to-fully-eliminate-horizontal-scrolling-apply-width-100-margin-0-and-overflow-x-hidden-to-html-body-and-ensure-root-is-width-100-with-min-height-100vh",
-      "featureTitle": "Add a global, mobile-safe overflow prevention baseline in `frontend/src/index.css` to fully eliminate horizontal scrolling: apply `width: 100%`, `margin: 0`, and `overflow-x: hidden` to `html, body`, and ensure `#root` is `width: 100%` with `min-height: 100vh`.",
+      "featureId": "feature-update-pricingcomparisonmodal-so-plan-upgrade-buttons-do-not-immediately-initiate-razorpay-checkout-instead-the-modal-must-present-an-in-modal-confirmation-step-or-secondary-button-that-the-user-explicitly-clicks-to-proceed-to-payment-keeping-the-user-in-the-app-modal-flow-until-they-confirm",
+      "featureTitle": "Update PricingComparisonModal so plan upgrade buttons do not immediately initiate Razorpay checkout. Instead, the modal must present an in-modal confirmation step (or secondary button) that the user explicitly clicks to proceed to payment, keeping the user in the app modal flow until they confirm.",
       "files": [
-        "frontend/src/index.css"
+        "frontend/src/features/subscription/PricingComparisonModal.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -35,16 +35,16 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-83"
+        "REQ-95"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-ensure-the-premium-dark-gradient-background-covers-the-full-screen-width-height-on-mobile-by-applying-the-background-to-either-body-or-a-single-full-width-top-level-wrapper-e-g-the-app-root-using-width-100vw-or-w-full-and-min-height-100vh-without-introducing-horizontal-overflow",
-      "featureTitle": "Ensure the premium dark gradient background covers the full screen width/height on mobile by applying the background to either `body` or a single full-width top-level wrapper (e.g., the `App` root) using `width: 100vw` (or `w-full`) and `min-height: 100vh`, without introducing horizontal overflow.",
+      "featureId": "feature-ensure-the-razorpay-upgrade-initiation-userazorpayupgrade-never-performs-a-full-page-navigation-redirect-as-part-of-the-client-flow-if-checkout-cannot-be-opened-as-an-in-context-experience-show-a-clear-english-error-toast-explaining-that-payment-could-not-be-started-and-to-try-again-later-without-leaving-the-app",
+      "featureTitle": "Ensure the Razorpay upgrade initiation (useRazorpayUpgrade) never performs a full-page navigation/redirect as part of the client flow; if checkout cannot be opened as an in-context experience, show a clear English error toast explaining that payment could not be started and to try again later, without leaving the app.",
       "files": [
-        "frontend/src/App.tsx",
-        "frontend/src/index.css"
+        "frontend/src/features/payments/razorpay.ts",
+        "frontend/src/features/subscription/PricingComparisonModal.tsx"
       ],
       "components": [
         "core-infrastructure@1.0.2",
@@ -55,50 +55,7 @@
         "authorization@4.0.0"
       ],
       "testIds": [
-        "REQ-84"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-audit-and-fix-layout-containers-and-section-components-to-remove-any-non-responsive-fixed-width-constraints-that-can-force-overflow-e-g-w-400px-w-420px-w-450px-or-problematic-max-w-500px-replace-them-with-mobile-first-responsive-patterns-w-full-optional-max-w-480px-mx-auto-and-px-4-p-4-p-6-so-content-stretches-correctly-on-small-screens",
-      "featureTitle": "Audit and fix layout containers and section components to remove any non-responsive fixed width constraints that can force overflow (e.g., `w-[400px]`, `w-[420px]`, `w-[450px]`, or problematic `max-w-[500px]`). Replace them with mobile-first responsive patterns (`w-full`, optional `max-w-[480px]`, `mx-auto`, and `px-4` / `p-4` / `p-6`) so content stretches correctly on small screens.",
-      "files": [
-        "frontend/src/sections/GeneratorSection.tsx",
-        "frontend/src/sections/HeroSection.tsx",
-        "frontend/src/sections/OutputSection.tsx",
-        "frontend/src/sections/PricingSection.tsx",
-        "frontend/src/sections/TemplatesSection.tsx"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-85"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-identify-and-eliminate-the-specific-dom-element-s-causing-right-side-overflow-e-g-oversized-absolutely-positioned-layers-transforms-fixed-alignment-or-any-element-wider-than-100-adjust-the-offending-styles-classes-so-no-element-exceeds-the-viewport-width-on-mobile-while-keeping-existing-ui-behavior-intact",
-      "featureTitle": "Identify and eliminate the specific DOM element(s) causing right-side overflow (e.g., oversized absolutely positioned layers, transforms, fixed alignment, or any element wider than 100%). Adjust the offending styles/classes so no element exceeds the viewport width on mobile while keeping existing UI behavior intact.",
-      "files": [
-        "frontend/src/features/surprise/SurpriseView.tsx",
-        "frontend/src/index.css"
-      ],
-      "components": [
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "authorization@4.0.0"
-      ],
-      "testIds": [
-        "REQ-86"
+        "REQ-96"
       ],
       "confidence": "high"
     }

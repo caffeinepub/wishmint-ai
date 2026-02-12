@@ -31,10 +31,9 @@ export const PLAN_DEFINITIONS: Record<PlanType, PlanMetadata> = {
     priceAmount: 0,
     description: 'Get started with basic features',
     features: [
-      '3 messages per day',
-      'Watermark on downloads',
+      '3 wishes per day',
+      'Watermark',
       'Limited templates',
-      'No HD export',
     ],
     entitlements: {
       dailyMessageLimit: 3,
@@ -55,12 +54,11 @@ export const PLAN_DEFINITIONS: Record<PlanType, PlanMetadata> = {
     priceAmount: 49,
     description: 'Perfect for personal use',
     features: [
-      'Unlimited messages',
+      'Unlimited wishes',
       'Remove watermark',
-      'HD image download (1080x1080 + 9:16)',
+      'HD download',
       'Premium templates',
-      'Hindi + Romantic AI tone',
-      'Surprise link feature',
+      'Surprise mode',
     ],
     entitlements: {
       dailyMessageLimit: null,
@@ -82,12 +80,10 @@ export const PLAN_DEFINITIONS: Record<PlanType, PlanMetadata> = {
     priceAmount: 149,
     description: 'For creators and professionals',
     features: [
-      'Everything in Pro',
-      'Sell templates in marketplace',
-      'Reel video export (MP4)',
-      'Voice message generation',
-      'Custom branding',
-      'Analytics dashboard',
+      'Sell templates',
+      'Voice wishes',
+      'Reel export',
+      'Marketplace access',
     ],
     entitlements: {
       dailyMessageLimit: null,

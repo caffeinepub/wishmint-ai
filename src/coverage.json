@@ -1,80 +1,51 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T13:34:04.796Z",
+  "generatedAt": "2026-02-12T14:35:47.547Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
-        "id": "REQ-82",
-        "summary": "Update the site viewport configuration by replacing the existing viewport meta tag in `frontend/index.html` with exactly: `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />`.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/index.html"
-        ],
-        "matchedFiles": [
-          "frontend/index.html"
-        ]
-      },
-      {
-        "id": "REQ-83",
-        "summary": "Add a global, mobile-safe overflow prevention baseline in `frontend/src/index.css` to fully eliminate horizontal scrolling: apply `width: 100%`, `margin: 0`, and `overflow-x: hidden` to `html, body`, and ensure `#root` is `width: 100%` with `min-height: 100vh`.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css"
-        ]
-      },
-      {
-        "id": "REQ-84",
-        "summary": "Ensure the premium dark gradient background covers the full screen width/height on mobile by applying the background to either `body` or a single full-width top-level wrapper (e.g., the `App` root) using `width: 100vw` (or `w-full`) and `min-height: 100vh`, without introducing horizontal overflow.",
+        "id": "REQ-94",
+        "summary": "Change all upgrade entry points (e.g., “Upgrade to Pro”, “Upgrade to Creator”, “Unlock Premium”, and any “Upgrade Plan” button) so that clicking them only opens the in-app PricingComparisonModal and does not immediately open or navigate to an external/full payment page.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/App.tsx",
-          "frontend/src/index.css"
+          "frontend/src/sections/PricingSection.tsx",
+          "frontend/src/features/subscription/PremiumLock.tsx",
+          "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/index.css"
+          "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md"
         ]
       },
       {
-        "id": "REQ-85",
-        "summary": "Audit and fix layout containers and section components to remove any non-responsive fixed width constraints that can force overflow (e.g., `w-[400px]`, `w-[420px]`, `w-[450px]`, or problematic `max-w-[500px]`). Replace them with mobile-first responsive patterns (`w-full`, optional `max-w-[480px]`, `mx-auto`, and `px-4` / `p-4` / `p-6`) so content stretches correctly on small screens.",
+        "id": "REQ-95",
+        "summary": "Update PricingComparisonModal so plan upgrade buttons do not immediately initiate Razorpay checkout. Instead, the modal must present an in-modal confirmation step (or secondary button) that the user explicitly clicks to proceed to payment, keeping the user in the app modal flow until they confirm.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/sections/TemplatesSection.tsx",
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/sections/PricingSection.tsx"
+          "frontend/src/features/subscription/PricingComparisonModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/sections/TemplatesSection.tsx",
-          "frontend/src/sections/OutputSection.tsx",
-          "frontend/src/sections/PricingSection.tsx"
+          "frontend/src/features/subscription/PricingComparisonModal.tsx"
         ]
       },
       {
-        "id": "REQ-86",
-        "summary": "Identify and eliminate the specific DOM element(s) causing right-side overflow (e.g., oversized absolutely positioned layers, transforms, fixed alignment, or any element wider than 100%). Adjust the offending styles/classes so no element exceeds the viewport width on mobile while keeping existing UI behavior intact.",
+        "id": "REQ-96",
+        "summary": "Ensure the Razorpay upgrade initiation (useRazorpayUpgrade) never performs a full-page navigation/redirect as part of the client flow; if checkout cannot be opened as an in-context experience, show a clear English error toast explaining that payment could not be started and to try again later, without leaving the app.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/features/surprise/SurpriseView.tsx",
-          "frontend/src/index.css"
+          "frontend/src/features/payments/razorpay.ts",
+          "frontend/src/features/subscription/PricingComparisonModal.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/features/surprise/SurpriseView.tsx",
-          "frontend/src/index.css"
+          "frontend/src/features/payments/razorpay.ts",
+          "frontend/src/features/subscription/PricingComparisonModal.tsx"
         ]
       }
     ]
@@ -84,15 +55,9 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/index.html",
-    "frontend/src/App.tsx",
-    "frontend/src/features/surprise/SurpriseView.tsx",
-    "frontend/src/index.css",
-    "frontend/src/sections/GeneratorSection.tsx",
-    "frontend/src/sections/HeroSection.tsx",
-    "frontend/src/sections/OutputSection.tsx",
-    "frontend/src/sections/PricingSection.tsx",
-    "frontend/src/sections/TemplatesSection.tsx",
+    "frontend/src/features/payments/razorpay.ts",
+    "frontend/src/features/subscription/PricingComparisonModal.tsx",
+    "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

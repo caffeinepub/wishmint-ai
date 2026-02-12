@@ -91,6 +91,28 @@ function App() {
     }
   });
 
+  // Handle /pricing route on initial load and navigation
+  useEffect(() => {
+    const handlePricingRoute = () => {
+      const path = window.location.pathname;
+      if (path === '/pricing' || path.endsWith('/pricing')) {
+        // Scroll to pricing section
+        setTimeout(() => {
+          pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          // Also open the pricing modal
+          setPricingModalOpen(true);
+        }, 300);
+      }
+    };
+
+    // Check on mount
+    handlePricingRoute();
+
+    // Listen for browser navigation
+    window.addEventListener('popstate', handlePricingRoute);
+    return () => window.removeEventListener('popstate', handlePricingRoute);
+  }, []);
+
   // Upsert user auth record after successful login (only once per session)
   useEffect(() => {
     if (isAuthenticated && !hasTriggeredAuthUpsert) {
@@ -164,13 +186,31 @@ function App() {
   };
 
   const openPricingModal = (plan?: 'pro' | 'creator') => {
+    // Debug log for upgrade click tracking
+    console.log('Upgrade clicked', plan ? `(${plan})` : '');
+    
     setHighlightPlan(plan);
     setPricingModalOpen(true);
+    
+    // Update URL to /pricing for shareable links
+    if (window.location.pathname !== '/pricing') {
+      window.history.pushState({}, '', '/pricing');
+    }
+    
+    // Scroll to pricing section
+    setTimeout(() => {
+      pricingRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   };
 
   const closePricingModal = () => {
     setPricingModalOpen(false);
     setHighlightPlan(undefined);
+    
+    // Reset URL when closing modal
+    if (window.location.pathname === '/pricing') {
+      window.history.pushState({}, '', '/');
+    }
   };
 
   const handleHeroCTA = () => {

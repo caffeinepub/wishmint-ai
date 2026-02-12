@@ -16,51 +16,59 @@ export const PricingSection = forwardRef<HTMLDivElement>((props, ref) => {
       period: 'forever',
       icon: Sparkles,
       features: [
-        '3 messages per day',
-        'Basic templates',
-        'WhatsApp sharing',
-        'Community access',
+        '3 wishes per day',
+        'Watermark',
+        'Limited templates',
       ],
       cta: 'Get Started',
       variant: 'outline' as const,
       highlight: false,
+      planKey: null,
     },
     {
       name: 'Pro',
-      price: '₹99',
+      price: '₹49',
       period: 'per month',
       icon: Zap,
       features: [
-        'Unlimited messages',
+        'Unlimited wishes',
+        'Remove watermark',
+        'HD download',
         'Premium templates',
-        'Card downloads',
-        'Surprise Mode',
-        'Priority support',
+        'Surprise mode',
       ],
       cta: 'Upgrade to Pro',
       variant: 'default' as const,
       highlight: true,
+      planKey: 'pro' as const,
     },
     {
       name: 'Creator',
-      price: '₹299',
+      price: '₹149',
       period: 'per month',
       icon: Crown,
       features: [
-        'Everything in Pro',
         'Sell templates',
+        'Voice wishes',
+        'Reel export',
         'Marketplace access',
-        'Creator dashboard',
-        'Revenue sharing',
       ],
-      cta: 'Become a Creator',
+      cta: 'Upgrade to Creator',
       variant: 'outline' as const,
       highlight: false,
+      planKey: 'creator' as const,
     },
   ];
 
+  const handlePlanClick = (planKey: 'pro' | 'creator' | null) => {
+    console.log('Upgrade clicked', planKey || 'free');
+    if (planKey) {
+      openPricingModal(planKey);
+    }
+  };
+
   return (
-    <section ref={ref} className="w-full section-padding px-4 sm:px-6 lg:px-8">
+    <section id="pricing" ref={ref} className="w-full section-padding px-4 sm:px-6 lg:px-8">
       <div className="section-container max-w-7xl">
         <Reveal>
           <div className="text-center mb-12 space-y-3">
@@ -84,7 +92,7 @@ export const PricingSection = forwardRef<HTMLDivElement>((props, ref) => {
                   }`}
                 >
                   {plan.highlight && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 z-10">
                       <Badge className="bg-gradient-to-r from-neon-purple to-neon-green text-white border-0">
                         Most Popular
                       </Badge>
@@ -112,12 +120,13 @@ export const PricingSection = forwardRef<HTMLDivElement>((props, ref) => {
                       ))}
                     </ul>
                     <Button
-                      onClick={() => openPricingModal(plan.name.toLowerCase() as 'pro' | 'creator')}
+                      type="button"
+                      onClick={() => handlePlanClick(plan.planKey)}
                       variant={plan.variant}
                       className={
                         plan.variant === 'default'
-                          ? 'w-full bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold'
-                          : 'w-full border-neon-purple/50 hover:bg-neon-purple/10'
+                          ? 'w-full bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold relative z-20 pointer-events-auto'
+                          : 'w-full border-neon-purple/50 hover:bg-neon-purple/10 relative z-20 pointer-events-auto'
                       }
                     >
                       {plan.cta}
@@ -147,19 +156,25 @@ export const PricingSection = forwardRef<HTMLDivElement>((props, ref) => {
                   </thead>
                   <tbody>
                     <tr className="border-b border-border">
-                      <td className="py-3 px-4">Messages per day</td>
+                      <td className="py-3 px-4">Wishes per day</td>
                       <td className="text-center py-3 px-4">3</td>
                       <td className="text-center py-3 px-4">Unlimited</td>
                       <td className="text-center py-3 px-4">Unlimited</td>
                     </tr>
                     <tr className="border-b border-border">
                       <td className="py-3 px-4">Templates</td>
-                      <td className="text-center py-3 px-4">Basic</td>
+                      <td className="text-center py-3 px-4">Limited</td>
                       <td className="text-center py-3 px-4">Premium</td>
                       <td className="text-center py-3 px-4">Premium</td>
                     </tr>
                     <tr className="border-b border-border">
-                      <td className="py-3 px-4">Card Downloads</td>
+                      <td className="py-3 px-4">Watermark</td>
+                      <td className="text-center py-3 px-4">Yes</td>
+                      <td className="text-center py-3 px-4">Removed</td>
+                      <td className="text-center py-3 px-4">Removed</td>
+                    </tr>
+                    <tr className="border-b border-border">
+                      <td className="py-3 px-4">HD Download</td>
                       <td className="text-center py-3 px-4">-</td>
                       <td className="text-center py-3 px-4">
                         <Check className="w-5 h-5 text-neon-green mx-auto" />

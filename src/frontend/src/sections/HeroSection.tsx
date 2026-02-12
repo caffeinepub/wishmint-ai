@@ -35,9 +35,9 @@ export function HeroSection({
   return (
     <>
       <section className="relative w-full min-h-screen flex flex-col px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
-        {/* Animated background gradient */}
-        <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/15 via-background to-neon-green/15 animate-gradient" />
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.08),transparent_50%)]" />
+        {/* Animated background gradient - non-interactive */}
+        <div className="absolute inset-0 bg-gradient-to-br from-neon-purple/15 via-background to-neon-green/15 animate-gradient pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(139,92,246,0.08),transparent_50%)] pointer-events-none" />
         
         {/* Top bar with creator credit and auth controls */}
         <div className="relative z-10 w-full max-w-7xl mx-auto flex items-center justify-between mb-4 gap-4">
@@ -86,18 +86,20 @@ export function HeroSection({
               {!isAuthenticated ? (
                 <>
                   <Button
+                    type="button"
                     size="lg"
                     onClick={onTryDemo}
-                    className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold px-8 py-6 text-base sm:text-lg rounded-xl shadow-neon transition-all hover:scale-105"
+                    className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold px-8 py-6 text-base sm:text-lg rounded-xl shadow-neon transition-all hover:scale-105 relative z-20 pointer-events-auto"
                   >
                     <Zap className="w-5 h-5 mr-2" />
                     Try Demo
                   </Button>
                   <Button
+                    type="button"
                     size="lg"
                     variant="outline"
                     onClick={() => setAuthDialogOpen(true)}
-                    className="border-neon-purple/50 hover:bg-neon-purple/10 px-8 py-6 text-base sm:text-lg rounded-xl transition-all hover:scale-105"
+                    className="border-neon-purple/50 hover:bg-neon-purple/10 px-8 py-6 text-base sm:text-lg rounded-xl transition-all hover:scale-105 relative z-20 pointer-events-auto"
                   >
                     <Gift className="w-5 h-5 mr-2" />
                     Sign In
@@ -106,18 +108,20 @@ export function HeroSection({
               ) : (
                 <>
                   <Button
+                    type="button"
                     size="lg"
                     onClick={onGenerateClick}
-                    className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold px-8 py-6 text-base sm:text-lg rounded-xl shadow-neon transition-all hover:scale-105"
+                    className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold px-8 py-6 text-base sm:text-lg rounded-xl shadow-neon transition-all hover:scale-105 relative z-20 pointer-events-auto"
                   >
                     <Sparkles className="w-5 h-5 mr-2" />
                     Generate Wish
                   </Button>
                   <Button
+                    type="button"
                     size="lg"
                     variant="outline"
                     onClick={onExamplesClick}
-                    className="border-neon-purple/50 hover:bg-neon-purple/10 px-8 py-6 text-base sm:text-lg rounded-xl transition-all hover:scale-105"
+                    className="border-neon-purple/50 hover:bg-neon-purple/10 px-8 py-6 text-base sm:text-lg rounded-xl transition-all hover:scale-105 relative z-20 pointer-events-auto"
                   >
                     <Gift className="w-5 h-5 mr-2" />
                     View Examples

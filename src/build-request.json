@@ -1,105 +1,72 @@
 {
   "kind": "build_request",
-  "title": "Fix mobile horizontal overflow and right-side black space on WishMint AI",
-  "priority": "high",
+  "title": "Change Upgrade behavior to open in-app modal instead of payment page",
+  "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-82",
-      "text": "Update the site viewport configuration by replacing the existing viewport meta tag in `frontend/index.html` with exactly: `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />`.",
+      "id": "REQ-94",
+      "text": "Change all upgrade entry points (e.g., “Upgrade to Pro”, “Upgrade to Creator”, “Unlock Premium”, and any “Upgrade Plan” button) so that clicking them only opens the in-app PricingComparisonModal and does not immediately open or navigate to an external/full payment page.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Add viewport meta tag:\n\n```html\n<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />\n```"
+          "change the behavior (open modal instead of full payment page)"
         ]
       },
       "acceptanceCriteria": [
-        "`frontend/index.html` contains the viewport meta tag exactly as provided by the user.",
-        "The previous `initial-scale=1.0` viewport meta tag is removed/replaced (no duplicate viewport tags)."
+        "Clicking any upgrade CTA keeps the user on the current page and opens the in-app pricing modal (Dialog) instead of navigating away.",
+        "No upgrade CTA directly calls the Razorpay initiation function on first click; it only opens the PricingComparisonModal.",
+        "The browser URL is not redirected to any Razorpay/checkout URL as a result of the initial upgrade click."
       ]
     },
     {
-      "id": "REQ-83",
-      "text": "Add a global, mobile-safe overflow prevention baseline in `frontend/src/index.css` to fully eliminate horizontal scrolling: apply `width: 100%`, `margin: 0`, and `overflow-x: hidden` to `html, body`, and ensure `#root` is `width: 100%` with `min-height: 100vh`.",
+      "id": "REQ-95",
+      "text": "Update PricingComparisonModal so plan upgrade buttons do not immediately initiate Razorpay checkout. Instead, the modal must present an in-modal confirmation step (or secondary button) that the user explicitly clicks to proceed to payment, keeping the user in the app modal flow until they confirm.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Prevent horizontal scrolling globally:\n\n```css\nhtml, body {\n  width: 100%;\n  margin: 0;\n  overflow-x: hidden;\n}\n```\n\nEnsure main wrappers (#root, .app, main, layout container) use:\n\n```css\nwidth: 100%;\nmin-height: 100vh;\n```"
+          "change the behavior (open modal instead of full payment page)"
         ]
       },
       "acceptanceCriteria": [
-        "At mobile widths (360px / 390px / 414px), the page does not allow horizontal scrolling (no sideways pan).",
-        "#root expands full width and at least the viewport height on mobile."
+        "Inside PricingComparisonModal, clicking “Upgrade to Pro/Creator” first shows a clear in-modal confirmation UI (still within the app) and does not open Razorpay immediately.",
+        "Only after the user clicks a “Proceed to payment” (or equivalent) control inside the modal should the Razorpay flow be initiated.",
+        "Closing/cancelling the confirmation step returns to the pricing modal content without navigating away from the app."
       ]
     },
     {
-      "id": "REQ-84",
-      "text": "Ensure the premium dark gradient background covers the full screen width/height on mobile by applying the background to either `body` or a single full-width top-level wrapper (e.g., the `App` root) using `width: 100vw` (or `w-full`) and `min-height: 100vh`, without introducing horizontal overflow.",
+      "id": "REQ-96",
+      "text": "Ensure the Razorpay upgrade initiation (useRazorpayUpgrade) never performs a full-page navigation/redirect as part of the client flow; if checkout cannot be opened as an in-context experience, show a clear English error toast explaining that payment could not be started and to try again later, without leaving the app.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Make sure background gradient covers full screen:\n\nApply background to:\n\n* body\n  OR\n* full-width wrapper using width: 100vw and min-height: 100vh"
+          "change the behavior (open modal instead of full payment page)"
         ]
       },
       "acceptanceCriteria": [
-        "On mobile, there is no unstyled/black empty band on the right side; the background visually covers the entire viewport.",
-        "No new horizontal overflow is introduced by `100vw` usage (if used, it is handled safely).",
-        "The existing dark premium gradient design language remains consistent (no visual theme change away from the current dark/neon look)."
-      ]
-    },
-    {
-      "id": "REQ-85",
-      "text": "Audit and fix layout containers and section components to remove any non-responsive fixed width constraints that can force overflow (e.g., `w-[400px]`, `w-[420px]`, `w-[450px]`, or problematic `max-w-[500px]`). Replace them with mobile-first responsive patterns (`w-full`, optional `max-w-[480px]`, `mx-auto`, and `px-4` / `p-4` / `p-6`) so content stretches correctly on small screens.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Remove any fixed width layouts like:\n\n* width: 420px\n* w-[400px]\n* w-[450px]\n* max-w-[500px] if breaking layout\n\nReplace them with responsive structure:\n\n* width: 100%\n* max-width: 480px (optional)\n* margin: 0 auto\n* padding: 16px"
-        ]
-      },
-      "acceptanceCriteria": [
-        "No fixed-width Tailwind classes (e.g., `w-[400px]`, `w-[420px]`, `w-[450px]`) remain on main layout wrappers/sections that participate in the mobile layout flow.",
-        "Primary sections (Hero, Generator, Templates, Pricing, Outputs, etc.) render with full-width behavior on 360px/390px/414px without clipping or right-side empty space."
-      ]
-    },
-    {
-      "id": "REQ-86",
-      "text": "Identify and eliminate the specific DOM element(s) causing right-side overflow (e.g., oversized absolutely positioned layers, transforms, fixed alignment, or any element wider than 100%). Adjust the offending styles/classes so no element exceeds the viewport width on mobile while keeping existing UI behavior intact.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-1"
-        ],
-        "quotes": [
-          "Ensure no element is causing overflow:\n\n* Remove large absolute positioned elements\n* Remove fixed left alignment\n* Check for elements wider than 100%"
-        ]
-      },
-      "acceptanceCriteria": [
-        "At 360px/390px/414px, the page fully fits the screen with NO black area on the right side.",
-        "There is no horizontal scrollbar and no content is cut off on the left/right edges.",
-        "Existing interactions and feature behavior are unchanged (only layout/overflow fixes)."
+        "Initiating payment does not change window.location or navigate the SPA to a new page.",
+        "If Razorpay cannot open (SDK missing/not loaded/config missing), the app shows an English toast error and remains usable.",
+        "The existing payment-configuration missing message remains English and actionable."
       ]
     }
   ],
   "constraints": [
-    "Do not edit files under the immutable frontend paths: `frontend/src/hooks/useInternetIdentity.ts`, `frontend/src/hooks/useInternetIdentity.tsx`, `frontend/src/hooks/useActor.ts`, `frontend/src/main.tsx`, and anything under `frontend/src/components/ui`.",
-    "Maintain the current dark premium gradient + neon (purple/green) design; do not re-theme the app.",
-    "All user-facing text related to this fix (if any) must remain in English."
+    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, or frontend/src/hooks/useActor.ts (immutable paths).",
+    "Keep the app as a single-page React app; do not add Next.js-style routing/pages.",
+    "All user-facing text must be in English."
   ],
   "nonGoals": [
-    "Do not add new product features, sections, or authentication changes as part of this task.",
-    "Do not change backend Motoko code or data models for this layout fix.",
-    "Do not modify the Google Analytics snippet beyond the requested viewport meta tag change."
+    "Implementing server-side Razorpay order creation, webhook verification, or backend subscription activation logic.",
+    "Adding new payment providers or external databases.",
+    "Changing plan definitions/entitlements beyond what is needed to support the modal-first upgrade behavior."
   ],
   "imageRequirements": {
     "required": [],

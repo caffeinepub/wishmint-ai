@@ -1,112 +1,73 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "WishMint AI: Eliminate mobile horizontal overflow and right-side black space",
+  "title": "Modal-first upgrade flow with in-modal payment confirmation and no redirects",
   "requirements": [
     {
-      "id": "REQ-82",
-      "summary": "Replace the viewport meta tag to use device-width, initial-scale=1, and viewport-fit=cover.",
+      "id": "REQ-94",
+      "summary": "Ensure all upgrade CTAs only open the in-app PricingComparisonModal and never initiate payment or navigate externally on first click.",
       "acceptanceCriteria": [
-        "`frontend/index.html` contains the viewport meta tag exactly as provided by the user.",
-        "The previous `initial-scale=1.0` viewport meta tag is removed/replaced (no duplicate viewport tags)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/index.html",
-          "operation": "modify",
-          "description": "Replace the existing viewport meta tag with exactly: `<meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />`, ensuring no duplicate viewport tags remain."
-        }
-      ]
-    },
-    {
-      "id": "REQ-83",
-      "summary": "Add a global CSS baseline to prevent mobile horizontal scrolling and ensure root wrapper sizing.",
-      "acceptanceCriteria": [
-        "At mobile widths (360px / 390px / 414px), the page does not allow horizontal scrolling (no sideways pan).",
-        "#root expands full width and at least the viewport height on mobile."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add global overflow prevention styles: apply `width: 100%`, `margin: 0`, and `overflow-x: hidden` to `html, body`; ensure `#root` has `width: 100%` and `min-height: 100vh`. Also add a safe baseline for media elements (e.g., images/canvas/svg) to not exceed container width to reduce accidental overflow."
-        }
-      ]
-    },
-    {
-      "id": "REQ-84",
-      "summary": "Ensure the dark premium gradient background covers the full viewport on mobile without creating overflow.",
-      "acceptanceCriteria": [
-        "On mobile, there is no unstyled/black empty band on the right side; the background visually covers the entire viewport.",
-        "No new horizontal overflow is introduced by `100vw` usage (if used, it is handled safely).",
-        "The existing dark premium gradient design language remains consistent (no visual theme change away from the current dark/neon look)."
+        "Clicking any upgrade CTA keeps the user on the current page and opens the in-app pricing modal (Dialog) instead of navigating away.",
+        "No upgrade CTA directly calls the Razorpay initiation function on first click; it only opens the PricingComparisonModal.",
+        "The browser URL is not redirected to any Razorpay/checkout URL as a result of the initial upgrade click."
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Adjust the top-level App wrapper to be a single full-width, mobile-safe container (e.g., ensure `w-full` and `min-h-[100dvh]`/`min-h-screen`) and apply/host the existing dark/neon gradient background coverage consistently across the viewport. Ensure the chosen approach does not reintroduce horizontal overflow (avoid unsafe `100vw` or compensate if required)."
-        },
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "If needed to support full-viewport background coverage, add minimal global styles for `body` / `#root` to keep the existing dark/neon gradient language consistent across the full viewport while preserving the current theme (no re-theming)."
-        }
-      ]
-    },
-    {
-      "id": "REQ-85",
-      "summary": "Remove fixed-width constraints in layout/sections and replace with responsive mobile-first sizing to prevent overflow.",
-      "acceptanceCriteria": [
-        "No fixed-width Tailwind classes (e.g., `w-[400px]`, `w-[420px]`, `w-[450px]`) remain on main layout wrappers/sections that participate in the mobile layout flow.",
-        "Primary sections (Hero, Generator, Templates, Pricing, Outputs, etc.) render with full-width behavior on 360px/390px/414px without clipping or right-side empty space."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/sections/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Audit Hero layout containers and decorative layers for any fixed-width constraints or sizing patterns that can exceed the viewport; replace with mobile-first responsive patterns (`w-full`, responsive `max-w-*`, `mx-auto`, and appropriate `px-*`) while keeping existing visuals and interactions unchanged."
-        },
-        {
-          "path": "frontend/src/sections/GeneratorSection.tsx",
-          "operation": "modify",
-          "description": "Audit Generator section wrappers/cards/grids for any non-responsive width constraints that can force overflow; replace with responsive `w-full` + sane `max-w-*` + padding patterns so the form and card never exceed the viewport on mobile."
-        },
-        {
-          "path": "frontend/src/sections/TemplatesSection.tsx",
-          "operation": "modify",
-          "description": "Audit Templates grid and preview card for overflow-causing sizing (including template preview containers); ensure responsive `w-full` behavior and safe padding so the grid/preview does not push beyond the viewport on small screens."
-        },
-        {
-          "path": "frontend/src/sections/OutputSection.tsx",
-          "operation": "modify",
-          "description": "Audit Output section card grid and action button row for mobile sizing; ensure responsive wrapping and container widths that cannot exceed the viewport (e.g., ensure long text and button groups wrap without forcing horizontal scroll)."
+          "description": "Audit and ensure the single app-level upgrade entry point (openPricingModal) remains modal-only (no payment initiation, no external navigation), and confirm all sections/components use it for upgrade CTAs. Verify the component's usage instructions before implementing."
         },
         {
           "path": "frontend/src/sections/PricingSection.tsx",
           "operation": "modify",
-          "description": "Audit Pricing section cards/table wrapper for any fixed widths or padding patterns that can exceed mobile viewport; ensure responsive container sizing and safe horizontal padding so the section stays within bounds at 360px/390px/414px."
+          "description": "Confirm Pricing section upgrade buttons only call openPricingModal (never useRazorpayUpgrade) and do not open any external checkout URL. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/subscription/PremiumLock.tsx",
+          "operation": "modify",
+          "description": "Ensure the Unlock Premium CTA continues to only open PricingComparisonModal via openPricingModal and never initiates payment directly. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/subscription/UPGRADE_TESTING_CHECKLIST.md",
+          "operation": "modify",
+          "description": "Update checklist to reflect modal-first behavior for all upgrade CTAs and verify no upgrade click triggers Razorpay until explicit in-modal confirmation. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-86",
-      "summary": "Find and fix the specific element(s) causing right-side overflow so no DOM node exceeds viewport width on mobile.",
+      "id": "REQ-95",
+      "summary": "Add an in-modal confirmation step in PricingComparisonModal so plan upgrade buttons do not start Razorpay until the user explicitly confirms.",
       "acceptanceCriteria": [
-        "At 360px/390px/414px, the page fully fits the screen with NO black area on the right side.",
-        "There is no horizontal scrollbar and no content is cut off on the left/right edges.",
-        "Existing interactions and feature behavior are unchanged (only layout/overflow fixes)."
+        "Inside PricingComparisonModal, clicking “Upgrade to Pro/Creator” first shows a clear in-modal confirmation UI (still within the app) and does not open Razorpay immediately.",
+        "Only after the user clicks a “Proceed to payment” (or equivalent) control inside the modal should the Razorpay flow be initiated.",
+        "Closing/cancelling the confirmation step returns to the pricing modal content without navigating away from the app."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/features/surprise/SurpriseView.tsx",
+          "path": "frontend/src/features/subscription/PricingComparisonModal.tsx",
           "operation": "modify",
-          "description": "Adjust the confetti DOM injection styling so generated fixed-position pieces cannot extend the document width (e.g., clamp horizontal positioning and/or center via translate) while preserving the existing confetti behavior and visuals."
+          "description": "Refactor PricingComparisonModal to use shadcn-ui Dialog content to include a secondary in-modal confirmation state per selected plan: initial click selects plan and reveals confirmation UI; only the confirmation control calls useRazorpayUpgrade.initiateUpgrade; add cancel/back to return to the comparison view without navigation. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-96",
+      "summary": "Prevent any full-page navigation during Razorpay initiation and show clear English toast errors when checkout cannot open, keeping the app usable.",
+      "acceptanceCriteria": [
+        "Initiating payment does not change window.location or navigate the SPA to a new page.",
+        "If Razorpay cannot open (SDK missing/not loaded/config missing), the app shows an English toast error and remains usable.",
+        "The existing payment-configuration missing message remains English and actionable."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/payments/razorpay.ts",
+          "operation": "modify",
+          "description": "Harden useRazorpayUpgrade so initiating payment never triggers full-page navigation: add explicit guards against missing SDK/config, surface a clear English toast when the SDK fails to load or checkout cannot be opened, and ensure all error messaging remains actionable and keeps the user in-app (no window.location changes). Verify the component's usage instructions before implementing."
         },
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/features/subscription/PricingComparisonModal.tsx",
           "operation": "modify",
-          "description": "Add a targeted overflow-safety baseline to reduce risk of any single oversized element causing horizontal scroll (e.g., ensure common media elements and long text containers can shrink/wrap within the viewport) without altering existing UI behavior."
+          "description": "Ensure the confirmation step integrates with the updated useRazorpayUpgrade failure states: if initiation fails, keep the modal open and show the English toast error without navigating away. Verify the component's usage instructions before implementing."
         }
       ]
     }

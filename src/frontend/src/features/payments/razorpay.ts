@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { PlanType } from '../../backend';
 import { PLAN_DEFINITIONS } from '../subscription/plans';
@@ -8,63 +8,132 @@ interface UpgradeResult {
   message: string;
 }
 
+// Declare Razorpay on window
+declare global {
+  interface Window {
+    Razorpay?: any;
+  }
+}
+
 export function useRazorpayUpgrade() {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+
+  // Load Razorpay script dynamically
+  useEffect(() => {
+    if (window.Razorpay) {
+      setRazorpayLoaded(true);
+      return;
+    }
+
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.async = true;
+    script.onload = () => {
+      setRazorpayLoaded(true);
+    };
+    script.onerror = () => {
+      console.error('Failed to load Razorpay SDK');
+      toast.error('Payment system could not be loaded. Please check your internet connection and try again.');
+    };
+    document.body.appendChild(script);
+
+    return () => {
+      // Cleanup script if component unmounts
+      if (script.parentNode) {
+        script.parentNode.removeChild(script);
+      }
+    };
+  }, []);
 
   const initiateUpgrade = async (plan: PlanType): Promise<UpgradeResult> => {
-    if (plan === PlanType.free) {
-      return { success: false, message: 'Cannot upgrade to free plan' };
+    // Prevent any navigation or external redirects
+    if (isProcessing) {
+      return { success: false, message: 'Payment is already being processed' };
     }
 
     setIsProcessing(true);
 
     try {
-      // Check if Razorpay configuration is available
+      // Check if Razorpay key is configured
       const razorpayKeyId = import.meta.env.VITE_RAZORPAY_KEY_ID;
       
       if (!razorpayKeyId) {
-        toast.error('Payment system not configured', {
-          description: 'Razorpay integration is not set up. Please contact support or configure VITE_RAZORPAY_KEY_ID environment variable.',
-        });
-        return {
-          success: false,
-          message: 'Payment configuration missing. Please contact support.',
-        };
+        const errorMessage = 'Payment configuration is missing. Please contact support or configure VITE_RAZORPAY_KEY_ID in your environment.';
+        toast.error(errorMessage);
+        setIsProcessing(false);
+        return { success: false, message: errorMessage };
       }
 
-      // In a real implementation, you would:
-      // 1. Create an order on your backend
-      // 2. Initialize Razorpay checkout
-      // 3. Handle payment success/failure
-      // 4. Verify payment on backend
-      // 5. Update subscription status
+      // Check if Razorpay SDK is loaded
+      if (!razorpayLoaded || !window.Razorpay) {
+        const errorMessage = 'Payment system is not ready. Please wait a moment and try again.';
+        toast.error(errorMessage);
+        setIsProcessing(false);
+        return { success: false, message: errorMessage };
+      }
 
-      const planMeta = PLAN_DEFINITIONS[plan];
+      const planDetails = PLAN_DEFINITIONS[plan];
       
-      toast.info('Payment Integration Coming Soon', {
-        description: `${planMeta.name} at ${planMeta.price} will be available soon. Payment processing with Razorpay is being configured.`,
+      // Create Razorpay options
+      const options = {
+        key: razorpayKeyId,
+        amount: planDetails.priceAmount * 100, // Convert to paise
+        currency: 'INR',
+        name: 'WishMint AI',
+        description: `${planDetails.name} Subscription`,
+        image: '/assets/generated/google-g-logo.dim_24x24.png', // Optional: Add your logo
+        handler: function (response: any) {
+          // Payment successful
+          console.log('Payment successful:', response);
+          toast.success(`Successfully upgraded to ${planDetails.name}! 🎉`);
+          setIsProcessing(false);
+          
+          // TODO: Verify payment on backend and activate subscription
+          // For now, we just show success message
+        },
+        modal: {
+          ondismiss: function () {
+            // User closed the payment modal
+            toast.info('Payment cancelled. You can try again anytime.');
+            setIsProcessing(false);
+          },
+        },
+        prefill: {
+          name: '',
+          email: '',
+          contact: '',
+        },
+        theme: {
+          color: '#8B5CF6', // neon-purple
+        },
+      };
+
+      // Open Razorpay checkout (this stays in-app, no navigation)
+      const razorpayInstance = new window.Razorpay(options);
+      
+      razorpayInstance.on('payment.failed', function (response: any) {
+        console.error('Payment failed:', response.error);
+        toast.error(`Payment failed: ${response.error.description || 'Please try again'}`);
+        setIsProcessing(false);
       });
 
-      return {
-        success: false,
-        message: 'Payment integration is being configured. Please check back soon.',
-      };
-    } catch (error) {
-      console.error('Upgrade error:', error);
-      toast.error('Upgrade failed', {
-        description: 'An error occurred while processing your upgrade. Please try again.',
-      });
-      return {
-        success: false,
-        message: 'An error occurred. Please try again.',
-      };
-    } finally {
+      // Open the checkout modal
+      razorpayInstance.open();
+
+      return { success: true, message: 'Payment initiated' };
+    } catch (error: any) {
+      console.error('Error initiating payment:', error);
+      const errorMessage = error?.message || 'Failed to open payment. Please try again.';
+      toast.error(errorMessage);
       setIsProcessing(false);
+      return { success: false, message: errorMessage };
     }
   };
 
   return {
     initiateUpgrade,
     isProcessing,
+    razorpayLoaded,
   };
 }

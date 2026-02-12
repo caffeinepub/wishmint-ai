@@ -13,6 +13,11 @@ interface PremiumLockProps {
 export function PremiumLock({ children, isLocked, feature, requiredPlan }: PremiumLockProps) {
   const { openPricingModal } = useAppContext();
 
+  const handleUnlock = () => {
+    console.log('Upgrade clicked', requiredPlan || 'premium');
+    openPricingModal(requiredPlan);
+  };
+
   if (!isLocked) {
     return <>{children}</>;
   }
@@ -22,10 +27,11 @@ export function PremiumLock({ children, isLocked, feature, requiredPlan }: Premi
       <div className="pointer-events-none select-none blur-sm opacity-50">
         {children}
       </div>
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
         <Button
-          onClick={() => openPricingModal(requiredPlan)}
-          className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold shadow-neon"
+          type="button"
+          onClick={handleUnlock}
+          className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold shadow-neon relative z-50 pointer-events-auto"
         >
           <Lock className="w-4 h-4 mr-2" />
           Unlock Premium

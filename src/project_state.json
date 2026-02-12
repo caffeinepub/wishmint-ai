@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 33,
+  "projectStateVersion": 37,
   "summary": "WishMint AI now needs an upgraded authentication system that adds Google OAuth 2.0 “Continue with Google” for both Sign Up and Sign In, with automatic account creation/login, user-provider linking rules, and a secure session approach (JWT + refresh or httpOnly cookies), potentially implying a React/Next.js frontend and Node/Express backend beyond the current Internet Computer offline-first stack.",
   "architectural_notes": [
     "Single-file offline-first implementation: all HTML/CSS/JS in one index.html; template-based text generation (no external APIs/keys).",
@@ -16,9 +16,10 @@
   ],
   "known_issues": [
     "Deployment/build error encountered when attempting to push/deploy the app to the network.",
-    "Mobile layout bug: unintended right-side black empty space/horizontal overflow; content not stretching full width on small screens."
+    "Mobile layout bug: unintended right-side black empty space/horizontal overflow; content not stretching full width on small screens.",
+    "Upgrade button not working: clicking/tapping Upgrade does nothing (pricing page/modal/payment flow not opening), possibly due to blocked click events (overlay/pointer-events/z-index), routing/navigation issues, or form submission behavior."
   ],
-  "isFixRequest": true,
+  "isFixRequest": false,
   "existing_features": [
     {
       "id": "feature-create-a-single-page-react-ui-for-wishmint-ai-with-a-premium-dark-theme-and-neon-gradient-accents-purple-green-using-clean-typography-rounded-cards-subtle-shadows-smooth-spacing-and-mobile-first-responsive-layout-suitable-for-india-audiences-on-phones-and-desktop",
@@ -675,6 +676,86 @@
         "REQ-86"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-fix-all-upgrade-entry-points-so-clicking-tapping-always-triggers-a-visible-action-open-the-pricingcomparisonmodal-and-or-navigate-to-a-pricing-route-and-add-temporary-click-debugging-logs-scope-includes-pricingsection-plan-cta-buttons-e-g-upgrade-to-pro-become-a-creator-any-unlock-premium-upgrade-ctas-e-g-premiumlock-any-other-upgrade-buttons-ctas-in-the-app-that-are-intended-to-upsell-add-a-temporary-console-log-upgrade-clicked-inside-the-click-handler-s-used-by-these-entry-points-to-confirm-the-click-event-fires",
+      "title": "Fix all “Upgrade” entry points so clicking/tapping always triggers a visible action (open the PricingComparisonModal and/or navigate to a pricing route) and add temporary click debugging logs.\n\nScope includes:\n- PricingSection plan CTA buttons (e.g., “Upgrade to Pro”, “Become a Creator”)\n- Any “Unlock Premium” / upgrade CTAs (e.g., PremiumLock)\n- Any other Upgrade buttons/CTAs in the app that are intended to upsell\n\nAdd a temporary `console.log(\"Upgrade clicked\")` inside the click handler(s) used by these entry points to confirm the click event fires.",
+      "reqIds": [
+        "REQ-87"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-identify-and-fix-any-overlay-layer-css-issues-that-can-block-pointer-events-on-the-upgrade-button-s-especially-decorative-absolute-positioned-gradients-blur-layers-and-modal-wrappers-ensure-decorative-layers-that-sit-above-content-use-pointer-events-none-upgrade-unlock-premium-buttons-are-clickable-with-explicit-stacking-interaction-safety-where-needed-e-g-position-relative-z-index-50-pointer-events-auto-apply-fixes-without-changing-the-existing-premium-dark-gradient-visual-design",
+      "title": "Identify and fix any overlay/layer/CSS issues that can block pointer events on the Upgrade button(s), especially decorative absolute-positioned gradients/blur layers and modal wrappers.\n\nEnsure:\n- Decorative layers that sit above content use `pointer-events: none`\n- Upgrade/Unlock Premium buttons are clickable with explicit stacking/interaction safety where needed (e.g., `position: relative`, `z-index: 50`, `pointer-events: auto`).\n\nApply fixes without changing the existing premium dark gradient visual design.",
+      "reqIds": [
+        "REQ-88"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-robust-pricing-navigation-behavior-for-wishmint-ai-so-users-can-reach-pricing-via-a-stable-route-like-url-because-this-app-is-a-single-page-react-app-no-next-js-pages-implement-one-of-the-following-behaviors-either-is-acceptable-and-standardize-it-across-the-app-option-a-preferred-support-pricing-as-a-pseudo-route-that-on-load-automatically-scrolls-to-the-pricingsection-and-optionally-opens-the-pricing-modal-option-b-standardize-on-opening-the-pricing-modal-pricingcomparisonmodal-from-all-upgrade-ctas-and-update-any-existing-pricing-links-to-use-this-behavior-if-option-a-is-implemented-ensure-direct-navigation-to-pricing-works-in-production-hosting-and-does-not-break-other-sections",
+      "title": "Implement robust pricing navigation behavior for WishMint AI so users can reach pricing via a stable route-like URL.\n\nBecause this app is a single-page React app (no Next.js pages), implement one of the following behaviors (either is acceptable) and standardize it across the app:\n- Option A (preferred): support “/pricing” as a pseudo-route that, on load, automatically scrolls to the PricingSection and optionally opens the pricing modal.\n- Option B: standardize on opening the pricing modal (PricingComparisonModal) from all Upgrade CTAs, and update any existing “/pricing” links to use this behavior.\n\nIf Option A is implemented, ensure direct navigation to `/pricing` works in production hosting and does not break other sections.",
+      "reqIds": [
+        "REQ-89"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-upgrade-plan-cta-buttons-do-not-fail-due-to-form-submission-behavior-audit-upgrade-related-buttons-that-might-live-inside-a-form-now-or-in-future-refactors-and-ensure-they-do-not-trigger-unintended-submits-reloads-by-explicitly-using-type-button-when-appropriate-and-preventing-default-where-needed",
+      "title": "Ensure Upgrade/plan CTA buttons do not fail due to form submission behavior.\n\nAudit Upgrade-related buttons that might live inside a `<form>` (now or in future refactors) and ensure they do not trigger unintended submits/reloads by explicitly using `type=\"button\"` when appropriate and preventing default where needed.",
+      "reqIds": [
+        "REQ-90"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-plan-content-shown-in-pricing-ui-matches-the-required-plans-and-entitlements-copy-free-plan-3-wishes-per-day-watermark-limited-templates-pro-plan-49-month-unlimited-wishes-remove-watermark-hd-download-premium-templates-surprise-mode-creator-plan-149-month-sell-templates-voice-wishes-reel-export-marketplace-access-update-the-pricing-section-modal-copy-as-needed-to-match-these-requirements-while-keeping-all-user-facing-text-in-english-and-maintaining-the-existing-dark-premium-ui-styling",
+      "title": "Ensure plan content shown in pricing UI matches the required plans and entitlements copy:\n\n- Free Plan: 3 wishes per day, watermark, limited templates\n- Pro Plan: ₹49/month, unlimited wishes, remove watermark, HD download, premium templates, Surprise mode\n- Creator Plan: ₹149/month, sell templates, voice wishes, reel export, marketplace access\n\nUpdate the pricing section/modal copy as needed to match these requirements while keeping all user-facing text in English and maintaining the existing dark premium UI styling.",
+      "reqIds": [
+        "REQ-91"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-connect-plan-selection-to-a-razorpay-checkout-open-action-so-that-selecting-a-paid-plan-pro-creator-reliably-opens-a-razorpay-payment-experience-use-the-existing-userazorpayupgrade-hook-as-the-integration-point-but-update-it-so-that-when-vite-razorpay-key-id-is-present-initiating-upgrade-attempts-to-open-razorpay-checkout-must-open-a-visible-payment-ui-on-mobile-and-desktop-when-configuration-is-missing-or-checkout-cannot-be-started-in-this-environment-show-a-clear-english-error-toast-that-explains-what-is-missing-and-what-to-do-next-without-breaking-offline-core-generation-keep-the-flow-working-in-caffeine-preview-and-live-deployment-as-a-best-effort-client-side-integration",
+      "title": "Connect plan selection to a Razorpay checkout open action so that selecting a paid plan (Pro/Creator) reliably opens a Razorpay payment experience.\n\nUse the existing `useRazorpayUpgrade` hook as the integration point, but update it so that:\n- When `VITE_RAZORPAY_KEY_ID` is present, initiating upgrade attempts to open Razorpay checkout (must open a visible payment UI on mobile and desktop).\n- When configuration is missing or checkout cannot be started in this environment, show a clear English error/toast that explains what is missing and what to do next (without breaking offline/core generation).\n\nKeep the flow working in Caffeine preview and live deployment as a best-effort client-side integration.",
+      "reqIds": [
+        "REQ-92"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-focused-testing-checklist-and-in-app-verification-points-for-the-upgrade-flow-ensure-the-build-is-manually-verified-for-mobile-screen-desktop-caffeine-preview-deployed-website-verification-must-include-that-upgrade-click-handlers-fire-console-log-and-a-pricing-experience-payment-initiation-ui-is-shown",
+      "title": "Add a focused testing checklist and in-app verification points for the Upgrade flow.\n\nEnsure the build is manually verified for:\n- Mobile screen\n- Desktop\n- Caffeine preview\n- Deployed website\n\nVerification must include that Upgrade click handlers fire (console log) and a pricing experience/payment initiation UI is shown.",
+      "reqIds": [
+        "REQ-93"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-change-all-upgrade-entry-points-e-g-upgrade-to-pro-upgrade-to-creator-unlock-premium-and-any-upgrade-plan-button-so-that-clicking-them-only-opens-the-in-app-pricingcomparisonmodal-and-does-not-immediately-open-or-navigate-to-an-external-full-payment-page",
+      "title": "Change all upgrade entry points (e.g., “Upgrade to Pro”, “Upgrade to Creator”, “Unlock Premium”, and any “Upgrade Plan” button) so that clicking them only opens the in-app PricingComparisonModal and does not immediately open or navigate to an external/full payment page.",
+      "reqIds": [
+        "REQ-94"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-pricingcomparisonmodal-so-plan-upgrade-buttons-do-not-immediately-initiate-razorpay-checkout-instead-the-modal-must-present-an-in-modal-confirmation-step-or-secondary-button-that-the-user-explicitly-clicks-to-proceed-to-payment-keeping-the-user-in-the-app-modal-flow-until-they-confirm",
+      "title": "Update PricingComparisonModal so plan upgrade buttons do not immediately initiate Razorpay checkout. Instead, the modal must present an in-modal confirmation step (or secondary button) that the user explicitly clicks to proceed to payment, keeping the user in the app modal flow until they confirm.",
+      "reqIds": [
+        "REQ-95"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-the-razorpay-upgrade-initiation-userazorpayupgrade-never-performs-a-full-page-navigation-redirect-as-part-of-the-client-flow-if-checkout-cannot-be-opened-as-an-in-context-experience-show-a-clear-english-error-toast-explaining-that-payment-could-not-be-started-and-to-try-again-later-without-leaving-the-app",
+      "title": "Ensure the Razorpay upgrade initiation (useRazorpayUpgrade) never performs a full-page navigation/redirect as part of the client flow; if checkout cannot be opened as an in-context experience, show a clear English error toast explaining that payment could not be started and to try again later, without leaving the app.",
+      "reqIds": [
+        "REQ-96"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -989,6 +1070,12 @@
     {
       "id": "AR-58",
       "summary": "Fix mobile layout overflow causing black empty space on the right; add viewport meta tag, remove fixed-width constraints, ensure full-width wrappers/background gradient coverage, and prevent horizontal scrolling across 360/390/414px widths while maintaining dark premium gradient design",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-59",
+      "summary": "Change Upgrade/paid plan CTA behavior to open an in-app pricing/upgrade modal instead of navigating directly to a full payment page (Razorpay checkout should be initiated from within the modal flow)",
       "reqIds": [],
       "status": "pending"
     }
