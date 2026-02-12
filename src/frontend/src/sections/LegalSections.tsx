@@ -1,120 +1,114 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Reveal } from '../components/Reveal';
 
 export function LegalSections() {
   return (
-    <div className="section-padding px-4 sm:px-6 lg:px-8 space-y-20">
-      <section id="privacy" className="section-container max-w-4xl">
-        <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 shadow-card">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold">Privacy Policy</CardTitle>
-          </CardHeader>
-          <CardContent className="prose prose-invert max-w-none space-y-6">
-            <p className="text-muted-foreground text-sm">
-              <strong>Last updated:</strong> {new Date().toLocaleDateString()}
-            </p>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">Data Collection</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  WishMint AI is designed with privacy in mind. All wish generation happens locally in
-                  your browser. We do not collect, store, or transmit any personal information you enter
-                  into the generator form.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">Local Processing</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  All data you input (names, relationships, memories, etc.) is processed entirely on your
-                  device. No information is sent to our servers or any third-party services.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">Analytics</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  We may use anonymous analytics to understand how users interact with our application,
-                  but this data cannot be used to identify individual users.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section id="terms" className="section-container max-w-4xl">
-        <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 shadow-card">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold">Terms of Service</CardTitle>
-          </CardHeader>
-          <CardContent className="prose prose-invert max-w-none space-y-6">
-            <p className="text-muted-foreground text-sm">
-              <strong>Last updated:</strong> {new Date().toLocaleDateString()}
-            </p>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">Acceptance of Terms</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  By using WishMint AI, you agree to these terms of service. If you do not agree, please
-                  do not use our service.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">Use of Service</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  WishMint AI is provided for personal, non-commercial use. You may generate wishes for
-                  yourself and others, and share them freely. The generated content is yours to use as you
-                  see fit.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">Content Responsibility</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  While we strive to generate appropriate content, you are responsible for reviewing and
-                  editing any generated wishes before sharing them. WishMint AI is not liable for any
-                  consequences arising from the use of generated content.
-                </p>
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold mb-2 text-foreground">Service Availability</h3>
-                <p className="text-muted-foreground text-sm leading-relaxed">
-                  We aim to provide reliable service but do not guarantee uninterrupted access. We reserve
-                  the right to modify or discontinue features at any time.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-
-      <section id="contact" className="section-container max-w-4xl">
-        <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 shadow-card">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold">Contact Us</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Have questions, feedback, or suggestions? We'd love to hear from you!
-            </p>
-            <div className="space-y-3 text-sm">
+    <section className="section-padding px-4 sm:px-6 lg:px-8 bg-muted/30">
+      <div className="section-container max-w-4xl space-y-12">
+        {/* Privacy Policy */}
+        <Reveal>
+          <Card id="privacy" className="bg-card/60 backdrop-blur-sm border-border shadow-card scroll-mt-20">
+            <CardHeader>
+              <CardTitle className="text-2xl">Privacy Policy</CardTitle>
+            </CardHeader>
+            <CardContent className="prose prose-sm max-w-none dark:prose-invert">
               <p className="text-muted-foreground">
-                <strong className="text-foreground">Email:</strong>{' '}
-                <a
-                  href="mailto:support@wishmint.ai"
-                  className="text-neon-purple hover:text-neon-green transition-colors"
-                >
-                  support@wishmint.ai
-                </a>
+                Your privacy is important to us. This policy outlines how we collect, use, and protect your personal information.
               </p>
+              <h3 className="text-lg font-semibold mt-6">Information We Collect</h3>
               <p className="text-muted-foreground">
-                <strong className="text-foreground">Response Time:</strong> We typically respond within 24-48 hours
+                We collect information you provide when using WishMint AI, including names, messages, and account details.
               </p>
-              <p className="text-muted-foreground pt-2 leading-relaxed">
-                For bug reports or feature requests, please include as much detail as possible to help
-                us assist you better.
+              <h3 className="text-lg font-semibold mt-6">How We Use Your Information</h3>
+              <p className="text-muted-foreground">
+                Your information is used to generate personalized birthday wishes and improve our services. We do not sell your data to third parties.
               </p>
-            </div>
-          </CardContent>
-        </Card>
-      </section>
-    </div>
+              <h3 className="text-lg font-semibold mt-6">Data Security</h3>
+              <p className="text-muted-foreground">
+                We implement industry-standard security measures to protect your data stored on the Internet Computer blockchain.
+              </p>
+            </CardContent>
+          </Card>
+        </Reveal>
+
+        {/* Terms & Conditions */}
+        <Reveal>
+          <Card id="terms" className="bg-card/60 backdrop-blur-sm border-border shadow-card scroll-mt-20">
+            <CardHeader>
+              <CardTitle className="text-2xl">Terms & Conditions</CardTitle>
+            </CardHeader>
+            <CardContent className="prose prose-sm max-w-none dark:prose-invert">
+              <p className="text-muted-foreground">
+                By using WishMint AI, you agree to these terms and conditions.
+              </p>
+              <h3 className="text-lg font-semibold mt-6">Acceptable Use</h3>
+              <p className="text-muted-foreground">
+                You agree to use WishMint AI for lawful purposes only. Do not use the service to generate harmful, offensive, or inappropriate content.
+              </p>
+              <h3 className="text-lg font-semibold mt-6">Subscription Plans</h3>
+              <p className="text-muted-foreground">
+                Subscription plans are billed monthly. You can cancel at any time, and your access will continue until the end of the billing period.
+              </p>
+              <h3 className="text-lg font-semibold mt-6">Intellectual Property</h3>
+              <p className="text-muted-foreground">
+                Content generated by WishMint AI is yours to use. However, templates and designs created by other users in the marketplace remain their intellectual property.
+              </p>
+              <h3 className="text-lg font-semibold mt-6">Limitation of Liability</h3>
+              <p className="text-muted-foreground">
+                WishMint AI is provided "as is" without warranties. We are not liable for any damages arising from your use of the service.
+              </p>
+            </CardContent>
+          </Card>
+        </Reveal>
+
+        {/* Refund Policy */}
+        <Reveal>
+          <Card id="refund" className="bg-card/60 backdrop-blur-sm border-border shadow-card scroll-mt-20">
+            <CardHeader>
+              <CardTitle className="text-2xl">Refund Policy</CardTitle>
+            </CardHeader>
+            <CardContent className="prose prose-sm max-w-none dark:prose-invert">
+              <p className="text-muted-foreground">
+                We want you to be satisfied with WishMint AI. Here's our refund policy:
+              </p>
+              <h3 className="text-lg font-semibold mt-6">Subscription Refunds</h3>
+              <p className="text-muted-foreground">
+                If you're not satisfied with your Pro or Creator subscription, you may request a refund within 7 days of purchase. Contact us with your transaction details.
+              </p>
+              <h3 className="text-lg font-semibold mt-6">Marketplace Purchases</h3>
+              <p className="text-muted-foreground">
+                Digital products purchased from the marketplace are generally non-refundable. However, if you experience technical issues preventing you from accessing your purchase, contact us for assistance.
+              </p>
+              <h3 className="text-lg font-semibold mt-6">How to Request a Refund</h3>
+              <p className="text-muted-foreground">
+                To request a refund, email us at support@wishmint.ai with your account details and reason for the refund request. We'll process eligible refunds within 5-7 business days.
+              </p>
+            </CardContent>
+          </Card>
+        </Reveal>
+
+        {/* Contact */}
+        <Reveal>
+          <Card id="contact" className="bg-card/60 backdrop-blur-sm border-border shadow-card scroll-mt-20">
+            <CardHeader>
+              <CardTitle className="text-2xl">Contact Us</CardTitle>
+            </CardHeader>
+            <CardContent className="prose prose-sm max-w-none dark:prose-invert">
+              <p className="text-muted-foreground">
+                Have questions or need support? We're here to help!
+              </p>
+              <h3 className="text-lg font-semibold mt-6">Email</h3>
+              <p className="text-muted-foreground">
+                support@wishmint.ai
+              </p>
+              <h3 className="text-lg font-semibold mt-6">Response Time</h3>
+              <p className="text-muted-foreground">
+                We typically respond to inquiries within 24-48 hours during business days.
+              </p>
+            </CardContent>
+          </Card>
+        </Reveal>
+      </div>
+    </section>
   );
 }

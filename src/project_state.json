@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 27,
-  "summary": "Upgrade “WishMint AI” into a premium, viral, emotional birthday wish generator with a professional startup SaaS feel, including improved hero UX, richer generator controls, enhanced output cards (copy + share), a separate standalone premium card designer module (Canva/Instagram-style) with multiple animated themes, deep customization, photo support, social exports (including 9:16 Instagram Story), plus template studio, examples/testimonials/features sections, social viral tools (WhatsApp, Instagram story format, QR codes), SEO meta tags, relaxed auth (generate without login; login for saving/premium), and add two new sections: (1) a community feed where users can post templates/stickers for others to view and subscribe/follow, and (2) buy/sell marketplace features.",
+  "projectStateVersion": 29,
+  "summary": "Shift WishMint AI toward a production-ready, scalable premium monetized birthday/emotional message platform with Razorpay subscriptions (India payments), tiered plans (Free/Pro/Creator) with automatic feature locking, enhanced export formats (PNG/PDF/MP4), Surprise Link experiences, voice + reel generation, conversion-focused homepage updates, user dashboard, and creator marketplace upgrades including payouts/analytics—potentially requiring an online backend stack beyond the current offline-first IC-only approach.",
   "architectural_notes": [
     "Single-file offline-first implementation: all HTML/CSS/JS in one index.html; template-based text generation (no external APIs/keys).",
     "Use wa.me URL with encodeURIComponent for WhatsApp sharing.",
@@ -11,7 +11,8 @@
     "Add QR code generation locally (client-side) with no external API dependencies to preserve offline-friendly behavior.",
     "Add SEO meta tags (title/description) directly in index.html head.",
     "User chose Option 2: implement the premium Canva/Instagram-style card system as a separate standalone card designer module inside the app (not just upgrading the existing card output flow).",
-    "Google Analytics (gtag.js) requires loading scripts from googletagmanager.com; this introduces an external network dependency and may conflict with offline-first/no-external-dependency goals—decide whether analytics is allowed as an online-only enhancement."
+    "Google Analytics (gtag.js) requires loading scripts from googletagmanager.com; this introduces an external network dependency and may conflict with offline-first/no-external-dependency goals—decide whether analytics is allowed as an online-only enhancement.",
+    "Razorpay subscriptions require online backend components: subscription creation, webhook verification, and secure server-side signature checks; cannot be fully offline-first."
   ],
   "known_issues": [
     "Deployment/build error encountered when attempting to push/deploy the app to the network."
@@ -505,6 +506,94 @@
         "REQ-63"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-update-the-plan-model-used-by-the-app-to-support-three-plans-free-pro-creator-and-plan-entitlements-required-for-feature-locking-free-3-messages-day-watermark-on-downloads-limited-templates-no-hd-export-pro-49-month-unlimited-messages-no-watermark-hd-export-1080x1080-9-16-premium-templates-hindi-romantic-tone-access-surprise-link-generation-creator-149-month-everything-in-pro-creator-marketplace-selling-features-analytics-dashboard-placeholder-all-user-facing-text-must-be-in-english",
+      "title": "Update the plan model used by the app to support three plans (Free, Pro, Creator) and plan entitlements required for feature locking: Free (3 messages/day, watermark on downloads, limited templates, no HD export), Pro (₹49/month: unlimited messages, no watermark, HD export 1080x1080 + 9:16, premium templates, Hindi + Romantic tone access, Surprise Link generation), Creator (₹149/month: everything in Pro + creator marketplace selling features, analytics dashboard placeholder). All user-facing text must be in English.",
+      "reqIds": [
+        "REQ-64"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-message-quota-enforcement-for-the-free-plan-limit-to-3-message-generations-per-calendar-day-for-anonymous-users-enforce-using-localstorage-per-device-for-authenticated-users-enforce-using-backend-storage-keyed-by-principal-when-the-limit-is-reached-block-generation-actions-and-show-a-clear-english-prompt-to-upgrade",
+      "title": "Implement message quota enforcement for the Free plan: limit to 3 message generations per calendar day. For anonymous users, enforce using localStorage per-device; for authenticated users, enforce using backend storage keyed by principal. When the limit is reached, block generation actions and show a clear English prompt to upgrade.",
+      "reqIds": [
+        "REQ-65"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-razorpay-upgrade-entry-point-in-the-pricing-section-ui-for-pro-and-creator-plans-that-starts-a-client-side-payment-flow-placeholder-stub-if-full-razorpay-verification-cannot-be-completed-in-this-environment-the-ui-must-clearly-indicate-that-payments-are-processed-via-razorpay-and-must-not-break-offline-core-generation",
+      "title": "Add a Razorpay upgrade entry-point in the Pricing section UI for Pro and Creator plans that starts a client-side payment flow (placeholder/stub if full Razorpay verification cannot be completed in this environment). The UI must clearly indicate that payments are processed via Razorpay and must not break offline core generation.",
+      "reqIds": [
+        "REQ-67"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-entitlement-based-feature-locking-ux-across-the-app-if-a-feature-is-not-included-in-the-user-s-current-plan-render-it-blurred-disabled-show-a-unlock-premium-button-and-open-a-pricing-comparison-modal-when-clicked-include-the-upgrade-cta-text-exactly-create-something-she-will-never-forget",
+      "title": "Implement entitlement-based feature locking UX across the app: if a feature is not included in the user’s current plan, render it blurred/disabled, show a “Unlock Premium” button, and open a pricing comparison modal when clicked. Include the upgrade CTA text exactly: “Create Something She Will Never Forget 💖”.",
+      "reqIds": [
+        "REQ-68"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-download-export-system-to-support-plan-based-behavior-free-users-can-download-with-a-watermark-pro-creator-users-can-download-without-a-watermark-and-in-hd-1080x1080-and-9-16-keep-the-existing-canvas-based-export-behavior-intact-and-extend-it-to-apply-watermarking-and-size-selection-where-applicable",
+      "title": "Update the download/export system to support plan-based behavior: Free users can download with a watermark; Pro/Creator users can download without a watermark and in HD (1080x1080) and 9:16. Keep the existing canvas-based export behavior intact and extend it to apply watermarking and size selection where applicable.",
+      "reqIds": [
+        "REQ-69"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-pdf-download-option-for-generated-content-at-minimum-the-main-wish-plus-wishmint-ai-branding-gate-pdf-hd-no-watermark-variants-behind-pro-creator-where-applicable-and-apply-watermarking-for-free",
+      "title": "Add PDF download option for generated content (at minimum: the Main Wish plus WishMint AI branding). Gate PDF HD/no-watermark variants behind Pro/Creator where applicable, and apply watermarking for Free.",
+      "reqIds": [
+        "REQ-70"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-surprise-mode-pro-creator-only-that-generates-a-private-link-to-a-dedicated-surprise-view-when-opened-the-page-plays-animated-confetti-a-name-reveal-animation-romantic-background-music-toggleable-mutable-and-a-message-fade-in-animation-store-the-surprise-payload-so-the-link-can-render-without-requiring-the-generator-form-on-open",
+      "title": "Implement “Surprise Mode” (Pro/Creator only) that generates a private link to a dedicated Surprise view. When opened, the page plays: animated confetti, a name reveal animation, romantic background music (toggleable/mutable), and a message fade-in animation. Store the surprise payload so the link can render without requiring the generator form on open.",
+      "reqIds": [
+        "REQ-71"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-improve-the-homepage-for-conversion-change-the-hero-primary-cta-label-from-try-demo-to-exactly-create-magic-now-add-a-social-proof-counter-reading-exactly-3-000-wishes-generated-today-add-a-premium-badge-ui-element-and-add-a-pricing-comparison-table-section-can-be-integrated-into-the-pricing-modal-and-or-pricing-section",
+      "title": "Improve the homepage for conversion: change the Hero primary CTA label from “Try Demo” to exactly “✨ Create Magic Now”; add a social proof counter reading exactly “3,000+ Wishes Generated Today”; add a premium badge UI element; and add a pricing comparison table section (can be integrated into the pricing modal and/or pricing section).",
+      "reqIds": [
+        "REQ-72"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-authenticated-user-dashboard-section-accessible-after-login-that-displays-subscription-status-plan-remaining-free-credits-if-on-free-download-history-saved-templates-and-if-on-creator-an-earnings-panel-placeholder-if-full-payouts-are-not-implemented",
+      "title": "Add an authenticated user dashboard section accessible after login that displays: subscription status/plan, remaining free credits (if on Free), download history, saved templates, and (if on Creator) an earnings panel (placeholder if full payouts are not implemented).",
+      "reqIds": [
+        "REQ-73"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-upgrade-marketplace-capabilities-for-creator-plan-restrict-creation-of-marketplace-listings-to-creator-users-free-pro-users-can-browse-and-add-creator-facing-tracking-of-listing-downloads-or-expresses-interest-interactions-if-downloads-are-not-implemented-in-the-dashboard",
+      "title": "Upgrade Marketplace capabilities for Creator plan: restrict creation of marketplace listings to Creator users (Free/Pro users can browse), and add creator-facing tracking of listing downloads (or expresses-interest interactions if downloads are not implemented) in the dashboard.",
+      "reqIds": [
+        "REQ-74"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-expand-legal-and-trust-content-sections-to-include-terms-conditions-and-refund-policy-in-addition-to-existing-privacy-policy-and-contact-ensure-all-user-facing-text-is-in-english-and-matches-the-site-s-premium-dark-gradient-style",
+      "title": "Add/expand legal and trust content sections to include Terms & Conditions and Refund Policy in addition to existing Privacy Policy and Contact. Ensure all user-facing text is in English and matches the site’s premium dark gradient style.",
+      "reqIds": [
+        "REQ-75"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -726,6 +815,80 @@
       "id": "AR-39",
       "summary": "Add Google Analytics (gtag.js) tracking script to the website using measurement ID G-ZPB7R21LJ4",
       "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Integrate Razorpay subscriptions/payments (UPI, cards, netbanking, wallets) with subscription status storage, webhook verification, and protection of premium routes/features",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Implement plan system with quotas/entitlements: Free (3 msgs/day, watermark, limited templates, no HD), Pro ₹49/mo (unlimited, no watermark, HD exports 1080x1080 + 9:16, premium templates, Hindi+Romantic tone, Surprise Links), Creator ₹149/mo (Pro + sell templates, reel MP4 export, voice generation, custom branding, analytics dashboard)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-42",
+      "summary": "Add premium feature-locking UX: blur locked features for Free users, show “Unlock Premium” button, and pricing comparison modal + upgrade CTA copy “Create Something She Will Never Forget”",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "Expand download/export system: PNG + PDF + MP4 (Reel Mode), watermarking for Free, no-watermark + HD for paid; allow html2canvas or server-side rendering approach",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-44",
+      "summary": "Add Surprise Mode / Surprise Link feature (Pro+): generate private link that plays confetti, name reveal animation, romantic background music, and message fade-in animation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "Add Voice Message Generator (Premium): convert message to AI voice (male/female) with optional background music and MP3 download",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-46",
+      "summary": "Add Reel Generator (Premium): generate Instagram Reel-style 9:16 animated text + background music and export MP4; Free gets watermark + 480p, Premium gets 1080p no watermark",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-47",
+      "summary": "Improve homepage conversion UI: change hero CTA to “Create Magic Now”, add social proof counter (“3,000+ Wishes Generated Today”), premium badge UI, testimonials, and a pricing comparison table",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-48",
+      "summary": "Add authenticated user dashboard showing subscription status, remaining free credits, download history, saved templates, and Creator earnings",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-49",
+      "summary": "Marketplace upgrade for Creator plan: upload templates with price + preview, track downloads, and integrate Razorpay payouts",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-50",
+      "summary": "Add trust/legal pages: Terms & Conditions, Privacy Policy, Refund Policy, and Contact page/sections",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-53",
+      "summary": "Add subscription status storage and retrieval in the backend for authenticated users, including: current plan, subscription state (e.g., active/canceled/expired), and timestamps. Expose query methods for the frontend to fetch the caller’s subscription status and update methods intended to be called after payment verification.",
+      "reqIds": [
+        "REQ-66"
+      ],
       "status": "pending"
     }
   ],

@@ -7,6 +7,35 @@ export interface None {
     __kind__: "None";
 }
 export type Option<T> = Some<T> | None;
+export interface CreatorEarnings {
+    totalRevenue: bigint;
+    totalDownloads: bigint;
+}
+export type PostId = bigint;
+export type TemplateId = bigint;
+export interface DownloadRecord {
+    contentId: bigint;
+    contentType: string;
+    timestamp: bigint;
+}
+export interface CommunityPost {
+    id: PostId;
+    title: string;
+    creator: Principal;
+    contentType: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    };
+    createdAt: bigint;
+    description: string;
+}
+export interface SavedTemplate {
+    templateId: bigint;
+    savedAt: bigint;
+}
 export interface MarketplaceListing {
     id: ListingId;
     title: string;
@@ -23,45 +52,38 @@ export interface MarketplaceListing {
     price: bigint;
 }
 export type ListingId = bigint;
-export interface BuyerIntent {
-    status: Variant_pending_rejected_accepted;
-    listingId: ListingId;
-    message: string;
-    buyer: Principal;
-}
-export type PostId = bigint;
-export type TemplateId = bigint;
-export interface CommunityPost {
-    id: PostId;
-    title: string;
-    creator: Principal;
-    contentType: {
-        __kind__: "template";
-        template: TemplateId;
-    } | {
-        __kind__: "sticker";
-        sticker: bigint;
-    };
-    createdAt: bigint;
-    description: string;
+export interface SubscriptionStatus {
+    startedAt: bigint;
+    expiresAt?: bigint;
+    plan: PlanType;
+    updatedAt: bigint;
+    state: SubscriptionState;
 }
 export interface UserProfile {
     bio: string;
     name: string;
 }
+export interface SurprisePayload {
+    id: string;
+    createdAt: bigint;
+    createdBy: Principal;
+    message: string;
+    recipientName: string;
+}
+export enum PlanType {
+    pro = "pro",
+    creator = "creator",
+    free = "free"
+}
+export enum SubscriptionState {
+    active = "active",
+    canceled = "canceled",
+    expired = "expired"
+}
 export enum UserRole {
     admin = "admin",
     user = "user",
     guest = "guest"
-}
-export enum Variant_pending_rejected_accepted {
-    pending = "pending",
-    rejected = "rejected",
-    accepted = "accepted"
-}
-export enum Variant_rejected_accepted {
-    rejected = "rejected",
-    accepted = "accepted"
 }
 export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
@@ -79,20 +101,33 @@ export interface backendInterface {
         __kind__: "sticker";
         sticker: bigint;
     }): Promise<ListingId>;
-    expressInterest(listingId: ListingId, message: string): Promise<void>;
+    createSurpriseLink(recipientName: string, message: string): Promise<string>;
     getAllCommunityPosts(): Promise<Array<CommunityPost>>;
     getAllMarketplaceListings(): Promise<Array<MarketplaceListing>>;
+    getCallerDownloadHistory(): Promise<Array<DownloadRecord>>;
+    getCallerSavedTemplates(): Promise<Array<SavedTemplate>>;
+    getCallerSubscriptionStatus(): Promise<SubscriptionStatus>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getCommunityPost(id: PostId): Promise<CommunityPost | null>;
+    getCreatorEarnings(): Promise<CreatorEarnings>;
     getCreatorListings(creator: Principal): Promise<Array<MarketplaceListing>>;
     getCreatorPosts(creator: Principal): Promise<Array<CommunityPost>>;
     getCreatorSubscribers(creator: Principal): Promise<Array<Principal>>;
-    getListingIntents(listingId: ListingId): Promise<Array<BuyerIntent>>;
+    getListingInteractionCount(listingId: ListingId): Promise<bigint>;
     getMarketplaceListing(id: ListingId): Promise<MarketplaceListing | null>;
+    getMessageQuotaStatus(): Promise<{
+        total: bigint;
+        remaining: bigint;
+    }>;
+    getSurprisePayload(surpriseId: string): Promise<SurprisePayload | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    recordDownload(contentType: string, contentId: bigint): Promise<void>;
+    recordListingInteraction(listingId: ListingId): Promise<void>;
+    recordMessageGeneration(): Promise<void>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    saveTemplate(templateId: bigint): Promise<void>;
     subscribeToCreator(creator: Principal): Promise<void>;
-    updateIntentStatus(listingId: ListingId, buyer: Principal, newStatus: Variant_rejected_accepted): Promise<void>;
+    updateSubscriptionStatus(user: Principal, plan: PlanType, state: SubscriptionState, expiresAt: bigint | null): Promise<void>;
 }

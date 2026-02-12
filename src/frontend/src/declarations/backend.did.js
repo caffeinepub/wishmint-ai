@@ -33,16 +33,43 @@ export const MarketplaceListing = IDL.Record({
   'description' : IDL.Text,
   'price' : IDL.Nat,
 });
+export const DownloadRecord = IDL.Record({
+  'contentId' : IDL.Nat,
+  'contentType' : IDL.Text,
+  'timestamp' : IDL.Int,
+});
+export const SavedTemplate = IDL.Record({
+  'templateId' : IDL.Nat,
+  'savedAt' : IDL.Int,
+});
+export const PlanType = IDL.Variant({
+  'pro' : IDL.Null,
+  'creator' : IDL.Null,
+  'free' : IDL.Null,
+});
+export const SubscriptionState = IDL.Variant({
+  'active' : IDL.Null,
+  'canceled' : IDL.Null,
+  'expired' : IDL.Null,
+});
+export const SubscriptionStatus = IDL.Record({
+  'startedAt' : IDL.Int,
+  'expiresAt' : IDL.Opt(IDL.Int),
+  'plan' : PlanType,
+  'updatedAt' : IDL.Int,
+  'state' : SubscriptionState,
+});
 export const UserProfile = IDL.Record({ 'bio' : IDL.Text, 'name' : IDL.Text });
-export const BuyerIntent = IDL.Record({
-  'status' : IDL.Variant({
-    'pending' : IDL.Null,
-    'rejected' : IDL.Null,
-    'accepted' : IDL.Null,
-  }),
-  'listingId' : ListingId,
+export const CreatorEarnings = IDL.Record({
+  'totalRevenue' : IDL.Nat,
+  'totalDownloads' : IDL.Nat,
+});
+export const SurprisePayload = IDL.Record({
+  'id' : IDL.Text,
+  'createdAt' : IDL.Int,
+  'createdBy' : IDL.Principal,
   'message' : IDL.Text,
-  'buyer' : IDL.Principal,
+  'recipientName' : IDL.Text,
 });
 
 export const idlService = IDL.Service({
@@ -67,16 +94,24 @@ export const idlService = IDL.Service({
       [ListingId],
       [],
     ),
-  'expressInterest' : IDL.Func([ListingId, IDL.Text], [], []),
+  'createSurpriseLink' : IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
   'getAllCommunityPosts' : IDL.Func([], [IDL.Vec(CommunityPost)], ['query']),
   'getAllMarketplaceListings' : IDL.Func(
       [],
       [IDL.Vec(MarketplaceListing)],
       ['query'],
     ),
+  'getCallerDownloadHistory' : IDL.Func(
+      [],
+      [IDL.Vec(DownloadRecord)],
+      ['query'],
+    ),
+  'getCallerSavedTemplates' : IDL.Func([], [IDL.Vec(SavedTemplate)], ['query']),
+  'getCallerSubscriptionStatus' : IDL.Func([], [SubscriptionStatus], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getCommunityPost' : IDL.Func([PostId], [IDL.Opt(CommunityPost)], ['query']),
+  'getCreatorEarnings' : IDL.Func([], [CreatorEarnings], ['query']),
   'getCreatorListings' : IDL.Func(
       [IDL.Principal],
       [IDL.Vec(MarketplaceListing)],
@@ -92,14 +127,20 @@ export const idlService = IDL.Service({
       [IDL.Vec(IDL.Principal)],
       ['query'],
     ),
-  'getListingIntents' : IDL.Func(
-      [ListingId],
-      [IDL.Vec(BuyerIntent)],
-      ['query'],
-    ),
+  'getListingInteractionCount' : IDL.Func([ListingId], [IDL.Nat], ['query']),
   'getMarketplaceListing' : IDL.Func(
       [ListingId],
       [IDL.Opt(MarketplaceListing)],
+      ['query'],
+    ),
+  'getMessageQuotaStatus' : IDL.Func(
+      [],
+      [IDL.Record({ 'total' : IDL.Nat, 'remaining' : IDL.Nat })],
+      ['query'],
+    ),
+  'getSurprisePayload' : IDL.Func(
+      [IDL.Text],
+      [IDL.Opt(SurprisePayload)],
       ['query'],
     ),
   'getUserProfile' : IDL.Func(
@@ -108,14 +149,14 @@ export const idlService = IDL.Service({
       ['query'],
     ),
   'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'recordDownload' : IDL.Func([IDL.Text, IDL.Nat], [], []),
+  'recordListingInteraction' : IDL.Func([ListingId], [], []),
+  'recordMessageGeneration' : IDL.Func([], [], []),
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'saveTemplate' : IDL.Func([IDL.Nat], [], []),
   'subscribeToCreator' : IDL.Func([IDL.Principal], [], []),
-  'updateIntentStatus' : IDL.Func(
-      [
-        ListingId,
-        IDL.Principal,
-        IDL.Variant({ 'rejected' : IDL.Null, 'accepted' : IDL.Null }),
-      ],
+  'updateSubscriptionStatus' : IDL.Func(
+      [IDL.Principal, PlanType, SubscriptionState, IDL.Opt(IDL.Int)],
       [],
       [],
     ),
@@ -155,16 +196,43 @@ export const idlFactory = ({ IDL }) => {
     'description' : IDL.Text,
     'price' : IDL.Nat,
   });
+  const DownloadRecord = IDL.Record({
+    'contentId' : IDL.Nat,
+    'contentType' : IDL.Text,
+    'timestamp' : IDL.Int,
+  });
+  const SavedTemplate = IDL.Record({
+    'templateId' : IDL.Nat,
+    'savedAt' : IDL.Int,
+  });
+  const PlanType = IDL.Variant({
+    'pro' : IDL.Null,
+    'creator' : IDL.Null,
+    'free' : IDL.Null,
+  });
+  const SubscriptionState = IDL.Variant({
+    'active' : IDL.Null,
+    'canceled' : IDL.Null,
+    'expired' : IDL.Null,
+  });
+  const SubscriptionStatus = IDL.Record({
+    'startedAt' : IDL.Int,
+    'expiresAt' : IDL.Opt(IDL.Int),
+    'plan' : PlanType,
+    'updatedAt' : IDL.Int,
+    'state' : SubscriptionState,
+  });
   const UserProfile = IDL.Record({ 'bio' : IDL.Text, 'name' : IDL.Text });
-  const BuyerIntent = IDL.Record({
-    'status' : IDL.Variant({
-      'pending' : IDL.Null,
-      'rejected' : IDL.Null,
-      'accepted' : IDL.Null,
-    }),
-    'listingId' : ListingId,
+  const CreatorEarnings = IDL.Record({
+    'totalRevenue' : IDL.Nat,
+    'totalDownloads' : IDL.Nat,
+  });
+  const SurprisePayload = IDL.Record({
+    'id' : IDL.Text,
+    'createdAt' : IDL.Int,
+    'createdBy' : IDL.Principal,
     'message' : IDL.Text,
-    'buyer' : IDL.Principal,
+    'recipientName' : IDL.Text,
   });
   
   return IDL.Service({
@@ -189,11 +257,26 @@ export const idlFactory = ({ IDL }) => {
         [ListingId],
         [],
       ),
-    'expressInterest' : IDL.Func([ListingId, IDL.Text], [], []),
+    'createSurpriseLink' : IDL.Func([IDL.Text, IDL.Text], [IDL.Text], []),
     'getAllCommunityPosts' : IDL.Func([], [IDL.Vec(CommunityPost)], ['query']),
     'getAllMarketplaceListings' : IDL.Func(
         [],
         [IDL.Vec(MarketplaceListing)],
+        ['query'],
+      ),
+    'getCallerDownloadHistory' : IDL.Func(
+        [],
+        [IDL.Vec(DownloadRecord)],
+        ['query'],
+      ),
+    'getCallerSavedTemplates' : IDL.Func(
+        [],
+        [IDL.Vec(SavedTemplate)],
+        ['query'],
+      ),
+    'getCallerSubscriptionStatus' : IDL.Func(
+        [],
+        [SubscriptionStatus],
         ['query'],
       ),
     'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -203,6 +286,7 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Opt(CommunityPost)],
         ['query'],
       ),
+    'getCreatorEarnings' : IDL.Func([], [CreatorEarnings], ['query']),
     'getCreatorListings' : IDL.Func(
         [IDL.Principal],
         [IDL.Vec(MarketplaceListing)],
@@ -218,14 +302,20 @@ export const idlFactory = ({ IDL }) => {
         [IDL.Vec(IDL.Principal)],
         ['query'],
       ),
-    'getListingIntents' : IDL.Func(
-        [ListingId],
-        [IDL.Vec(BuyerIntent)],
-        ['query'],
-      ),
+    'getListingInteractionCount' : IDL.Func([ListingId], [IDL.Nat], ['query']),
     'getMarketplaceListing' : IDL.Func(
         [ListingId],
         [IDL.Opt(MarketplaceListing)],
+        ['query'],
+      ),
+    'getMessageQuotaStatus' : IDL.Func(
+        [],
+        [IDL.Record({ 'total' : IDL.Nat, 'remaining' : IDL.Nat })],
+        ['query'],
+      ),
+    'getSurprisePayload' : IDL.Func(
+        [IDL.Text],
+        [IDL.Opt(SurprisePayload)],
         ['query'],
       ),
     'getUserProfile' : IDL.Func(
@@ -234,14 +324,14 @@ export const idlFactory = ({ IDL }) => {
         ['query'],
       ),
     'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'recordDownload' : IDL.Func([IDL.Text, IDL.Nat], [], []),
+    'recordListingInteraction' : IDL.Func([ListingId], [], []),
+    'recordMessageGeneration' : IDL.Func([], [], []),
     'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'saveTemplate' : IDL.Func([IDL.Nat], [], []),
     'subscribeToCreator' : IDL.Func([IDL.Principal], [], []),
-    'updateIntentStatus' : IDL.Func(
-        [
-          ListingId,
-          IDL.Principal,
-          IDL.Variant({ 'rejected' : IDL.Null, 'accepted' : IDL.Null }),
-        ],
+    'updateSubscriptionStatus' : IDL.Func(
+        [IDL.Principal, PlanType, SubscriptionState, IDL.Opt(IDL.Int)],
         [],
         [],
       ),

@@ -1,164 +1,229 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Copy, Download, MessageCircle, Lock, Sparkles } from 'lucide-react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Copy, Share2, Download, Sparkles, Link as LinkIcon, FileText } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { useAppContext } from '../App';
 import { copyToClipboard } from '../lib/clipboard';
 import { createWhatsAppLink } from '../lib/whatsapp';
-import { formatBirthdayPack } from '../features/generator/format';
 import { exportCardImage } from '../features/cardExport/canvasExport';
+import { exportAsPDF } from '../features/cardExport/pdfExport';
+import { useCreateSurpriseLink } from '../features/surprise/useSurpriseLinks';
+import { useEntitlements } from '../features/subscription/useEntitlements';
 import { toast } from 'sonner';
-import { useState } from 'react';
 
 export function OutputSection() {
-  const { outputs, formData, selectedTemplate, isAuthenticated, demoMode, openPremiumDesigner } = useAppContext();
+  const { outputs, formData, selectedTemplate, openPremiumDesigner, isAuthenticated, demoMode, openPricingModal } = useAppContext();
+  const { entitlements, effectivePlan } = useEntitlements();
+  const createSurpriseMutation = useCreateSurpriseLink();
   const [isExporting, setIsExporting] = useState(false);
 
   if (!outputs) return null;
 
-  // Download is only available for authenticated users (not in demo mode)
-  const canDownload = isAuthenticated && !demoMode;
-
-  const handleCopy = (text: string, label: string) => {
-    copyToClipboard(text);
-    toast.success(`${label} copied to clipboard!`);
-  };
-
-  const handleCopyAll = () => {
-    const allText = formatBirthdayPack(outputs);
-    copyToClipboard(allText);
-    toast.success('All wishes copied to clipboard!');
-  };
-
-  const handleWhatsAppShare = () => {
-    const allText = formatBirthdayPack(outputs);
-    const url = createWhatsAppLink(allText);
-    window.open(url, '_blank');
-  };
-
-  const handleDownloadCard = async () => {
-    if (!canDownload) {
-      toast.error('Sign in to download card images');
-      return;
-    }
-
-    if (!formData.name) {
-      toast.error('Please enter a name first');
-      return;
-    }
-    
-    setIsExporting(true);
-    try {
-      await exportCardImage(outputs.mainWish, formData.name, selectedTemplate);
-      toast.success('Card image downloaded!');
-    } catch (error) {
-      console.error('Export failed:', error);
-      toast.error('Failed to export card image');
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   const outputCards = [
-    { title: 'Main Wish', content: outputs.mainWish, icon: '💝' },
+    { title: 'Main Wish', content: outputs.mainWish, icon: '🎂' },
     { title: 'WhatsApp Short', content: outputs.whatsappShort, icon: '💬' },
     { title: 'Instagram Caption', content: outputs.instagramCaption, icon: '📸' },
     { title: 'Mini Speech', content: outputs.miniSpeech, icon: '🎤' },
     { title: 'Hashtags', content: outputs.hashtags, icon: '#️⃣' },
   ];
 
+  const handleCopy = (content: string, title: string) => {
+    copyToClipboard(content);
+    toast.success(`${title} copied!`);
+  };
+
+  const handleShareWhatsApp = (content: string) => {
+    const url = createWhatsAppLink(content);
+    window.open(url, '_blank');
+  };
+
+  const handleDownloadImage = async () => {
+    if (demoMode) {
+      toast.error('Demo Mode', {
+        description: 'Sign in to download images.',
+      });
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast.error('Sign in required', {
+        description: 'Please sign in to download images.',
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      await exportCardImage(outputs.mainWish, formData.name, selectedTemplate);
+      toast.success('Image downloaded!');
+    } catch (error) {
+      toast.error('Export failed', {
+        description: 'Failed to generate image. Please try again.',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleDownloadPDF = async () => {
+    if (demoMode) {
+      toast.error('Demo Mode', {
+        description: 'Sign in to download PDF.',
+      });
+      return;
+    }
+
+    if (!isAuthenticated) {
+      toast.error('Sign in required', {
+        description: 'Please sign in to download PDF.',
+      });
+      return;
+    }
+
+    setIsExporting(true);
+    try {
+      const includeWatermark = entitlements.watermarkDownloads;
+      await exportAsPDF(outputs, formData.name, includeWatermark);
+      toast.success('PDF downloaded!');
+    } catch (error: any) {
+      toast.error('Export failed', {
+        description: error.message || 'Failed to generate PDF. Please try again.',
+      });
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const handleCreateSurpriseLink = async () => {
+    if (!isAuthenticated) {
+      toast.error('Sign in required', {
+        description: 'Please sign in to create surprise links.',
+      });
+      return;
+    }
+
+    if (!entitlements.surpriseLinks) {
+      toast.error('Premium Feature', {
+        description: 'Surprise links require Pro or Creator plan.',
+      });
+      openPricingModal('pro');
+      return;
+    }
+
+    try {
+      const surpriseId = await createSurpriseMutation.mutateAsync({
+        recipientName: formData.name,
+        message: outputs.mainWish,
+      });
+
+      const surpriseUrl = `${window.location.origin}${window.location.pathname}?surprise=${surpriseId}`;
+      await navigator.clipboard.writeText(surpriseUrl);
+      toast.success('Surprise link copied!', {
+        description: 'Share this link to create a magical reveal experience.',
+      });
+    } catch (error: any) {
+      // Error already handled by mutation
+    }
+  };
+
   return (
-    <section id="outputs" className="section-padding px-4 sm:px-6 lg:px-8 bg-muted/20">
+    <section id="outputs" className="section-padding px-4 sm:px-6 lg:px-8 bg-muted/30">
       <div className="section-container max-w-6xl">
         <Reveal>
-          <div className="text-center mb-12 space-y-3">
+          <div className="text-center mb-8">
             <h2 className="section-heading bg-gradient-to-r from-neon-purple to-neon-green bg-clip-text text-transparent">
               Your Birthday Pack
             </h2>
-            <p className="section-subheading">
-              5 perfect wishes ready to share
+            <p className="section-subheading mt-4">
+              5 personalized messages ready to share
             </p>
           </div>
         </Reveal>
 
-        <div className="grid md:grid-cols-2 gap-5 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
           {outputCards.map((card, index) => (
-            <Reveal key={card.title} delay={index * 0.1}>
-              <Card className="bg-card/70 backdrop-blur-sm border-neon-purple/20 hover:border-neon-purple/40 transition-all shadow-card h-full">
+            <Reveal key={index}>
+              <Card className="bg-card/60 backdrop-blur-sm border-neon-purple/20 shadow-card h-full flex flex-col">
                 <CardHeader className="pb-3">
-                  <CardTitle className="flex items-center gap-2 text-lg font-semibold">
+                  <CardTitle className="text-lg flex items-center gap-2">
                     <span className="text-2xl">{card.icon}</span>
                     {card.title}
                   </CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                  <p className="text-foreground/90 whitespace-pre-wrap leading-relaxed text-sm">
+                <CardContent className="flex-1 flex flex-col">
+                  <p className="text-sm leading-relaxed mb-4 flex-1 whitespace-pre-wrap">
                     {card.content}
                   </p>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => handleCopy(card.content, card.title)}
-                    className="w-full h-9 text-sm"
-                  >
-                    <Copy className="w-3.5 h-3.5 mr-2" />
-                    Copy
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleCopy(card.content, card.title)}
+                      className="flex-1 border-neon-purple/30 hover:bg-neon-purple/10"
+                    >
+                      <Copy className="w-3 h-3 mr-1" />
+                      Copy
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleShareWhatsApp(card.content)}
+                      className="flex-1 border-neon-green/30 hover:bg-neon-green/10"
+                    >
+                      <Share2 className="w-3 h-3 mr-1" />
+                      Share
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </Reveal>
           ))}
         </div>
 
-        <Reveal delay={0.5}>
+        <Reveal>
           <div className="flex flex-wrap gap-3 justify-center">
             <Button
-              onClick={handleCopyAll}
-              size="lg"
-              variant="outline"
-              className="gap-2 h-11"
+              onClick={handleDownloadImage}
+              disabled={isExporting}
+              className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold"
             >
-              <Copy className="w-4 h-4" />
-              Copy All
+              <Download className="w-4 h-4 mr-2" />
+              {isExporting ? 'Exporting...' : 'Download Card Image'}
             </Button>
             <Button
-              onClick={handleWhatsAppShare}
-              size="lg"
+              onClick={handleDownloadPDF}
+              disabled={isExporting}
               variant="outline"
-              className="gap-2 h-11"
+              className="border-neon-purple/50 hover:bg-neon-purple/10"
             >
-              <MessageCircle className="w-4 h-4" />
-              Share on WhatsApp
+              <FileText className="w-4 h-4 mr-2" />
+              Download as PDF
             </Button>
             <Button
-              onClick={handleDownloadCard}
-              size="lg"
+              onClick={handleCreateSurpriseLink}
+              disabled={createSurpriseMutation.isPending}
               variant="outline"
-              className="gap-2 h-11"
-              disabled={!canDownload || isExporting}
-              title={!canDownload ? 'Sign in to download card images' : ''}
+              className="border-neon-green/50 hover:bg-neon-green/10"
             >
-              {!canDownload ? (
-                <>
-                  <Lock className="w-4 h-4" />
-                  Sign in to Download
-                </>
-              ) : (
-                <>
-                  <Download className="w-4 h-4" />
-                  {isExporting ? 'Exporting...' : 'Download Card Image'}
-                </>
-              )}
+              <LinkIcon className="w-4 h-4 mr-2" />
+              {entitlements.surpriseLinks ? 'Create Surprise Link' : '🔒 Surprise Link (Pro)'}
             </Button>
             <Button
               onClick={openPremiumDesigner}
-              size="lg"
-              className="gap-2 h-11 bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90"
+              variant="outline"
+              className="border-neon-purple/50 hover:bg-neon-purple/10"
             >
-              <Sparkles className="w-4 h-4" />
+              <Sparkles className="w-4 h-4 mr-2" />
               Create Premium Card
             </Button>
           </div>
+          {entitlements.watermarkDownloads && (
+            <p className="text-xs text-center text-muted-foreground mt-4">
+              Free plan downloads include watermark. Upgrade to Pro to remove watermark.
+            </p>
+          )}
         </Reveal>
       </div>
     </section>

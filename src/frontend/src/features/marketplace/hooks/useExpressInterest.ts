@@ -1,4 +1,4 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useActor } from '../../../hooks/useActor';
 import { toast } from 'sonner';
 import type { ListingId } from '../../../backend';
@@ -10,22 +10,24 @@ interface ExpressInterestParams {
 
 export function useExpressInterest() {
   const { actor } = useActor();
+  const queryClient = useQueryClient();
 
-  return useMutation<void, Error, ExpressInterestParams>({
-    mutationFn: async (params) => {
+  return useMutation({
+    mutationFn: async (params: ExpressInterestParams) => {
       if (!actor) throw new Error('Actor not available');
-      return actor.expressInterest(params.listingId, params.message);
+      // Use recordListingInteraction to track buyer interest
+      return actor.recordListingInteraction(params.listingId);
     },
     onSuccess: () => {
-      toast.success('Interest recorded! The seller will be notified.');
+      queryClient.invalidateQueries({ queryKey: ['marketplaceListings'] });
+      toast.success('Interest recorded!', {
+        description: 'The seller has been notified of your interest.',
+      });
     },
-    onError: (error) => {
-      const errorMessage = error.message.toLowerCase();
-      if (errorMessage.includes('unauthorized') || errorMessage.includes('only users')) {
-        toast.info('Sign in to record your interest with the seller');
-      } else {
-        toast.error('Failed to record interest. Please try again.');
-      }
+    onError: (error: Error) => {
+      toast.error('Failed to record interest', {
+        description: error.message,
+      });
     },
   });
 }

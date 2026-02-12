@@ -13,9 +13,11 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Loader2, AlertCircle } from 'lucide-react';
+import { Loader2, AlertCircle, Crown } from 'lucide-react';
 import { useCreateMarketplaceListing } from '../hooks/useCreateMarketplaceListing';
 import { useInternetIdentity } from '../../../hooks/useInternetIdentity';
+import { useEntitlements } from '../../subscription/useEntitlements';
+import { useAppContext } from '../../../App';
 
 interface CreateListingDialogProps {
   open: boolean;
@@ -25,6 +27,8 @@ interface CreateListingDialogProps {
 export function CreateListingDialog({ open, onClose }: CreateListingDialogProps) {
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
+  const { entitlements } = useEntitlements();
+  const { openPricingModal } = useAppContext();
   const createMutation = useCreateMarketplaceListing();
 
   const [title, setTitle] = useState('');
@@ -32,9 +36,11 @@ export function CreateListingDialog({ open, onClose }: CreateListingDialogProps)
   const [price, setPrice] = useState('');
   const [contentType, setContentType] = useState<'template' | 'sticker'>('template');
 
+  const canCreateListing = isAuthenticated && entitlements.creatorMarketplace;
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isAuthenticated) return;
+    if (!canCreateListing) return;
 
     const priceNum = parseFloat(price);
     if (isNaN(priceNum) || priceNum <= 0) {
@@ -86,6 +92,22 @@ export function CreateListingDialog({ open, onClose }: CreateListingDialogProps)
               Please sign in to create a listing and start selling your designs.
             </AlertDescription>
           </Alert>
+        ) : !canCreateListing ? (
+          <Alert className="bg-neon-purple/10 border-neon-purple/20">
+            <Crown className="h-4 w-4 text-neon-purple" />
+            <AlertDescription className="text-sm">
+              Creating marketplace listings requires Creator plan.{' '}
+              <button
+                onClick={() => {
+                  handleClose();
+                  openPricingModal('creator');
+                }}
+                className="underline font-semibold hover:text-neon-purple"
+              >
+                Upgrade now
+              </button>
+            </AlertDescription>
+          </Alert>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
@@ -114,13 +136,13 @@ export function CreateListingDialog({ open, onClose }: CreateListingDialogProps)
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="listing-price">Price (USD)</Label>
+              <Label htmlFor="listing-price">Price (₹)</Label>
               <Input
                 id="listing-price"
                 type="number"
                 min="0"
                 step="1"
-                placeholder="10"
+                placeholder="49"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 required

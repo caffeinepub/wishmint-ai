@@ -3,14 +3,13 @@ import { Sparkles, Gift, Zap } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { AuthControls } from '../components/AuthControls';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { Plan } from '../hooks/usePlanSelection';
+import { Badge } from '@/components/ui/badge';
 
 interface HeroSectionProps {
   onGenerateClick: () => void;
   onTryDemo: () => void;
   onExamplesClick: () => void;
   isAuthenticated: boolean;
-  selectedPlan: Plan;
   authControlsRef: React.RefObject<HTMLButtonElement | null>;
 }
 
@@ -19,12 +18,9 @@ export function HeroSection({
   onTryDemo,
   onExamplesClick,
   isAuthenticated,
-  selectedPlan,
   authControlsRef,
 }: HeroSectionProps) {
   const showAuthPrompt = !isAuthenticated;
-  const showPlanPrompt = isAuthenticated && !selectedPlan;
-  const canGenerate = isAuthenticated && !!selectedPlan;
 
   return (
     <section className="relative min-h-screen flex flex-col px-4 sm:px-6 lg:px-8 py-6 overflow-hidden">
@@ -58,19 +54,19 @@ export function HeroSection({
             Make birthdays feel personal in seconds.
           </p>
 
+          {/* Social proof */}
+          <div className="flex items-center justify-center gap-2">
+            <Badge variant="outline" className="border-neon-green/50 bg-neon-green/10 text-neon-green px-4 py-2">
+              <Sparkles className="w-4 h-4 mr-2" />
+              3,000+ Wishes Generated Today
+            </Badge>
+          </div>
+
           {/* Inline prompts */}
           {showAuthPrompt && (
             <Alert className="max-w-md mx-auto border-neon-purple/30 bg-neon-purple/5">
               <AlertDescription className="text-center text-sm">
                 Try the demo or sign in to unlock all features
-              </AlertDescription>
-            </Alert>
-          )}
-
-          {showPlanPrompt && (
-            <Alert className="max-w-md mx-auto border-neon-green/30 bg-neon-green/5">
-              <AlertDescription className="text-center text-sm">
-                Select a plan to continue
               </AlertDescription>
             </Alert>
           )}
@@ -103,7 +99,7 @@ export function HeroSection({
                   className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold px-8 py-6 text-base sm:text-lg rounded-xl shadow-neon transition-all hover:scale-105"
                 >
                   <Gift className="w-5 h-5 mr-2" />
-                  {canGenerate ? 'Generate Wish' : 'Get Started'}
+                  ✨ Create Magic Now
                 </Button>
                 <Button
                   size="lg"

@@ -1,24 +1,105 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T05:34:05.452Z",
-  "summary": "REQ-62 appears implemented by adding the gtag.js snippet with measurement ID G-ZPB7R21LJ4 to frontend/index.html. REQ-63 is partially addressed by expanding CSP in frontend/.ic-assets.json to allow googletagmanager and some Google Analytics endpoints, but the CSP may still be missing endpoints commonly required for GA measurement collection.",
+  "generatedAt": "2026-02-12T12:33:14.694Z",
+  "summary": "Diff implements core subscription scaffolding (plans/entitlements hooks + pricing modal/table), free-plan daily quota (localStorage + backend APIs referenced), Surprise links + Surprise view experience, dashboard data hooks/section, marketplace Creator gating + interaction tracking hooks, Razorpay upgrade stub, and legal sections/footer anchors. However, several acceptance criteria remain unmet (notably export/watermark/HD behavior, hero CTA text, and plan persistence/selection), and some unrequested/non-goal features are advertised in plan copy (MP4/voice/custom branding).",
   "missing_requirements": [
     {
-      "id": "REQ-63",
-      "requirement": "Update the deployed frontend Content Security Policy (CSP) configuration to allow loading and using Google Analytics resources required by gtag.js, without breaking existing Internet Identity and app functionality.",
-      "reason": "The CSP allows connect-src to https://www.google-analytics.com, https://analytics.google.com, and https://www.googletagmanager.com, but does not include wildcard subdomains that are commonly used for GA collection (e.g., region-specific google-analytics domains) nor other commonly used related endpoints. Based on the diff alone, it's not clear that all GA-initiated measurement requests will avoid CSP blocking as required by the acceptance criteria.",
+      "id": "REQ-64",
+      "requirement": "App supports selecting and persisting one of: Free, Pro, Creator (alongside any existing plan selection state).",
+      "reason": "The diff adds plan definitions and reads effective plan from backend subscription status, but does not show any UI/state for selecting a plan nor persistence of a selection (especially for anonymous users).",
       "evidence": [
-        "frontend/.ic-assets.json"
+        "frontend/src/features/subscription/useEntitlements.ts",
+        "frontend/src/features/subscription/plans.ts",
+        "frontend/src/sections/PricingSection.tsx",
+        "frontend/src/features/subscription/PricingComparisonModal.tsx"
+      ]
+    },
+    {
+      "id": "REQ-65",
+      "requirement": "Quota resets automatically on the next local calendar day (authenticated users enforced by backend principal-based tracking; anonymous users per-device).",
+      "reason": "Anonymous quota uses ISO date (OK), but backend helper uses `days.toText()` derived from `Time.now()` rather than a local-calendar date string, so the reset mechanism as specified (local calendar day) is not evidenced for authenticated users.",
+      "evidence": [
+        "frontend/src/features/quota/quotaStorage.ts",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-69",
+      "requirement": "Update download/export system to support plan-based behavior: Free users download with a visible watermark; Pro/Creator no watermark and allow choosing 1080x1080 and 9:16; premium-only export on Free is blocked and routes to Unlock Premium modal.",
+      "reason": "OutputSection calls `exportCardImage(...)` without any plan-based size selection or watermark parameter, and no UI is shown for choosing 1080x1080 vs 9:16. Also, downloads are gated behind authentication/demo checks rather than Free-vs-Pro-vs-Creator plan behavior, and there is no evidence of routing Free users attempting premium export to the pricing modal.",
+      "evidence": [
+        "frontend/src/sections/OutputSection.tsx"
+      ]
+    },
+    {
+      "id": "REQ-70",
+      "requirement": "Add PDF download option gated by plan rules (Free watermarked; Pro/Creator no watermark; gate HD/no-watermark variants where applicable).",
+      "reason": "A PDF export function is added and includes an `includeWatermark` flag; however, it is not shown that Pro/Creator get a no-watermark/HD variant choice, nor that Free attempting premium variants is blocked via the premium lock modal. Additionally, the UI gates PDF download behind authentication/demo rather than plan-tier behavior.",
+      "evidence": [
+        "frontend/src/features/cardExport/pdfExport.ts",
+        "frontend/src/sections/OutputSection.tsx"
+      ]
+    },
+    {
+      "id": "REQ-72",
+      "requirement": "Change the Hero primary CTA label from “Try Demo” to exactly “✨ Create Magic Now”; add a premium badge UI element; add pricing comparison table section accessible from upgrade flow.",
+      "reason": "Hero still shows a primary button labeled “Try Demo” (not updated to the required exact text). Social proof text is present and a comparison table exists, but a distinct “premium badge UI element” in the landing flow is not clearly evidenced beyond the social proof badge.",
+      "evidence": [
+        "frontend/src/sections/HeroSection.tsx",
+        "frontend/src/features/subscription/PricingComparisonTable.tsx",
+        "frontend/src/sections/PricingSection.tsx"
       ]
     }
   ],
-  "hallucinated_features": [],
-  "confidence": 0.62,
+  "hallucinated_features": [
+    {
+      "description": "Creator plan marketing includes MP4 reel export, voice message generation, and custom branding as plan features.",
+      "reason": "These are explicitly listed in the Creator plan feature list, but are non-goals/constraints in the BuildRequest (MP4 export and true voice synthesis were not to be implemented unless supported), and were not requested as part of the plan entitlements/features to ship now.",
+      "evidence": [
+        "frontend/src/features/subscription/plans.ts"
+      ]
+    },
+    {
+      "description": "Backend migration adds multiple new stable-state maps (download history, saved templates, listing interactions, surprise payloads, message quotas, subscription status) beyond what is strictly required for subscriptions/quota/surprise link storage.",
+      "reason": "REQ-66 requires subscription storage; REQ-65 requires quota tracking; REQ-71 requires surprise payload storage; REQ-73/74 mention download history/saved templates/interaction tracking, but the migration introduces all these at once without clear evidence all corresponding backend APIs are implemented/used in full in the diff summary (diff is truncated).",
+      "evidence": [
+        "backend/migration.mo",
+        "backend/main.mo",
+        "frontend/src/features/account/useAccountData.ts"
+      ]
+    }
+  ],
+  "confidence": 0.68,
   "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
     "frontend-file-summaries.txt",
-    "frontend/.ic-assets.json",
-    "frontend/index.html",
+    "frontend/src/App.tsx",
+    "frontend/src/components/PlanStatus.tsx",
+    "frontend/src/features/account/useAccountData.ts",
+    "frontend/src/features/cardExport/pdfExport.ts",
+    "frontend/src/features/marketplace/components/CreateListingDialog.tsx",
+    "frontend/src/features/marketplace/hooks/useExpressInterest.ts",
+    "frontend/src/features/marketplace/hooks/useListingInteractions.ts",
+    "frontend/src/features/payments/razorpay.ts",
+    "frontend/src/features/quota/quotaStorage.ts",
+    "frontend/src/features/quota/useMessageQuota.ts",
+    "frontend/src/features/subscription/PremiumLock.tsx",
+    "frontend/src/features/subscription/PricingComparisonModal.tsx",
+    "frontend/src/features/subscription/PricingComparisonTable.tsx",
+    "frontend/src/features/subscription/plans.ts",
+    "frontend/src/features/subscription/useEntitlements.ts",
+    "frontend/src/features/subscription/useSubscriptionStatus.ts",
+    "frontend/src/features/surprise/SurpriseView.tsx",
+    "frontend/src/features/surprise/useSurpriseLinks.ts",
+    "frontend/src/sections/DashboardSection.tsx",
+    "frontend/src/sections/FooterSection.tsx",
+    "frontend/src/sections/GeneratorSection.tsx",
+    "frontend/src/sections/HeroSection.tsx",
+    "frontend/src/sections/LegalSections.tsx",
+    "frontend/src/sections/OutputSection.tsx",
+    "frontend/src/sections/PricingSection.tsx",
     "project_state.json"
   ]
 }

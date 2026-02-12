@@ -1,37 +1,346 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add Google Analytics (gtag.js) tracking and CSP allowances",
+  "title": "WishMint AI: Tiered subscriptions, entitlement-based locking, premium upgrade UX, and quota/export upgrades",
   "requirements": [
     {
-      "id": "REQ-62",
-      "summary": "Load the provided Google Analytics gtag.js snippet on every page using measurement ID G-ZPB7R21LJ4.",
+      "id": "REQ-64",
+      "summary": "Add 3-plan model (Free/Pro/Creator) with a single entitlements source-of-truth and English-only plan UI.",
       "acceptanceCriteria": [
-        "The built app’s delivered HTML includes the exact Google tag (gtag.js) snippet with measurement ID G-ZPB7R21LJ4.",
-        "On a fresh load, the browser requests https://www.googletagmanager.com/gtag/js?id=G-ZPB7R21LJ4 successfully.",
-        "After page load, window.dataLayer exists and window.gtag is defined (or equivalent gtag function behavior is present)."
+        "App supports selecting and persisting one of: Free, Pro, Creator (alongside any existing plan selection state).",
+        "A single entitlement source-of-truth is available to the frontend so the UI can check: dailyMessageLimit, watermarkDownloads, hdExport, storyExport, premiumTemplates, hindiRomanticAccess, surpriseLinks, creatorMarketplace, analyticsDashboard.",
+        "All plan names/prices/features display in English in the UI where shown."
       ],
       "file_operations": [
         {
-          "path": "frontend/index.html",
+          "path": "frontend/src/hooks/usePlanSelection.ts",
           "operation": "modify",
-          "description": "Insert the exact provided Google tag (gtag.js) snippet into the document <head> so it loads on every page view, using measurement ID G-ZPB7R21LJ4."
+          "description": "Extend local plan selection to support 'creator' and anonymous persistence (per-device). Ensure selection can coexist with authenticated subscription-derived plan. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/subscription/plans.ts",
+          "operation": "create",
+          "description": "Create the plan + entitlement source-of-truth (Free/Pro/Creator) including entitlements: dailyMessageLimit, watermarkDownloads, hdExport, storyExport, premiumTemplates, hindiRomanticAccess, surpriseLinks, creatorMarketplace, analyticsDashboard, plus English display metadata (names/prices/features). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/subscription/useEntitlements.ts",
+          "operation": "create",
+          "description": "Add a hook/helper that resolves the effective plan and returns entitlements for UI checks (preferring authenticated subscription status when available). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/components/PlanStatus.tsx",
+          "operation": "modify",
+          "description": "Update plan badge rendering to support Free/Pro/Creator labels in English and align visuals with existing neon/dark gradient styling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/PricingSection.tsx",
+          "operation": "modify",
+          "description": "Replace current 2-tier pricing with three plans and English feature lists/prices (Free, Pro ₹49/month, Creator ₹149/month), driven by the shared plan metadata. Verify the component's usage instructions before implementing."
         }
       ]
     },
     {
-      "id": "REQ-63",
-      "summary": "Adjust deployed CSP to allow Google Analytics (gtag.js) resources while preserving existing Internet Identity and app functionality.",
+      "id": "REQ-65",
+      "summary": "Enforce Free plan message quota (3/day) with per-device localStorage for anonymous users and backend-based tracking for authenticated users, blocking generation with an upgrade prompt.",
       "acceptanceCriteria": [
-        "With CSP enabled in production, the GA script loads without CSP violations in the browser console.",
-        "Network requests needed by Google Analytics measurement (initiated by gtag.js) are not blocked by CSP.",
-        "Existing authentication (Internet Identity) and app API calls remain functional after the CSP change."
+        "On Free plan, after 3 successful generations in the same local day, further Generate/Surprise Me actions are blocked with an English message explaining the limit and offering upgrade.",
+        "Quota resets automatically on the next local calendar day.",
+        "Authenticated users have quota enforced across devices via backend principal-based tracking; anonymous users are per-device.",
+        "Pro and Creator plans do not enforce a daily message cap."
       ],
       "file_operations": [
         {
-          "path": "frontend/.ic-assets.json",
+          "path": "frontend/src/features/quota/quotaStorage.ts",
+          "operation": "create",
+          "description": "Implement local (anonymous) quota storage keyed by local calendar day using localStorage, exposing helpers to read/increment/reset. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/quota/useMessageQuota.ts",
+          "operation": "create",
+          "description": "Create a unified quota hook that (a) uses backend quota status + record for authenticated users and (b) uses localStorage for anonymous users; return remaining count and a function to attempt/record a generation. Verify the component's usage instructions before implementing. Use the authorization component guidance for authenticated-only backend calls; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/GeneratorSection.tsx",
           "operation": "modify",
-          "description": "Update the Content-Security-Policy header to allow loading gtag.js and sending analytics beacons by permitting required Google hosts (at minimum add https://www.googletagmanager.com to allowed script sources and add Google Analytics collection hosts such as https://www.google-analytics.com to connect-src), while keeping current allowances needed for Internet Identity (https://identity.ic0.app) and existing app connectivity unchanged. Ensure the CSP is applied to index.html responses as deployed (add/duplicate the CSP header under the index.html rule if the asset rules override headers)."
+          "description": "Wire quota enforcement into Generate and Surprise Me flows: allow anonymous Free generation up to 3/day, block after limit with an English upgrade prompt that opens the premium modal; bypass quota for Pro/Creator. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Update app-level gating so core wish generation can work offline for anonymous users under Free (with quota), while keeping authenticated flows intact. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-67",
+      "summary": "Add Razorpay upgrade entry-point UI for Pro and Creator with a safe placeholder flow and clear English messaging.",
+      "acceptanceCriteria": [
+        "Pricing shows Pro at ₹49/month and Creator at ₹149/month with an Upgrade action.",
+        "If payment cannot be completed/configured, the app shows a clear English message explaining what is missing (e.g., configuration) and does not crash.",
+        "Core wish generation continues to work offline; payment UI is additive and does not block offline use."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/payments/razorpay.ts",
+          "operation": "create",
+          "description": "Add a client-side Razorpay upgrade starter (stub) that validates presence of required configuration and returns actionable English errors when missing; must not block offline generation. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/PricingSection.tsx",
+          "operation": "modify",
+          "description": "Add Upgrade actions for Pro and Creator that call the Razorpay stub and show clear English success/failure feedback without crashing. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/subscription/PricingComparisonModal.tsx",
+          "operation": "create",
+          "description": "Provide a modal that can surface upgrade actions for Pro/Creator, and can be reused by feature-locking flows. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-68",
+      "summary": "Implement entitlement-based feature locking UX with blurred/disabled controls and an “Unlock Premium” modal that includes the exact CTA text.",
+      "acceptanceCriteria": [
+        "Locked UI elements appear visually blurred and non-interactive (no accidental activation).",
+        "Clicking “Unlock Premium” opens a modal that compares Free vs Pro vs Creator in English and includes the CTA line exactly as provided.",
+        "The modal provides clear actions to navigate to/trigger upgrade from within the modal.",
+        "No existing non-premium flow is broken by the locking UI."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/subscription/PremiumLock.tsx",
+          "operation": "create",
+          "description": "Create a reusable entitlement-lock wrapper that renders children blurred/disabled when locked, shows an “Unlock Premium” button, and opens the pricing comparison modal. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/subscription/PricingComparisonModal.tsx",
+          "operation": "modify",
+          "description": "Ensure modal compares Free vs Pro vs Creator in English and contains the upgrade CTA text exactly: “Create Something She Will Never Forget 💖”. Provide upgrade actions inside the modal. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add global wiring/state so multiple sections can open the pricing comparison modal (and optionally highlight a specific plan like Creator). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add minimal global utility styles for the lock blur/disabled treatment that match the existing dark gradient/neon style. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-69",
+      "summary": "Extend canvas export to support plan-based watermarking and size options (square + 9:16) while keeping existing behavior intact and gating premium exports behind entitlements.",
+      "acceptanceCriteria": [
+        "Free plan exports include a visible WishMint AI watermark on the image output.",
+        "Pro/Creator exports have no watermark and allow choosing between 1080x1080 and 9:16.",
+        "If a user attempts a premium-only export on Free, the action is blocked and routes to the “Unlock Premium” modal.",
+        "Existing “Download Card Image” behavior still works for supported formats/sizes and fails gracefully with an English error on export failures."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/cardExport/canvasExport.ts",
+          "operation": "modify",
+          "description": "Add export options for watermarking and size/format selection (1080x1080 and 1080x1920), preserving existing export behavior and adding graceful English errors. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Update download UI to (a) add size selection for Pro/Creator, (b) enforce Free watermark exports, and (c) block premium-only exports on Free by opening the pricing comparison modal. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/premiumCardDesigner/ExportActions.tsx",
+          "operation": "modify",
+          "description": "Gate story export and HD export behind entitlements where applicable; on Free, route attempts to the premium modal and ensure no accidental activation. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-70",
+      "summary": "Add PDF download option for generated content with watermarking rules and graceful English failure states.",
+      "acceptanceCriteria": [
+        "A “Download as PDF” option is available after outputs are generated.",
+        "Free downloads include watermarking/branding consistent with the plan rules.",
+        "Pro/Creator downloads remove watermarking as per plan rules.",
+        "If PDF generation fails, the app shows an actionable English error message."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/package.json",
+          "operation": "modify",
+          "description": "Add a lightweight client-side PDF generation dependency (e.g., jsPDF) needed for PDF exports. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/cardExport/pdfExport.ts",
+          "operation": "create",
+          "description": "Implement PDF export for at minimum the Main Wish plus WishMint AI branding, applying watermarking rules based on entitlements and returning actionable English errors on failure. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Add a “Download as PDF” action alongside image downloads, enforcing plan rules and routing locked actions to the premium modal. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-71",
+      "summary": "Add Pro/Creator-only Surprise Mode: generate a shareable private link and render a dedicated Surprise view with confetti, reveal/fade animations, and toggleable music.",
+      "acceptanceCriteria": [
+        "Only Pro/Creator users can create a Surprise Link; Free users see the premium lock modal.",
+        "A generated link can be copied and opened in a new tab and renders the surprise experience.",
+        "Surprise view includes confetti + name reveal + message fade-in; background music has a visible mute/pause control and respects user interaction requirements (no forced autoplay without interaction).",
+        "If the link is invalid/expired/missing data, show an English error and a path back to the home page."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/surprise/useSurpriseLinks.ts",
+          "operation": "create",
+          "description": "Create hooks for Surprise Mode to (a) request link creation for eligible users and (b) fetch surprise payload for rendering, handling English error states. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/surprise/SurpriseView.tsx",
+          "operation": "create",
+          "description": "Build the dedicated Surprise view UI: confetti animation, recipient name reveal animation, message fade-in, and a visible play/mute/pause control for romantic background music (no autoplay without interaction). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire Surprise view into the SPA by detecting a dedicated Surprise route/state (e.g., path-based) and rendering SurpriseView; include a safe navigation path back to the main flow. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/OutputSection.tsx",
+          "operation": "modify",
+          "description": "Add a Surprise Mode action: for Pro/Creator generate a private link and show copy/open affordances; for Free, open the premium modal. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/public/assets/romantic-music.mp3",
+          "operation": "create",
+          "description": "Add a bundled romantic background music asset used by the Surprise view (played only after user interaction). Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-72",
+      "summary": "Improve homepage conversion UX: update Hero CTA label, add social proof counter text, premium badge, and an accessible pricing comparison table.",
+      "acceptanceCriteria": [
+        "Hero shows “✨ Create Magic Now” in place of “Try Demo”.",
+        "A social proof area displays the text “3,000+ Wishes Generated Today” exactly.",
+        "A premium badge UI element is visible in the landing flow and matches the existing dark gradient/neon style.",
+        "A pricing comparison table exists and is accessible from the upgrade flow (modal and/or pricing section)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/sections/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Change primary CTA label to exactly “✨ Create Magic Now”, add a social proof counter displaying exactly “3,000+ Wishes Generated Today”, and add a premium badge element consistent with the neon/dark gradient design. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/subscription/PricingComparisonTable.tsx",
+          "operation": "create",
+          "description": "Create a pricing comparison table component for Free vs Pro vs Creator (English-only) that can render in the Pricing section and/or the upgrade modal. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/subscription/PricingComparisonModal.tsx",
+          "operation": "modify",
+          "description": "Embed the pricing comparison table within the modal so it is accessible from the upgrade/locking flow. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/PricingSection.tsx",
+          "operation": "modify",
+          "description": "Ensure a pricing comparison table section is present (or linked) within the Pricing section and aligned with the modal content. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-73",
+      "summary": "Add an authenticated Dashboard section showing subscription status, remaining free credits, download history, saved templates, and Creator earnings placeholder/panel.",
+      "acceptanceCriteria": [
+        "After login, users can navigate/scroll to a Dashboard section within the single-page app.",
+        "Dashboard shows subscription status sourced from backend for authenticated users.",
+        "Dashboard shows remaining credits for Free plan (based on the daily quota implementation).",
+        "Download history and saved templates render as lists; if none exist, show empty states in English.",
+        "Creator plan shows an Earnings panel; if data is not available, show a clearly labeled placeholder in English."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/subscription/useSubscriptionStatus.ts",
+          "operation": "create",
+          "description": "Add React Query hook(s) to fetch the authenticated caller’s subscription status and expose loading/error states; handle English errors gracefully. Use the authorization component guidance for authenticated-only data access; verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/account/useAccountData.ts",
+          "operation": "create",
+          "description": "Create hooks to fetch download history, saved templates, and creator earnings (where applicable), providing empty-state helpers and English error messages. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/DashboardSection.tsx",
+          "operation": "create",
+          "description": "Implement the Dashboard section UI (authenticated-only): subscription status/plan, remaining free credits, download history list, saved templates list, and Creator earnings panel with a clear English placeholder if unavailable. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wire DashboardSection into the single-page flow and ensure it is reachable after login (e.g., inserted into the page sections and/or linked in footer/nav). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/FooterSection.tsx",
+          "operation": "modify",
+          "description": "Add a Dashboard anchor link visible when authenticated so users can navigate/scroll to the Dashboard section. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-74",
+      "summary": "Restrict marketplace listing creation to Creator plan (browse for all), and show creator listing interaction tracking in the dashboard.",
+      "acceptanceCriteria": [
+        "Non-Creator users can browse marketplace listings but cannot create listings; attempting to create a listing opens the premium lock modal with Creator plan highlighted.",
+        "Creator users can create listings as before.",
+        "Creator users can see per-listing interaction tracking (at minimum, counts of interest requests) either on the listing UI or within the dashboard.",
+        "Any payout integration not implemented is clearly labeled as “Coming soon” in English and does not block the marketplace MVP flow."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/marketplace/components/CreateListingDialog.tsx",
+          "operation": "modify",
+          "description": "Gate listing creation behind Creator entitlement: allow Creator to proceed; for Free/Pro, prevent form access and open the premium modal with Creator highlighted (browse remains available). Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/MarketplaceSection.tsx",
+          "operation": "modify",
+          "description": "Update Create Listing entry-points to respect Creator-only creation; keep browsing and searching available to all users. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/features/marketplace/useListingInteractions.ts",
+          "operation": "create",
+          "description": "Add hooks to fetch per-listing interaction counts for creator-owned listings and provide data for Dashboard display; handle empty/error states in English. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/DashboardSection.tsx",
+          "operation": "modify",
+          "description": "Add a creator-facing marketplace tracking panel showing creator listings with per-listing interaction counts; add a “Coming soon” English note for payouts integration. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-75",
+      "summary": "Add Terms & Conditions and Refund Policy sections (English-only) while keeping Privacy Policy and Contact accessible and styled consistently.",
+      "acceptanceCriteria": [
+        "The page includes a Refund Policy section (with an on-page anchor link from the footer).",
+        "The page includes a Terms & Conditions section (can be separate from or replace “Terms of Service”, but must be clearly titled “Terms & Conditions”).",
+        "Existing Privacy Policy and Contact sections remain accessible.",
+        "All legal sections render correctly on mobile and desktop and use English text only."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/sections/LegalSections.tsx",
+          "operation": "modify",
+          "description": "Rename “Terms of Service” to “Terms & Conditions” (retain #terms anchor) and add a new “Refund Policy” section with its own anchor (e.g., #refund), ensuring English-only content and consistent premium dark gradient styling. Verify the component's usage instructions before implementing."
+        },
+        {
+          "path": "frontend/src/sections/FooterSection.tsx",
+          "operation": "modify",
+          "description": "Add/adjust footer quick links to include a Refund Policy anchor and update Terms link text to match “Terms & Conditions”, while keeping Privacy Policy and Contact accessible. Verify the component's usage instructions before implementing."
         }
       ]
     }

@@ -1,34 +1,44 @@
 import { Badge } from '@/components/ui/badge';
-import { Crown, Sparkles } from 'lucide-react';
-import type { Plan } from '../hooks/usePlanSelection';
+import { Crown, Sparkles, Zap } from 'lucide-react';
+import type { PlanType } from '../backend';
 
 interface PlanStatusProps {
-  plan: Plan;
+  plan: PlanType;
   className?: string;
 }
 
-/**
- * Displays the current selected plan with an icon and label.
- */
 export function PlanStatus({ plan, className = '' }: PlanStatusProps) {
-  if (!plan) return null;
+  if (plan === 'free') {
+    return (
+      <Badge
+        variant="outline"
+        className={`border-muted-foreground/50 bg-muted/10 text-muted-foreground ${className}`}
+      >
+        <Sparkles className="w-3 h-3 mr-1" />
+        Free Plan
+      </Badge>
+    );
+  }
+
+  if (plan === 'pro') {
+    return (
+      <Badge
+        variant="outline"
+        className={`border-neon-purple/50 bg-neon-purple/10 text-neon-purple ${className}`}
+      >
+        <Zap className="w-3 h-3 mr-1" />
+        Pro Plan
+      </Badge>
+    );
+  }
 
   return (
     <Badge
       variant="outline"
-      className={`border-neon-purple/50 bg-neon-purple/10 text-neon-purple ${className}`}
+      className={`border-neon-green/50 bg-neon-green/10 text-neon-green ${className}`}
     >
-      {plan === 'pro' ? (
-        <>
-          <Crown className="w-3 h-3 mr-1" />
-          Current plan: Pro
-        </>
-      ) : (
-        <>
-          <Sparkles className="w-3 h-3 mr-1" />
-          Current plan: Free
-        </>
-      )}
+      <Crown className="w-3 h-3 mr-1" />
+      Creator Plan
     </Badge>
   );
 }

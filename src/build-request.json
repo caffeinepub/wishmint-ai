@@ -1,66 +1,252 @@
 {
   "kind": "build_request",
-  "title": "Add Google Analytics (gtag.js) tracking to WishMint AI",
+  "title": "Add tiered subscriptions, entitlements-based feature locking, and conversion-focused premium upgrade UX for WishMint AI",
   "priority": "normal",
   "requirements": [
     {
-      "id": "REQ-62",
-      "text": "Add the provided Google Analytics gtag.js tracking snippet to the site HTML so it loads on every page view, using measurement ID G-ZPB7R21LJ4.",
-      "target": "frontend",
+      "id": "REQ-64",
+      "text": "Update the plan model used by the app to support three plans (Free, Pro, Creator) and plan entitlements required for feature locking: Free (3 messages/day, watermark on downloads, limited templates, no HD export), Pro (₹49/month: unlimited messages, no watermark, HD export 1080x1080 + 9:16, premium templates, Hindi + Romantic tone access, Surprise Link generation), Creator (₹149/month: everything in Pro + creator marketplace selling features, analytics dashboard placeholder). All user-facing text must be in English.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Add Google analytical tracking Script to my website <!-- Google tag (gtag.js) -->\n<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-ZPB7R21LJ4\"></script>\n<script>\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n\n  gtag('config', 'G-ZPB7R21LJ4');\n</script>"
+          "Create 3 Plans:\n\n### 💎 Free Plan\n\n* 3 messages per day\n* Watermark on downloads\n* Limited templates\n* No HD export\n\n### 🚀 Pro Plan – ₹49/month\n\n* Unlimited messages\n* Remove watermark\n* HD image download (1080x1080 + 9:16)\n* Premium templates\n* Hindi + Romantic AI tone\n* Surprise link feature\n\n### 👑 Creator Plan – ₹149/month\n\n* Everything in Pro\n* Sell templates in marketplace\n* Reel video export (MP4)\n* Voice message generation\n* Custom branding\n* Analytics dashboard"
         ]
       },
       "acceptanceCriteria": [
-        "The built app’s delivered HTML includes the exact Google tag (gtag.js) snippet with measurement ID G-ZPB7R21LJ4.",
-        "On a fresh load, the browser requests https://www.googletagmanager.com/gtag/js?id=G-ZPB7R21LJ4 successfully.",
-        "After page load, window.dataLayer exists and window.gtag is defined (or equivalent gtag function behavior is present)."
+        "App supports selecting and persisting one of: Free, Pro, Creator (alongside any existing plan selection state).",
+        "A single entitlement source-of-truth is available to the frontend so the UI can check: dailyMessageLimit, watermarkDownloads, hdExport, storyExport, premiumTemplates, hindiRomanticAccess, surpriseLinks, creatorMarketplace, analyticsDashboard.",
+        "All plan names/prices/features display in English in the UI where shown."
       ]
     },
     {
-      "id": "REQ-63",
-      "text": "Update the deployed frontend Content Security Policy (CSP) configuration to allow loading and using Google Analytics resources required by gtag.js, without breaking existing Internet Identity and app functionality.",
-      "target": "frontend",
+      "id": "REQ-65",
+      "text": "Implement message quota enforcement for the Free plan: limit to 3 message generations per calendar day. For anonymous users, enforce using localStorage per-device; for authenticated users, enforce using backend storage keyed by principal. When the limit is reached, block generation actions and show a clear English prompt to upgrade.",
+      "target": "both",
       "source": {
         "messageIds": [
-          "msg-1"
+          "msg-6"
         ],
         "quotes": [
-          "Add Google analytical tracking Script to my website <!-- Google tag (gtag.js) -->\n<script async src=\"https://www.googletagmanager.com/gtag/js?id=G-ZPB7R21LJ4\"></script>\n<script>\n  window.dataLayer = window.dataLayer || [];\n  function gtag(){dataLayer.push(arguments);}\n  gtag('js', new Date());\n\n  gtag('config', 'G-ZPB7R21LJ4');\n</script>"
+          "Free Plan\n\n* 3 messages per day"
         ]
       },
       "acceptanceCriteria": [
-        "With CSP enabled in production, the GA script loads without CSP violations in the browser console.",
-        "Network requests needed by Google Analytics measurement (initiated by gtag.js) are not blocked by CSP.",
-        "Existing authentication (Internet Identity) and app API calls remain functional after the CSP change."
+        "On Free plan, after 3 successful generations in the same local day, further Generate/Surprise Me actions are blocked with an English message explaining the limit and offering upgrade.",
+        "Quota resets automatically on the next local calendar day.",
+        "Authenticated users have quota enforced across devices via backend principal-based tracking; anonymous users are per-device.",
+        "Pro and Creator plans do not enforce a daily message cap."
+      ]
+    },
+    {
+      "id": "REQ-66",
+      "text": "Add subscription status storage and retrieval in the backend for authenticated users, including: current plan, subscription state (e.g., active/canceled/expired), and timestamps. Expose query methods for the frontend to fetch the caller’s subscription status and update methods intended to be called after payment verification.",
+      "target": "backend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Add:\n\n* Razorpay subscription API\n* Webhook verification\n* User subscription status storage\n* Middleware to protect premium routes\n\nLock premium features automatically."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend provides methods to read the caller’s subscription status and plan.",
+        "Backend provides a method to set/update the caller’s subscription status (to be used by a future payment verification flow).",
+        "Unauthenticated callers cannot write subscription status.",
+        "All error messages returned/trapped are in English and actionable."
+      ]
+    },
+    {
+      "id": "REQ-67",
+      "text": "Add a Razorpay upgrade entry-point in the Pricing section UI for Pro and Creator plans that starts a client-side payment flow (placeholder/stub if full Razorpay verification cannot be completed in this environment). The UI must clearly indicate that payments are processed via Razorpay and must not break offline core generation.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Integrate **Razorpay** for Indian payments.\n\nAdd:\n\n* UPI\n* Debit/Credit Card\n* Net Banking\n* Wallet support"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Pricing shows Pro at ₹49/month and Creator at ₹149/month with an Upgrade action.",
+        "If payment cannot be completed/configured, the app shows a clear English message explaining what is missing (e.g., configuration) and does not crash.",
+        "Core wish generation continues to work offline; payment UI is additive and does not block offline use."
+      ]
+    },
+    {
+      "id": "REQ-68",
+      "text": "Implement entitlement-based feature locking UX across the app: if a feature is not included in the user’s current plan, render it blurred/disabled, show a “Unlock Premium” button, and open a pricing comparison modal when clicked. Include the upgrade CTA text exactly: “Create Something She Will Never Forget 💖”.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "## 2️⃣ Add Feature Locking Logic\n\nIf user is Free:\n\n* Show premium features blurred\n* Show “🔒 Unlock Premium” button\n* Show popup modal with pricing comparison\n\nAdd upgrade CTA:\n“Create Something She Will Never Forget 💖”"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Locked UI elements appear visually blurred and non-interactive (no accidental activation).",
+        "Clicking “Unlock Premium” opens a modal that compares Free vs Pro vs Creator in English and includes the CTA line exactly as provided.",
+        "The modal provides clear actions to navigate to/trigger upgrade from within the modal.",
+        "No existing non-premium flow is broken by the locking UI."
+      ]
+    },
+    {
+      "id": "REQ-69",
+      "text": "Update the download/export system to support plan-based behavior: Free users can download with a watermark; Pro/Creator users can download without a watermark and in HD (1080x1080) and 9:16. Keep the existing canvas-based export behavior intact and extend it to apply watermarking and size selection where applicable.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "## 3️⃣ Add Download System\n\nAllow:\n\n* Download as PNG\n* Download as PDF\n* Download as MP4 (Reel Mode)\n\nFree:\n\n* With watermark\n\nPremium:\n\n* No watermark\n* HD export"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Free plan exports include a visible WishMint AI watermark on the image output.",
+        "Pro/Creator exports have no watermark and allow choosing between 1080x1080 and 9:16.",
+        "If a user attempts a premium-only export on Free, the action is blocked and routes to the “Unlock Premium” modal.",
+        "Existing “Download Card Image” behavior still works for supported formats/sizes and fails gracefully with an English error on export failures."
+      ]
+    },
+    {
+      "id": "REQ-70",
+      "text": "Add PDF download option for generated content (at minimum: the Main Wish plus WishMint AI branding). Gate PDF HD/no-watermark variants behind Pro/Creator where applicable, and apply watermarking for Free.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "Allow:\n\n* Download as PNG\n* Download as PDF"
+        ]
+      },
+      "acceptanceCriteria": [
+        "A “Download as PDF” option is available after outputs are generated.",
+        "Free downloads include watermarking/branding consistent with the plan rules.",
+        "Pro/Creator downloads remove watermarking as per plan rules.",
+        "If PDF generation fails, the app shows an actionable English error message."
+      ]
+    },
+    {
+      "id": "REQ-71",
+      "text": "Implement “Surprise Mode” (Pro/Creator only) that generates a private link to a dedicated Surprise view. When opened, the page plays: animated confetti, a name reveal animation, romantic background music (toggleable/mutable), and a message fade-in animation. Store the surprise payload so the link can render without requiring the generator form on open.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "## 4️⃣ Add Surprise Mode Feature\n\nGenerate private link.\n\nWhen opened:\n\n* Animated confetti\n* Name reveal animation\n* Romantic background music\n* Message fade-in animation\n\nOnly Pro & Creator users can generate surprise links."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Only Pro/Creator users can create a Surprise Link; Free users see the premium lock modal.",
+        "A generated link can be copied and opened in a new tab and renders the surprise experience.",
+        "Surprise view includes confetti + name reveal + message fade-in; background music has a visible mute/pause control and respects user interaction requirements (no forced autoplay without interaction).",
+        "If the link is invalid/expired/missing data, show an English error and a path back to the home page."
+      ]
+    },
+    {
+      "id": "REQ-72",
+      "text": "Improve the homepage for conversion: change the Hero primary CTA label from “Try Demo” to exactly “✨ Create Magic Now”; add a social proof counter reading exactly “3,000+ Wishes Generated Today”; add a premium badge UI element; and add a pricing comparison table section (can be integrated into the pricing modal and/or pricing section).",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "## 7️⃣ Improve Homepage for Conversion\n\nChange CTA buttons:\n\nInstead of “Try Demo”\nUse:\n“✨ Create Magic Now”\n\nAdd social proof section:\n\n* Counter: “3,000+ Wishes Generated Today”\n* Testimonials section\n* Premium badge UI\n* Pricing comparison table"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Hero shows “✨ Create Magic Now” in place of “Try Demo”.",
+        "A social proof area displays the text “3,000+ Wishes Generated Today” exactly.",
+        "A premium badge UI element is visible in the landing flow and matches the existing dark gradient/neon style.",
+        "A pricing comparison table exists and is accessible from the upgrade flow (modal and/or pricing section)."
+      ]
+    },
+    {
+      "id": "REQ-73",
+      "text": "Add an authenticated user dashboard section accessible after login that displays: subscription status/plan, remaining free credits (if on Free), download history, saved templates, and (if on Creator) an earnings panel (placeholder if full payouts are not implemented).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "## 8️⃣ Add User Dashboard\n\nAfter login:\n\nShow:\n\n* Subscription status\n* Remaining free credits\n* Download history\n* Saved templates\n* Earnings (for Creator plan)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "After login, users can navigate/scroll to a Dashboard section within the single-page app.",
+        "Dashboard shows subscription status sourced from backend for authenticated users.",
+        "Dashboard shows remaining credits for Free plan (based on the daily quota implementation).",
+        "Download history and saved templates render as lists; if none exist, show empty states in English.",
+        "Creator plan shows an Earnings panel; if data is not available, show a clearly labeled placeholder in English."
+      ]
+    },
+    {
+      "id": "REQ-74",
+      "text": "Upgrade Marketplace capabilities for Creator plan: restrict creation of marketplace listings to Creator users (Free/Pro users can browse), and add creator-facing tracking of listing downloads (or expresses-interest interactions if downloads are not implemented) in the dashboard.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "## 9️⃣ Add Marketplace Upgrade\n\nAllow Creator users to:\n\n* Upload template\n* Add price\n* Add preview\n* Track downloads\n* Get Razorpay payout integration"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Non-Creator users can browse marketplace listings but cannot create listings; attempting to create a listing opens the premium lock modal with Creator plan highlighted.",
+        "Creator users can create listings as before.",
+        "Creator users can see per-listing interaction tracking (at minimum, counts of interest requests) either on the listing UI or within the dashboard.",
+        "Any payout integration not implemented is clearly labeled as “Coming soon” in English and does not block the marketplace MVP flow."
+      ]
+    },
+    {
+      "id": "REQ-75",
+      "text": "Add/expand legal and trust content sections to include Terms & Conditions and Refund Policy in addition to existing Privacy Policy and Contact. Ensure all user-facing text is in English and matches the site’s premium dark gradient style.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-6"
+        ],
+        "quotes": [
+          "# ⚡ After Upgrade You Should Add\n\n* Terms & Conditions\n* Privacy Policy\n* Refund Policy\n* Contact page"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The page includes a Refund Policy section (with an on-page anchor link from the footer).",
+        "The page includes a Terms & Conditions section (can be separate from or replace “Terms of Service”, but must be clearly titled “Terms & Conditions”).",
+        "Existing Privacy Policy and Contact sections remain accessible.",
+        "All legal sections render correctly on mobile and desktop and use English text only."
       ]
     }
   ],
   "constraints": [
-    "Frontend immutable paths must not be edited (frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui).",
-    "Keep all user-facing text in English (no new non-English UI copy introduced as part of this change)."
+    "Do not change or edit files under frontend/src/components/ui (read-only UI library components).",
+    "Keep the frontend stack as React + TypeScript + Tailwind + React Query (no Next.js).",
+    "Keep backend as a single Motoko actor in backend/main.mo; only add migration.mo if stable state changes require it.",
+    "No external databases (e.g., MongoDB/Postgres) may be introduced.",
+    "No third-party authentication providers; only Internet Identity is supported.",
+    "No external AI/LLM integrations for “AI voice” or “AI tone” generation; generation must remain local/template-based unless explicitly implemented via supported means."
   ],
   "nonGoals": [
-    "Building an analytics dashboard or reporting UI inside the app.",
-    "Adding cookie consent banners or privacy UX changes (unless separately requested).",
-    "Adding any non-Google third-party tracking scripts."
+    "Implementing Node.js/Express/MongoDB/JWT architecture changes requested in the tech stack recommendation.",
+    "Implementing real Razorpay webhook ingestion directly into the canister if the environment cannot receive/verify Razorpay webhooks over standard HTTP; in that case, ship a clearly labeled stub and backend storage APIs only.",
+    "Implementing MP4 Reel export and true voice synthesis generation if it requires unsupported codecs, server-side rendering infrastructure, or external AI services.",
+    "Implementing Razorpay payouts integration for marketplace creators (can be shown as “Coming soon” placeholders)."
   ],
   "imageRequirements": {
     "required": [],
     "edits": []
-  },
-  "userProfileUpdate": {
-    "goalsToAdd": [],
-    "goalsToRemove": [],
-    "preferencesToAdd": [],
-    "preferencesToRemove": [],
-    "miscToAdd": [],
-    "miscToRemove": [],
-    "fieldsToSet": {},
-    "fieldsToDelete": []
   }
 }

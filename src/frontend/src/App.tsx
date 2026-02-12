@@ -8,14 +8,17 @@ import { PricingSection } from './sections/PricingSection';
 import { FaqSection } from './sections/FaqSection';
 import { CommunitySection } from './sections/CommunitySection';
 import { MarketplaceSection } from './sections/MarketplaceSection';
+import { DashboardSection } from './sections/DashboardSection';
 import { FooterSection } from './sections/FooterSection';
 import { LegalSections } from './sections/LegalSections';
 import { DeployDiagnosticsBanner } from './components/DeployDiagnosticsBanner';
 import { PremiumCardDesignerModule } from './features/premiumCardDesigner/PremiumCardDesignerModule';
+import { SurpriseView } from './features/surprise/SurpriseView';
+import { PricingComparisonModal } from './features/subscription/PricingComparisonModal';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
-import { usePlanSelection, type Plan } from './hooks/usePlanSelection';
 import { generateBirthdayPack } from './features/generator/generateBirthdayPack';
 import type { GeneratorFormData, BirthdayPack, TemplateId } from './features/generator/types';
+import type { PlanType } from './backend';
 
 interface AppContextValue {
   formData: GeneratorFormData;
@@ -25,14 +28,14 @@ interface AppContextValue {
   selectedTemplate: TemplateId;
   setSelectedTemplate: (template: TemplateId) => void;
   isAuthenticated: boolean;
-  selectedPlan: Plan;
-  selectPlan: (plan: Plan) => void;
   demoMode: boolean;
   startDemo: () => void;
   exitDemo: () => void;
   premiumDesignerOpen: boolean;
   openPremiumDesigner: () => void;
   closePremiumDesigner: () => void;
+  openPricingModal: (highlightPlan?: 'pro' | 'creator') => void;
+  closePricingModal: () => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -60,19 +63,30 @@ function App() {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('minimal');
   const [demoMode, setDemoMode] = useState(false);
   const [premiumDesignerOpen, setPremiumDesignerOpen] = useState(false);
+  const [pricingModalOpen, setPricingModalOpen] = useState(false);
+  const [highlightPlan, setHighlightPlan] = useState<'pro' | 'creator' | undefined>(undefined);
+  const [surpriseMode, setSurpriseMode] = useState<string | null>(null);
 
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
-  const principal = isAuthenticated ? identity.getPrincipal().toString() : null;
-  const { selectedPlan, selectPlan } = usePlanSelection(principal);
 
   const generatorRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
   const examplesRef = useRef<HTMLDivElement>(null);
   const communityRef = useRef<HTMLDivElement>(null);
   const marketplaceRef = useRef<HTMLDivElement>(null);
+  const dashboardRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const authControlsRef = useRef<HTMLButtonElement>(null);
+
+  // Check for surprise mode in URL
+  useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const surpriseId = params.get('surprise');
+    if (surpriseId) {
+      setSurpriseMode(surpriseId);
+    }
+  });
 
   const scrollToGenerator = () => {
     generatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -90,7 +104,6 @@ function App() {
   };
 
   const startDemo = () => {
-    // Pre-fill form with demo data
     const demoFormData: GeneratorFormData = {
       name: 'Sarah',
       yourName: '',
@@ -104,11 +117,9 @@ function App() {
     setFormData(demoFormData);
     setDemoMode(true);
     
-    // Generate outputs immediately
     const pack = generateBirthdayPack(demoFormData);
     setOutputs(pack);
     
-    // Scroll to generator section
     setTimeout(() => {
       generatorRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }, 100);
@@ -126,30 +137,28 @@ function App() {
     setPremiumDesignerOpen(false);
   };
 
+  const openPricingModal = (plan?: 'pro' | 'creator') => {
+    setHighlightPlan(plan);
+    setPricingModalOpen(true);
+  };
+
+  const closePricingModal = () => {
+    setPricingModalOpen(false);
+    setHighlightPlan(undefined);
+  };
+
   const handleHeroCTA = () => {
     if (!isAuthenticated) {
-      // Focus sign-in button
       authControlsRef.current?.focus();
       authControlsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    } else if (!selectedPlan) {
-      // Scroll to pricing
-      scrollToPricing();
     } else {
-      // Scroll to generator
       scrollToGenerator();
     }
   };
 
-  const handlePlanSelect = (plan: Plan) => {
-    selectPlan(plan);
-    // Exit demo mode when user selects a plan
-    if (demoMode) {
-      exitDemo();
-    }
-    // After selecting plan, scroll to generator
-    setTimeout(() => {
-      scrollToGenerator();
-    }, 300);
+  const handleBackFromSurprise = () => {
+    setSurpriseMode(null);
+    window.history.replaceState({}, '', window.location.pathname);
   };
 
   const contextValue: AppContextValue = {
@@ -160,21 +169,23 @@ function App() {
     selectedTemplate,
     setSelectedTemplate,
     isAuthenticated,
-    selectedPlan,
-    selectPlan: handlePlanSelect,
     demoMode,
     startDemo,
     exitDemo,
     premiumDesignerOpen,
     openPremiumDesigner,
     closePremiumDesigner,
+    openPricingModal,
+    closePricingModal,
   };
 
   return (
     <AppContext.Provider value={contextValue}>
       <div className="min-h-screen bg-background text-foreground">
         <DeployDiagnosticsBanner />
-        {premiumDesignerOpen ? (
+        {surpriseMode ? (
+          <SurpriseView surpriseId={surpriseMode} onBackHome={handleBackFromSurprise} />
+        ) : premiumDesignerOpen ? (
           <PremiumCardDesignerModule />
         ) : (
           <>
@@ -183,7 +194,6 @@ function App() {
               onTryDemo={startDemo}
               onExamplesClick={scrollToExamples}
               isAuthenticated={isAuthenticated}
-              selectedPlan={selectedPlan}
               authControlsRef={authControlsRef}
             />
             <GeneratorSection ref={generatorRef} nameInputRef={nameInputRef as React.RefObject<HTMLInputElement>} />
@@ -193,11 +203,17 @@ function App() {
             <PricingSection ref={pricingRef} />
             <CommunitySection ref={communityRef} />
             <MarketplaceSection ref={marketplaceRef} />
+            {isAuthenticated && <DashboardSection ref={dashboardRef} />}
             <FaqSection />
             <LegalSections />
             <FooterSection />
           </>
         )}
+        <PricingComparisonModal
+          open={pricingModalOpen}
+          onClose={closePricingModal}
+          highlightPlan={highlightPlan}
+        />
       </div>
     </AppContext.Provider>
   );

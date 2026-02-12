@@ -10,14 +10,6 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export interface BuyerIntent {
-  'status' : { 'pending' : null } |
-    { 'rejected' : null } |
-    { 'accepted' : null },
-  'listingId' : ListingId,
-  'message' : string,
-  'buyer' : Principal,
-}
 export interface CommunityPost {
   'id' : PostId,
   'title' : string,
@@ -26,6 +18,15 @@ export interface CommunityPost {
     { 'sticker' : bigint },
   'createdAt' : bigint,
   'description' : string,
+}
+export interface CreatorEarnings {
+  'totalRevenue' : bigint,
+  'totalDownloads' : bigint,
+}
+export interface DownloadRecord {
+  'contentId' : bigint,
+  'contentType' : string,
+  'timestamp' : bigint,
 }
 export type ListingId = bigint;
 export interface MarketplaceListing {
@@ -38,7 +39,28 @@ export interface MarketplaceListing {
   'description' : string,
   'price' : bigint,
 }
+export type PlanType = { 'pro' : null } |
+  { 'creator' : null } |
+  { 'free' : null };
 export type PostId = bigint;
+export interface SavedTemplate { 'templateId' : bigint, 'savedAt' : bigint }
+export type SubscriptionState = { 'active' : null } |
+  { 'canceled' : null } |
+  { 'expired' : null };
+export interface SubscriptionStatus {
+  'startedAt' : bigint,
+  'expiresAt' : [] | [bigint],
+  'plan' : PlanType,
+  'updatedAt' : bigint,
+  'state' : SubscriptionState,
+}
+export interface SurprisePayload {
+  'id' : string,
+  'createdAt' : bigint,
+  'createdBy' : Principal,
+  'message' : string,
+  'recipientName' : string,
+}
 export type TemplateId = bigint;
 export interface UserProfile { 'bio' : string, 'name' : string }
 export type UserRole = { 'admin' : null } |
@@ -61,23 +83,36 @@ export interface _SERVICE {
     ],
     ListingId
   >,
-  'expressInterest' : ActorMethod<[ListingId, string], undefined>,
+  'createSurpriseLink' : ActorMethod<[string, string], string>,
   'getAllCommunityPosts' : ActorMethod<[], Array<CommunityPost>>,
   'getAllMarketplaceListings' : ActorMethod<[], Array<MarketplaceListing>>,
+  'getCallerDownloadHistory' : ActorMethod<[], Array<DownloadRecord>>,
+  'getCallerSavedTemplates' : ActorMethod<[], Array<SavedTemplate>>,
+  'getCallerSubscriptionStatus' : ActorMethod<[], SubscriptionStatus>,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCommunityPost' : ActorMethod<[PostId], [] | [CommunityPost]>,
+  'getCreatorEarnings' : ActorMethod<[], CreatorEarnings>,
   'getCreatorListings' : ActorMethod<[Principal], Array<MarketplaceListing>>,
   'getCreatorPosts' : ActorMethod<[Principal], Array<CommunityPost>>,
   'getCreatorSubscribers' : ActorMethod<[Principal], Array<Principal>>,
-  'getListingIntents' : ActorMethod<[ListingId], Array<BuyerIntent>>,
+  'getListingInteractionCount' : ActorMethod<[ListingId], bigint>,
   'getMarketplaceListing' : ActorMethod<[ListingId], [] | [MarketplaceListing]>,
+  'getMessageQuotaStatus' : ActorMethod<
+    [],
+    { 'total' : bigint, 'remaining' : bigint }
+  >,
+  'getSurprisePayload' : ActorMethod<[string], [] | [SurprisePayload]>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'recordDownload' : ActorMethod<[string, bigint], undefined>,
+  'recordListingInteraction' : ActorMethod<[ListingId], undefined>,
+  'recordMessageGeneration' : ActorMethod<[], undefined>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'saveTemplate' : ActorMethod<[bigint], undefined>,
   'subscribeToCreator' : ActorMethod<[Principal], undefined>,
-  'updateIntentStatus' : ActorMethod<
-    [ListingId, Principal, { 'rejected' : null } | { 'accepted' : null }],
+  'updateSubscriptionStatus' : ActorMethod<
+    [Principal, PlanType, SubscriptionState, [] | [bigint]],
     undefined
   >,
 }

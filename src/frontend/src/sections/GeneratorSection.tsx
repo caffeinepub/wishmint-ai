@@ -7,9 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
-import { Wand2, Shuffle, Copy, Share2, Sparkles } from 'lucide-react';
+import { Wand2, Shuffle, Copy, Share2, Sparkles, AlertCircle } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
-import { PlanStatus } from '../components/PlanStatus';
 import { useAppContext } from '../App';
 import { generateBirthdayPack } from '../features/generator/generateBirthdayPack';
 import { randomizeForm } from '../features/generator/randomize';
@@ -17,6 +16,7 @@ import { formatBirthdayPack } from '../features/generator/format';
 import { copyToClipboard } from '../lib/clipboard';
 import { createWhatsAppLink } from '../lib/whatsapp';
 import { RELATIONSHIPS, TONES, LANGUAGES, PERSONALITIES } from '../features/generator/constants';
+import { useMessageQuota } from '../features/quota/useMessageQuota';
 import { toast } from 'sonner';
 
 interface GeneratorSectionProps {
@@ -25,37 +25,106 @@ interface GeneratorSectionProps {
 
 export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps>(
   ({ nameInputRef }, ref) => {
-    const { formData, setFormData, setOutputs, isAuthenticated, selectedPlan, demoMode } = useAppContext();
+    const { formData, setFormData, setOutputs, isAuthenticated, demoMode, openPricingModal } = useAppContext();
     const [nameError, setNameError] = useState('');
+    const quotaQuery = useMessageQuota();
 
-    // Generator is enabled if user is authenticated with a plan OR in demo mode
-    const isGeneratorEnabled = (isAuthenticated && !!selectedPlan) || demoMode;
+    const isGeneratorEnabled = (isAuthenticated && quotaQuery.canGenerate) || demoMode;
 
-    const handleGenerate = () => {
-      if (!isGeneratorEnabled) return;
-      
+    const handleGenerate = async () => {
       if (!formData.name.trim()) {
         setNameError('Name is required');
         nameInputRef.current?.focus();
         return;
       }
       setNameError('');
+
+      // Check quota for authenticated users
+      if (isAuthenticated && !quotaQuery.canGenerate) {
+        toast.error('Daily limit reached', {
+          description: 'Upgrade to Pro for unlimited messages.',
+        });
+        openPricingModal('pro');
+        return;
+      }
+
+      // Record generation
+      if (isAuthenticated) {
+        try {
+          await quotaQuery.recordGeneration();
+        } catch (error: any) {
+          if (error.message.includes('quota exceeded')) {
+            toast.error('Daily limit reached', {
+              description: 'Upgrade to Pro for unlimited messages.',
+            });
+            openPricingModal('pro');
+            return;
+          }
+        }
+      } else if (!demoMode) {
+        // Anonymous user not in demo mode
+        if (quotaQuery.remaining <= 0) {
+          toast.error('Daily limit reached', {
+            description: 'Sign in or upgrade to continue.',
+          });
+          return;
+        }
+        await quotaQuery.recordGeneration();
+      }
+
       const pack = generateBirthdayPack(formData);
       setOutputs(pack);
       toast.success('Birthday Pack generated!');
       
-      // Scroll to outputs
       setTimeout(() => {
         document.getElementById('outputs')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }, 100);
     };
 
-    const handleSurpriseMe = () => {
-      if (!isGeneratorEnabled) return;
-      
+    const handleSurpriseMe = async () => {
+      if (!isGeneratorEnabled && !demoMode) {
+        if (!isAuthenticated) {
+          toast.error('Sign in required', {
+            description: 'Please sign in to use Surprise Me.',
+          });
+          return;
+        }
+        if (!quotaQuery.canGenerate) {
+          toast.error('Daily limit reached', {
+            description: 'Upgrade to Pro for unlimited messages.',
+          });
+          openPricingModal('pro');
+          return;
+        }
+      }
+
       const randomized = randomizeForm(formData.name);
       setFormData(randomized);
       setNameError('');
+
+      // Record generation for authenticated users
+      if (isAuthenticated && !demoMode) {
+        try {
+          await quotaQuery.recordGeneration();
+        } catch (error: any) {
+          if (error.message.includes('quota exceeded')) {
+            toast.error('Daily limit reached', {
+              description: 'Upgrade to Pro for unlimited messages.',
+            });
+            openPricingModal('pro');
+            return;
+          }
+        }
+      } else if (!demoMode && !isAuthenticated) {
+        if (quotaQuery.remaining <= 0) {
+          toast.error('Daily limit reached', {
+            description: 'Sign in or upgrade to continue.',
+          });
+          return;
+        }
+        await quotaQuery.recordGeneration();
+      }
+
       setTimeout(() => {
         const pack = generateBirthdayPack(randomized);
         setOutputs(pack);
@@ -67,8 +136,6 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
     };
 
     const handleCopyAll = () => {
-      if (!isGeneratorEnabled) return;
-      
       if (!formData.name.trim()) {
         setNameError('Name is required');
         nameInputRef.current?.focus();
@@ -82,8 +149,6 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
     };
 
     const handleShareWhatsApp = () => {
-      if (!isGeneratorEnabled) return;
-      
       if (!formData.name.trim()) {
         setNameError('Name is required');
         nameInputRef.current?.focus();
@@ -116,8 +181,10 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                       <Sparkles className="w-3 h-3 mr-1" />
                       Demo Mode
                     </Badge>
-                  ) : (
-                    selectedPlan && <PlanStatus plan={selectedPlan} />
+                  ) : isAuthenticated && (
+                    <Badge variant="outline" className="border-neon-green/50 text-neon-green">
+                      {quotaQuery.remaining === 999999 ? '∞' : quotaQuery.remaining} / {quotaQuery.total === 999999 ? '∞' : quotaQuery.total} today
+                    </Badge>
                   )}
                 </div>
               </CardHeader>
@@ -132,13 +199,12 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                   </Alert>
                 )}
 
-                {/* Gating alert for non-demo users */}
-                {!isGeneratorEnabled && (
+                {/* Quota warning */}
+                {!demoMode && isAuthenticated && quotaQuery.remaining <= 1 && quotaQuery.remaining !== 999999 && (
                   <Alert className="border-neon-purple/30 bg-neon-purple/5">
+                    <AlertCircle className="h-4 w-4" />
                     <AlertDescription className="text-sm">
-                      {!isAuthenticated
-                        ? 'Try the demo or sign in to generate wishes.'
-                        : 'Select a plan to continue.'}
+                      You have {quotaQuery.remaining} message{quotaQuery.remaining !== 1 ? 's' : ''} remaining today. Upgrade to Pro for unlimited messages.
                     </AlertDescription>
                   </Alert>
                 )}
@@ -151,29 +217,23 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                     <Input
                       id="name"
                       ref={nameInputRef}
-                      placeholder="Enter their name"
+                      placeholder="Enter the birthday person's name"
                       value={formData.name}
-                      onChange={(e) => {
-                        setFormData({ ...formData, name: e.target.value });
-                        setNameError('');
-                      }}
-                      className={`h-11 ${nameError ? 'border-destructive' : ''}`}
-                      disabled={!isGeneratorEnabled}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                      className={nameError ? 'border-destructive' : ''}
                     />
                     {nameError && <p className="text-xs text-destructive">{nameError}</p>}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="yourName" className="text-sm font-medium">
-                      Your Name (optional)
+                      Your Name (Optional)
                     </Label>
                     <Input
                       id="yourName"
                       placeholder="Your name"
                       value={formData.yourName}
                       onChange={(e) => setFormData({ ...formData, yourName: e.target.value })}
-                      className="h-11"
-                      disabled={!isGeneratorEnabled}
                     />
                   </div>
 
@@ -183,10 +243,9 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                     </Label>
                     <Select
                       value={formData.relationship}
-                      onValueChange={(value) => setFormData({ ...formData, relationship: value as any })}
-                      disabled={!isGeneratorEnabled}
+                      onValueChange={(value) => setFormData({ ...formData, relationship: value as typeof formData.relationship })}
                     >
-                      <SelectTrigger className="h-11">
+                      <SelectTrigger id="relationship">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -205,10 +264,9 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                     </Label>
                     <Select
                       value={formData.tone}
-                      onValueChange={(value) => setFormData({ ...formData, tone: value as any })}
-                      disabled={!isGeneratorEnabled}
+                      onValueChange={(value) => setFormData({ ...formData, tone: value as typeof formData.tone })}
                     >
-                      <SelectTrigger className="h-11">
+                      <SelectTrigger id="tone">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -227,10 +285,9 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                     </Label>
                     <Select
                       value={formData.language}
-                      onValueChange={(value) => setFormData({ ...formData, language: value as any })}
-                      disabled={!isGeneratorEnabled}
+                      onValueChange={(value) => setFormData({ ...formData, language: value as typeof formData.language })}
                     >
-                      <SelectTrigger className="h-11">
+                      <SelectTrigger id="language">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -249,10 +306,9 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                     </Label>
                     <Select
                       value={formData.personality}
-                      onValueChange={(value) => setFormData({ ...formData, personality: value as any })}
-                      disabled={!isGeneratorEnabled}
+                      onValueChange={(value) => setFormData({ ...formData, personality: value as typeof formData.personality })}
                     >
-                      <SelectTrigger className="h-11">
+                      <SelectTrigger id="personality">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -268,46 +324,39 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
 
                 <div className="space-y-2">
                   <Label htmlFor="memory" className="text-sm font-medium">
-                    Special Memory (optional)
+                    Special Memory (Optional)
                   </Label>
                   <Textarea
                     id="memory"
-                    placeholder="Share a special memory to make it more personal..."
+                    placeholder="Share a special memory to make the wish more personal..."
                     value={formData.memory}
                     onChange={(e) => setFormData({ ...formData, memory: e.target.value })}
-                    className="min-h-[100px] resize-none"
-                    disabled={!isGeneratorEnabled}
+                    rows={3}
                   />
                 </div>
 
                 <div className="flex flex-wrap gap-3 pt-2">
                   <Button
                     onClick={handleGenerate}
-                    size="lg"
-                    className="flex-1 min-w-[200px] bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 h-11"
-                    disabled={!isGeneratorEnabled}
+                    disabled={!isGeneratorEnabled && !demoMode}
+                    className="bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90 text-white font-semibold"
                   >
                     <Wand2 className="w-4 h-4 mr-2" />
                     Generate
                   </Button>
                   <Button
                     onClick={handleSurpriseMe}
-                    size="lg"
+                    disabled={!isGeneratorEnabled && !demoMode}
                     variant="outline"
-                    className="flex-1 min-w-[200px] h-11"
-                    disabled={!isGeneratorEnabled}
+                    className="border-neon-purple/50 hover:bg-neon-purple/10"
                   >
                     <Shuffle className="w-4 h-4 mr-2" />
                     Surprise Me
                   </Button>
-                </div>
-
-                <div className="flex flex-wrap gap-3">
                   <Button
                     onClick={handleCopyAll}
                     variant="outline"
-                    className="flex-1 min-w-[150px] h-10"
-                    disabled={!isGeneratorEnabled}
+                    className="border-neon-green/50 hover:bg-neon-green/10"
                   >
                     <Copy className="w-4 h-4 mr-2" />
                     Copy All
@@ -315,11 +364,10 @@ export const GeneratorSection = forwardRef<HTMLDivElement, GeneratorSectionProps
                   <Button
                     onClick={handleShareWhatsApp}
                     variant="outline"
-                    className="flex-1 min-w-[150px] h-10"
-                    disabled={!isGeneratorEnabled}
+                    className="border-neon-green/50 hover:bg-neon-green/10"
                   >
                     <Share2 className="w-4 h-4 mr-2" />
-                    Share on WhatsApp
+                    Share
                   </Button>
                 </div>
               </CardContent>
