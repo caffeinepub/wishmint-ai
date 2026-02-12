@@ -1,0 +1,285 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 7,
+  "summary": "Build “WishMint AI”: an offline-friendly, single-file (index.html) mobile-first premium dark/neon web app that generates a shareable Birthday Pack (5 outputs) with template-based generation, copying, WhatsApp sharing, examples gallery, templates, pricing, FAQ, and footer links, plus a Google login system.",
+  "architectural_notes": [
+    "Single-file offline-first implementation: all HTML/CSS/JS in one index.html; template-based text generation (no external APIs/keys).",
+    "Use wa.me URL with encodeURIComponent for WhatsApp sharing.",
+    "Use HTML canvas rendering for downloadable share card images.",
+    "Google Sign-In/OAuth requires external network access and third-party integration; this may conflict with fully offline-first/no-external-dependency goals and needs an explicit decision on allowed online-only features."
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-a-single-page-react-ui-for-wishmint-ai-with-a-premium-dark-theme-and-neon-gradient-accents-purple-green-using-clean-typography-rounded-cards-subtle-shadows-smooth-spacing-and-mobile-first-responsive-layout-suitable-for-india-audiences-on-phones-and-desktop",
+      "title": "Create a single-page React UI for “WishMint AI” with a premium dark theme and neon gradient accents (purple + green), using clean typography, rounded cards, subtle shadows, smooth spacing, and mobile-first responsive layout suitable for India audiences on phones and desktop.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-minimal-premium-animations-for-key-section-reveals-and-interactions-fade-slide-ensuring-animations-are-subtle-and-do-not-block-interaction-or-significantly-impact-performance",
+      "title": "Implement minimal premium animations for key section reveals and interactions (fade/slide), ensuring animations are subtle and do not block interaction or significantly impact performance.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-hero-section-with-title-wishmint-ai-subtitle-make-birthdays-feel-personal-in-seconds-and-two-ctas-primary-generate-wish-scrolls-focuses-generator-and-secondary-see-examples-scrolls-to-examples-gallery",
+      "title": "Add a Hero section with title “WishMint AI”, subtitle “Make birthdays feel personal in seconds.”, and two CTAs: primary “Generate Wish” (scrolls/focuses generator) and secondary “See Examples” (scrolls to examples/gallery).",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-core-generator-section-with-the-specified-inputs-name-required-your-name-optional-relationship-dropdown-friend-best-friend-mom-dad-brother-sister-girlfriend-boyfriend-crush-teacher-colleague-tone-dropdown-emotional-funny-romantic-formal-short-sweet-light-roast-language-dropdown-english-hinglish-hindi-personality-dropdown-kind-fun-hardworking-cute-savage-supportive-creative-introvert-and-an-optional-memory-textarea-labeled-add-1-personal-memory-line-optional",
+      "title": "Build the core Generator section with the specified inputs: Name (required), Your name (optional), Relationship dropdown (friend, best friend, mom, dad, brother, sister, girlfriend, boyfriend, crush, teacher, colleague), Tone dropdown (emotional, funny, romantic, formal, short & sweet, light roast), Language dropdown (English, Hinglish, Hindi), Personality dropdown (kind, fun, hardworking, cute, savage, supportive, creative, introvert), and an optional memory textarea labeled “Add 1 personal memory line (optional)”.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-generator-actions-generate-surprise-me-randomize-copy-all-and-share-on-whatsapp-implement-basic-validation-so-generate-copy-share-requires-name-show-a-clear-inline-error-when-missing",
+      "title": "Add generator actions: “Generate”, “Surprise Me (randomize)”, “Copy All”, and “Share on WhatsApp”. Implement basic validation so Generate/Copy/Share requires Name; show a clear inline error when missing.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-template-based-non-ai-birthday-pack-generation-on-the-client-with-modular-javascript-typescript-functions-generation-must-produce-5-outputs-main-wish-whatsapp-short-instagram-caption-mini-speech-targeting-10-15s-spoken-length-and-hashtags-varying-based-on-relationship-tone-language-personality-and-optional-memory-line",
+      "title": "Implement template-based (non-AI) “Birthday Pack” generation on the client with modular JavaScript/TypeScript functions. Generation must produce 5 outputs: Main Wish, WhatsApp Short, Instagram Caption, Mini Speech (targeting 10–15s spoken length), and Hashtags, varying based on relationship, tone, language, personality, and optional memory line.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-an-output-section-that-displays-5-output-cards-titled-main-wish-whatsapp-short-instagram-caption-mini-speech-10-15s-and-hashtags-each-card-must-include-a-copy-button-that-copies-only-that-card-s-content",
+      "title": "Create an Output section that displays 5 output cards titled: “Main Wish”, “WhatsApp Short”, “Instagram Caption”, “Mini Speech (10–15s)”, and “Hashtags”. Each card must include a “Copy” button that copies only that card’s content.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-download-as-card-image-that-renders-a-shareable-card-using-html-canvas-no-external-api-keys-the-exported-image-must-include-wishmint-ai-branding-selected-template-style-and-the-generated-main-wish-and-optionally-recipient-name-allow-downloading-as-a-png-file",
+      "title": "Implement “Download as Card Image” that renders a shareable card using HTML canvas (no external API keys). The exported image must include: WishMint AI branding, selected template style, and the generated Main Wish (and optionally recipient name). Allow downloading as a PNG file.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-examples-gallery-section-showing-6-sample-wishes-covering-different-tones-and-relationships-with-a-tone-filter-that-updates-the-displayed-examples",
+      "title": "Add an Examples/Gallery section showing 6 sample wishes covering different tones and relationships, with a tone filter that updates the displayed examples.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-templates-section-mvp-that-displays-8-selectable-card-templates-minimal-cute-luxury-anime-neon-classic-aesthetic-funny-selecting-a-template-changes-the-styling-used-to-preview-the-generated-wish-and-is-also-used-by-the-download-as-card-image-export",
+      "title": "Add a Templates section (MVP) that displays 8 selectable card templates: Minimal, Cute, Luxury, Anime, Neon, Classic, Aesthetic, Funny. Selecting a template changes the styling used to preview the generated wish and is also used by the “Download as Card Image” export.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-pricing-section-with-clearly-presented-tiers-free-text-generation-copy-share-and-pro-unlimited-templates-export-card-image-premium-styles-plus-a-future-subsection-listing-voice-wishes-and-video-slideshow-as-future-features-non-functional",
+      "title": "Add a Pricing section with clearly presented tiers: Free (text generation + copy/share) and Pro (unlimited templates + export card image + premium styles), plus a “Future” subsection listing voice wishes and video slideshow as future features (non-functional).",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-faq-section-covering-privacy-how-it-works-language-support-and-how-to-share-content-must-be-in-english",
+      "title": "Add an FAQ section covering: privacy, how it works, language support, and how to share. Content must be in English.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-footer-with-privacy-policy-terms-and-contact-links-sections-provide-simple-on-page-sections-or-anchor-links-no-external-dependencies-required",
+      "title": "Add a Footer with Privacy Policy, Terms, and Contact links/sections. Provide simple on-page sections or anchor links (no external dependencies required).",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-keep-the-app-fast-and-offline-friendly-by-avoiding-external-api-calls-for-core-functionality-and-ensuring-the-app-works-without-network-access-after-being-loaded-once-all-generation-logic-must-be-local",
+      "title": "Keep the app fast and offline-friendly by avoiding external API calls for core functionality and ensuring the app works without network access after being loaded once. All generation logic must be local.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-built-in-set-of-selectable-birthday-card-background-images-a-small-gallery-that-can-be-used-as-the-background-for-the-card-preview-and-the-exported-png-card",
+      "title": "Add a built-in set of selectable birthday card background images (a small gallery) that can be used as the background for the card preview and the exported PNG card.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-store-the-generated-birthday-card-background-images-as-static-assets-under-frontend-public-assets-generated-and-reference-them-from-the-ui-and-export-logic-by-file-path",
+      "title": "Store the generated birthday card background images as static assets under frontend/public/assets/generated and reference them from the UI and export logic by file path.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-template-selection-ui-to-visually-display-the-birthday-card-background-images-as-selectable-thumbnails-in-addition-to-or-replacing-the-current-gradient-only-previews-and-clearly-indicate-the-currently-selected-background",
+      "title": "Update the template selection UI to visually display the birthday card background images as selectable thumbnails (in addition to, or replacing, the current gradient-only previews) and clearly indicate the currently selected background.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-card-export-implementation-to-render-the-selected-birthday-card-background-image-onto-the-canvas-before-drawing-text-and-branding-while-preserving-the-existing-text-wrapping-and-downloadable-png-behavior",
+      "title": "Update the card export implementation to render the selected birthday card background image onto the canvas before drawing text and branding, while preserving the existing text wrapping and downloadable PNG behavior.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-user-login-logout-ui-using-the-existing-internet-identity-authentication-hook-and-present-it-to-users-as-the-app-s-google-based-login-alternative-since-direct-google-oauth-is-not-supported-in-this-stack",
+      "title": "Implement a user login/logout UI using the existing Internet Identity authentication hook, and present it to users as the app’s Google-based login alternative (since direct Google OAuth is not supported in this stack).",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-basic-authenticated-user-info-in-the-ui-after-login-using-the-active-identity-principal-as-the-user-identifier-and-keep-the-app-usable-when-not-logged-in",
+      "title": "Display basic authenticated user info in the UI after login, using the active identity principal as the user identifier, and keep the app usable when not logged in.",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-minimal-backend-method-to-verify-authentication-wiring-by-returning-the-caller-principal-and-ensure-the-frontend-can-call-it-using-the-authenticated-actor-when-logged-in",
+      "title": "Add a minimal backend method to verify authentication wiring by returning the caller principal, and ensure the frontend can call it using the authenticated actor when logged in.",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Create mobile-first single-page layout with dark premium theme, neon (purple+green) accents, responsive typography/cards, and subtle fade/slide animations",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Hero section with title/subtitle and CTAs (Generate Wish, See Examples)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Generator form with required Name + optional Your Name, dropdowns (relationship, tone, language, personality), optional memory line, and validation",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Template-based wish generation producing 5 outputs (Main Wish, WhatsApp Short, Instagram Caption, Mini Speech 10–15s, Hashtags)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Output UI: 5 cards each with Copy button, plus Copy All and Share on WhatsApp actions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Implement WhatsApp sharing via wa.me link with encoded combined text",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Surprise Me button to randomize inputs and generate",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Download as Card Image feature using HTML canvas rendering of selected template + generated wish",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Examples/Gallery section with 6 sample wishes and tone filter",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Templates section showing 8 selectable card templates (Minimal, Cute, Luxury, Anime, Neon, Classic, Aesthetic, Funny) and applying selection to display",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Pricing section: Free vs Pro, plus Future roadmap (voice wishes, video slideshow)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "FAQ section covering privacy, how it works, language support, and sharing",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Footer with Privacy Policy, Terms, and Contact links/sections",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Deliver complete working offline-friendly single index.html with modular JS functions and brief local run instructions; no external API keys",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Add built-in birthday card images/backgrounds (a small gallery of selectable card image designs) to use in the card preview/export",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add a login/authentication system using Google (Google Sign-In / OAuth)",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "WishMint AI",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

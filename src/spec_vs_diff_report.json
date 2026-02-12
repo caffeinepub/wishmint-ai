@@ -1,0 +1,37 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-12T00:41:32.811Z",
+  "summary": "AuthControls UI was added to the Hero section using the existing Internet Identity hook, including sign-in/sign-out and error display. A backend method and frontend hook to call it were added, but the backend method is not a query and traps for anonymous callers, which does not meet REQ-21’s stated behavior. The UI also doesn’t explicitly present the Internet Identity flow as a “Google-based login alternative.”",
+  "missing_requirements": [
+    {
+      "id": "REQ-19",
+      "requirement": "Present the Internet Identity login UI to users as the app’s Google-based login alternative (since direct Google OAuth is not supported).",
+      "reason": "The new auth UI provides generic “Sign in/Sign out” controls but does not include any user-facing wording indicating it is the Google-based login alternative or referencing Google in any way.",
+      "evidence": [
+        "frontend/src/components/AuthControls.tsx",
+        "frontend/src/sections/HeroSection.tsx"
+      ]
+    },
+    {
+      "id": "REQ-21",
+      "requirement": "Backend exposes a query method that returns the caller’s principal (Who am I) and behaves consistently for anonymous callers (e.g., returns anonymous principal), with frontend handling it gracefully.",
+      "reason": "The backend method added is `public shared ({ caller }) func ...` (not declared as a `query`) and it traps when the caller is anonymous, instead of returning the anonymous principal. The frontend hook then catches the trap and returns null, which is a workaround but does not satisfy the requirement that the backend method return the caller principal for anonymous/consistent behavior.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/hooks/useWhoAmI.ts"
+      ]
+    }
+  ],
+  "hallucinated_features": [],
+  "confidence": 0.74,
+  "changed_files": [
+    "backend/main.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/components/AuthControls.tsx",
+    "frontend/src/hooks/useWhoAmI.ts",
+    "frontend/src/lib/principal.ts",
+    "frontend/src/sections/HeroSection.tsx",
+    "project_state.json"
+  ]
+}

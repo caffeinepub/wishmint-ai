@@ -1,0 +1,71 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Internet Identity sign-in UI framed as Google alternative",
+  "requirements": [
+    {
+      "id": "REQ-19",
+      "summary": "Add sign-in/sign-out controls on the landing (Hero) that use the existing Internet Identity hook and present it as a Google-based alternative.",
+      "acceptanceCriteria": [
+        "A visible sign-in control exists on the landing experience (e.g., in the Hero section area or a simple top bar) with English text such as “Sign in”.",
+        "Clicking “Sign in” triggers the existing Internet Identity login flow via `useInternetIdentity().login()` (no direct Google OAuth implementation).",
+        "When signed in, the UI changes to show an authenticated state and provides a “Sign out” action wired to `useInternetIdentity().clear()`.",
+        "If login fails, an English error message is shown (using the existing `loginError` from `useInternetIdentity`)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AuthControls.tsx",
+          "operation": "create",
+          "description": "Create an auth controls component that uses `useInternetIdentity()` to render “Sign in” (calls `login()`) and, when authenticated, “Sign out” (calls `clear()`), plus an English error message bound to `loginError`. Use shadcn-ui Button for consistent styling (Verify the component's usage instructions before implementing)."
+        },
+        {
+          "path": "frontend/src/sections/HeroSection.tsx",
+          "operation": "modify",
+          "description": "Wire the new AuthControls into the landing Hero experience (e.g., a simple top bar area within the section) so the sign-in control is visible on load. Keep copy in English and position it without adding new routes/pages."
+        }
+      ]
+    },
+    {
+      "id": "REQ-20",
+      "summary": "Show basic authenticated user info (Principal) near auth controls while keeping the app fully usable when not logged in.",
+      "acceptanceCriteria": [
+        "When authenticated, the UI displays the user’s Principal (or a safely shortened version) somewhere near the auth controls.",
+        "When not authenticated, the app continues to function for generating/copying/sharing wishes as it does today.",
+        "Auth UI does not block core offline functionality after the app is loaded (no dependency on external APIs for generation)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/principal.ts",
+          "operation": "create",
+          "description": "Add a small utility to safely format/shorten a Principal string for UI display (e.g., first/last characters with an ellipsis) to avoid layout overflow."
+        },
+        {
+          "path": "frontend/src/components/AuthControls.tsx",
+          "operation": "modify",
+          "description": "Display the current identity Principal (or shortened form via the new util) near the auth buttons when authenticated. Ensure unauthenticated state does not block or gate any generator/copy/share interactions."
+        }
+      ]
+    },
+    {
+      "id": "REQ-21",
+      "summary": "Add a small “Who am I” verification call from the frontend using the identity-bound actor and handle anonymous vs authenticated results gracefully.",
+      "acceptanceCriteria": [
+        "`backend/main.mo` exposes a query method that returns the caller’s principal (e.g., for a “Who am I” check).",
+        "When logged in, frontend calls the method using the identity-bound actor from the existing `useActor` hook and displays the returned principal (or logs it in a non-intrusive way).",
+        "When not logged in, calling the method returns the anonymous principal (or behaves consistently with anonymous identity), and the UI handles this gracefully."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useWhoAmI.ts",
+          "operation": "create",
+          "description": "Create a React hook that uses the existing `useActor()` to call `actor.testAuthenticatedCaller()` and returns the resolved Principal (and loading/error state). Keep the call non-blocking for the rest of the app."
+        },
+        {
+          "path": "frontend/src/components/AuthControls.tsx",
+          "operation": "modify",
+          "description": "Use the new `useWhoAmI` hook to display (or non-intrusively log) the backend-returned caller Principal when authenticated, and gracefully handle anonymous results when not logged in (e.g., show nothing or an English hint without blocking the UI)."
+        }
+      ]
+    }
+  ]
+}
