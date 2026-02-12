@@ -1,7 +1,6 @@
 import { forwardRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { useWhoAmI } from '../hooks/useWhoAmI';
 import { shortenPrincipal } from '../lib/principal';
 import { LogIn, LogOut, Loader2 } from 'lucide-react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -13,7 +12,6 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
  */
 export const AuthControls = forwardRef<HTMLButtonElement>((props, ref) => {
   const { login, clear, loginStatus, identity, isLoggingIn, isLoginError, loginError } = useInternetIdentity();
-  const { data: backendPrincipal } = useWhoAmI();
 
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
   const principalString = identity?.getPrincipal().toString();
@@ -35,11 +33,6 @@ export const AuthControls = forwardRef<HTMLButtonElement>((props, ref) => {
             <span className="text-sm font-mono text-foreground">
               {principalString ? shortenPrincipal(principalString) : '...'}
             </span>
-            {backendPrincipal && (
-              <span className="text-xs text-muted-foreground/70">
-                Backend: {shortenPrincipal(backendPrincipal.toString())}
-              </span>
-            )}
           </div>
           <Button
             onClick={clear}

@@ -1,12 +1,10 @@
 # Specification
 
 ## Summary
-**Goal:** Add a pre-login “Demo mode” so anonymous users can try generating a Birthday Pack locally without signing in or selecting a plan.
+**Goal:** Add Google Analytics (gtag.js) tracking to WishMint AI so it loads on every page view using measurement ID G-ZPB7R21LJ4.
 
 **Planned changes:**
-- Add a clear pre-login entry point to start Demo mode (e.g., “Try Demo” CTA in the Hero and/or Generator sections) with English demo-labeled messaging.
-- Implement Demo mode onboarding that pre-fills the generator with realistic example data and auto-generates a Birthday Pack, then scrolls the user to the generator/outputs.
-- Update generator gating so Demo mode bypasses authentication/plan requirements for core actions (at minimum: Generate and Surprise Me) while keeping existing authenticated flows unchanged.
-- Keep advanced/auth-only actions disabled for anonymous Demo mode users and show clear English prompts indicating sign-in is required when those actions are unavailable.
+- Include the provided Google tag (gtag.js) snippet in the app’s delivered HTML so it runs on all page loads.
+- Update the deployed frontend Content Security Policy (CSP) to allow required Google Analytics resources while keeping existing Internet Identity authentication and app API functionality working.
 
-**User-visible outcome:** Signed-out users can start a Demo mode from the landing experience, immediately see a generated Birthday Pack using pre-filled sample data, and use core generator actions offline; advanced features remain sign-in gated with clear English prompts.
+**User-visible outcome:** Site usage is tracked by Google Analytics (G-ZPB7R21LJ4) without breaking login or existing app behavior.

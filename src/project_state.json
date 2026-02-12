@@ -1,7 +1,7 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 17,
-  "summary": "Upgrade “WishMint AI” into a premium, viral, emotional birthday wish generator with a professional startup SaaS feel: improved hero UX (animated tagline, demo preview, trust badges), richer generator controls (wish length + emoji level), enhanced output cards (copy + share), template studio with downloadable posters, examples by category, feature-explanation + testimonials sections, social viral tools (WhatsApp, Instagram story format, QR codes), SEO meta tags, and a relaxed auth model where users can generate their first wish without login (login only for saving and premium/advanced features).",
+  "projectStateVersion": 27,
+  "summary": "Upgrade “WishMint AI” into a premium, viral, emotional birthday wish generator with a professional startup SaaS feel, including improved hero UX, richer generator controls, enhanced output cards (copy + share), a separate standalone premium card designer module (Canva/Instagram-style) with multiple animated themes, deep customization, photo support, social exports (including 9:16 Instagram Story), plus template studio, examples/testimonials/features sections, social viral tools (WhatsApp, Instagram story format, QR codes), SEO meta tags, relaxed auth (generate without login; login for saving/premium), and add two new sections: (1) a community feed where users can post templates/stickers for others to view and subscribe/follow, and (2) buy/sell marketplace features.",
   "architectural_notes": [
     "Single-file offline-first implementation: all HTML/CSS/JS in one index.html; template-based text generation (no external APIs/keys).",
     "Use wa.me URL with encodeURIComponent for WhatsApp sharing.",
@@ -9,7 +9,9 @@
     "Google Sign-In/OAuth requires external network access and third-party integration; this may conflict with fully offline-first/no-external-dependency goals and needs an explicit decision on allowed online-only features.",
     "Relax gated UX flow: generation is allowed without login; only saving, premium template exports, and advanced features require authentication.",
     "Add QR code generation locally (client-side) with no external API dependencies to preserve offline-friendly behavior.",
-    "Add SEO meta tags (title/description) directly in index.html head."
+    "Add SEO meta tags (title/description) directly in index.html head.",
+    "User chose Option 2: implement the premium Canva/Instagram-style card system as a separate standalone card designer module inside the app (not just upgrading the existing card output flow).",
+    "Google Analytics (gtag.js) requires loading scripts from googletagmanager.com; this introduces an external network dependency and may conflict with offline-first/no-external-dependency goals—decide whether analytics is allowed as an online-only enhancement."
   ],
   "known_issues": [
     "Deployment/build error encountered when attempting to push/deploy the app to the network."
@@ -383,6 +385,126 @@
         "REQ-46"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-create-a-separate-standalone-premium-card-designer-module-inside-the-existing-wishmint-ai-react-app-option-2-that-is-clearly-distinct-from-the-current-templates-output-card-preview-and-can-be-entered-from-the-main-flow-after-a-birthday-pack-is-generated",
+      "title": "Create a separate, standalone “Premium Card Designer” module inside the existing WishMint AI React app (Option 2) that is clearly distinct from the current Templates/Output card preview and can be entered from the main flow after a birthday pack is generated.",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-the-premium-card-designer-module-implement-a-template-theme-selection-step-before-showing-the-final-designed-card-offering-these-themes-cute-pastel-romantic-love-minimal-luxury-neon-party-and-anime-aesthetic-each-with-premium-styling-backgrounds-typography-and-decorative-vibe-consistent-with-the-theme-name",
+      "title": "In the Premium Card Designer module, implement a template/theme selection step before showing the final designed card, offering these themes: Cute Pastel, Romantic Love, Minimal Luxury, Neon Party, and Anime/Aesthetic, each with premium styling (backgrounds, typography, and decorative vibe) consistent with the theme name.",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-interactive-customization-panel-within-the-premium-card-designer-module-that-allows-the-user-to-customize-background-style-font-style-font-color-text-alignment-emoji-decoration-toggle-border-style-and-an-animation-toggle",
+      "title": "Add an interactive customization panel within the Premium Card Designer module that allows the user to customize: background style, font style, font color, text alignment, emoji decoration toggle, border style, and an animation toggle.",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-premium-visual-treatment-for-the-premium-card-designer-card-preview-to-look-like-an-instagram-canva-style-greeting-card-including-animated-gradient-background-option-glassmorphism-card-styling-option-card-shadow-glow-controls-or-theme-defaults-and-decorative-emoji-elements-placed-around-the-card-when-enabled",
+      "title": "Implement premium visual treatment for the Premium Card Designer card preview to look like an Instagram/Canva-style greeting card, including: animated gradient background option, glassmorphism card styling option, card shadow/glow controls (or theme defaults), and decorative emoji elements placed around the card when enabled.",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-animated-card-preview-experience-in-the-premium-card-designer-module-when-the-card-is-generated-opened-including-fade-in-animation-floating-emoji-animation-when-enabled-and-a-smooth-text-scroll-entrance-animation-when-enabled-while-respecting-reduced-motion-preferences",
+      "title": "Add an animated card preview experience in the Premium Card Designer module when the card is generated/opened, including: fade-in animation, floating emoji animation (when enabled), and a smooth text scroll/entrance animation (when enabled), while respecting reduced-motion preferences.",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-photo-support-in-the-premium-card-designer-module-so-a-user-can-add-a-photo-to-the-birthday-wishes-card-using-a-local-file-upload-then-position-it-within-the-card-design-in-a-simple-mobile-friendly-way-e-g-preset-placements-such-as-top-center-bottom-or-draggable-placement-if-already-supported-by-existing-patterns",
+      "title": "Add photo support in the Premium Card Designer module so a user can add a photo to the birthday wishes card using a local file upload, then position it within the card design in a simple, mobile-friendly way (e.g., preset placements such as “Top”, “Center”, “Bottom” or draggable placement if already supported by existing patterns).",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-social-export-actions-within-the-premium-card-designer-module-download-as-instagram-story-9-16-download-as-image-share-on-whatsapp-share-on-instagram-and-copy-text-ensure-the-exported-instagram-story-format-uses-a-9-16-canvas-layout-and-that-export-works-fully-offline-after-first-load",
+      "title": "Add social export actions within the Premium Card Designer module: Download as Instagram Story (9:16), Download as Image, Share on WhatsApp, Share on Instagram, and Copy Text; ensure the exported Instagram Story format uses a 9:16 canvas/layout and that export works fully offline after first load.",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-extend-the-existing-canvas-export-pipeline-so-the-premium-card-designer-can-export-images-that-reflect-the-new-designer-state-theme-customization-options-optional-user-photo-without-breaking-the-current-exportcardimage-behavior-used-by-outputsection",
+      "title": "Extend the existing canvas export pipeline so the Premium Card Designer can export images that reflect the new designer state (theme + customization options + optional user photo), without breaking the current exportCardImage behavior used by OutputSection.",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-future-ready-placeholders-within-the-premium-card-designer-module-ui-for-ai-voice-message-card-birthday-video-slideshow-card-and-memory-photo-collage-card-implemented-as-non-functional-placeholders-with-clear-english-copy-indicating-they-are-coming-soon",
+      "title": "Add “Future ready” placeholders within the Premium Card Designer module UI for: AI voice message card, Birthday video slideshow card, and Memory photo collage card, implemented as non-functional placeholders with clear English copy indicating they are coming soon.",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-community-section-where-users-can-publish-templates-or-stickers-so-others-can-browse-view-details-and-subscribe-follow-creators-to-build-an-audience",
+      "title": "Add a new “Community” section where users can publish templates or stickers so others can browse, view details, and subscribe/follow creators to build an audience.",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-new-marketplace-section-enabling-buy-and-sell-listings-for-templates-stickers-mvp-users-can-create-listings-browse-search-listings-and-express-intent-to-buy-without-integrating-payments",
+      "title": "Add a new “Marketplace” section enabling buy-and-sell listings for templates/stickers (MVP): users can create listings, browse/search listings, and express intent to buy without integrating payments.",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-the-new-community-and-marketplace-sections-into-the-existing-navigation-scroll-flow-and-keep-styling-consistent-with-the-current-premium-dark-neon-theme-using-existing-ui-components-and-animations",
+      "title": "Integrate the new Community and Marketplace sections into the existing navigation/scroll flow and keep styling consistent with the current premium dark + neon theme, using existing UI components and animations.",
+      "reqIds": [
+        "REQ-60"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-promote-the-currently-deployed-draft-version-11-build-to-a-public-production-release-for-wishmint-ai-ensuring-end-users-no-longer-see-any-draft-only-labeling-or-draft-only-behavior-in-the-ui-or-deployed-assets-for-version-11",
+      "title": "Promote the currently deployed “Draft Version 11” build to a public/production release for WishMint AI, ensuring end users no longer see any draft-only labeling or draft-only behavior in the UI or deployed assets for Version 11.",
+      "reqIds": [
+        "REQ-61"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-the-provided-google-analytics-gtag-js-tracking-snippet-to-the-site-html-so-it-loads-on-every-page-view-using-measurement-id-g-zpb7r21lj4",
+      "title": "Add the provided Google Analytics gtag.js tracking snippet to the site HTML so it loads on every page view, using measurement ID G-ZPB7R21LJ4.",
+      "reqIds": [
+        "REQ-62"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-the-deployed-frontend-content-security-policy-csp-configuration-to-allow-loading-and-using-google-analytics-resources-required-by-gtag-js-without-breaking-existing-internet-identity-and-app-functionality",
+      "title": "Update the deployed frontend Content Security Policy (CSP) configuration to allow loading and using Google Analytics resources required by gtag.js, without breaking existing Internet Identity and app functionality.",
+      "reqIds": [
+        "REQ-63"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
@@ -563,6 +685,46 @@
     {
       "id": "AR-31",
       "summary": "Add a pre-login demo system so users can try the app (demo generation/preview) before authentication is required for advanced features",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-32",
+      "summary": "Create a separate standalone premium card designer module (Option 2) with multiple animated card themes, customization panel (background/font/color/alignment/borders/emoji+animation toggles), photo support, premium visual effects (glassmorphism/particles/hover), and social exports (download image + 9:16 Instagram Story, share to WhatsApp/Instagram, copy text), plus placeholders for future voice/video/collage features",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-33",
+      "summary": "Add a community posting section where users can post/share templates or stickers to build an audience; others can view and subscribe/follow creators",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-34",
+      "summary": "Add buy-and-sell marketplace features (a section enabling buying/selling of templates/stickers or related items)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Implement backend storage and APIs for Community posts and creator subscriptions using the existing single Motoko actor, with authenticated write operations and anonymous read access.",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Implement backend storage and APIs for Marketplace listings and buyer intent requests in the single Motoko actor, using authenticated writes and anonymous read access.",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-39",
+      "summary": "Add Google Analytics (gtag.js) tracking script to the website using measurement ID G-ZPB7R21LJ4",
       "reqIds": [],
       "status": "pending"
     }

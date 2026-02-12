@@ -1,82 +1,35 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-12T01:55:16.308Z",
+  "generatedAt": "2026-02-12T05:34:05.456Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 2,
+    "implemented": 2,
     "items": [
       {
-        "id": "REQ-42",
-        "summary": "Implement a pre-login “Demo mode” so anonymous users can try generating a Birthday Pack without signing in or selecting a plan.",
+        "id": "REQ-62",
+        "summary": "Add the provided Google Analytics gtag.js tracking snippet to the site HTML so it loads on every page view, using measurement ID G-ZPB7R21LJ4.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/sections/GeneratorSection.tsx"
+          "frontend/index.html"
         ],
         "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/sections/GeneratorSection.tsx"
+          "frontend/index.html"
         ]
       },
       {
-        "id": "REQ-43",
-        "summary": "Update generator gating logic so authentication/plan gating does not block Demo mode, while keeping existing authenticated flows intact.",
+        "id": "REQ-63",
+        "summary": "Update the deployed frontend Content Security Policy (CSP) configuration to allow loading and using Google Analytics resources required by gtag.js, without breaking existing Internet Identity and app functionality.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/sections/HeroSection.tsx"
+          "frontend/.ic-assets.json"
         ],
         "matchedFiles": [
-          "frontend/src/sections/GeneratorSection.tsx",
-          "frontend/src/App.tsx",
-          "frontend/src/sections/HeroSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-44",
-        "summary": "Add a demo-friendly onboarding experience that pre-fills the generator with a realistic example and generates outputs automatically when Demo mode is started.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/sections/HeroSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/sections/HeroSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-45",
-        "summary": "Gate advanced/auth-only actions appropriately during Demo mode and show clear English prompts when an action requires sign-in.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/sections/OutputSection.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/App.tsx",
-          "frontend/src/sections/OutputSection.tsx"
-        ]
-      },
-      {
-        "id": "REQ-46",
-        "summary": "Ensure the Hero section’s prompts and CTAs support the pre-login demo flow in addition to sign-in.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/sections/HeroSection.tsx",
-          "frontend/src/App.tsx"
+          "frontend/.ic-assets.json"
         ]
       }
     ]
@@ -86,10 +39,8 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/App.tsx",
-    "frontend/src/sections/GeneratorSection.tsx",
-    "frontend/src/sections/HeroSection.tsx",
-    "frontend/src/sections/OutputSection.tsx",
+    "frontend/.ic-assets.json",
+    "frontend/index.html",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

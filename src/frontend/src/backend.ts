@@ -89,26 +89,599 @@ export class ExternalBlob {
         return this;
     }
 }
-export type Principal = Principal;
-export interface backendInterface {
-    testAuthenticatedCaller(): Promise<Principal>;
+export interface MarketplaceListing {
+    id: ListingId;
+    title: string;
+    creator: Principal;
+    contentType: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    };
+    createdAt: bigint;
+    description: string;
+    price: bigint;
 }
+export type ListingId = bigint;
+export interface BuyerIntent {
+    status: Variant_pending_rejected_accepted;
+    listingId: ListingId;
+    message: string;
+    buyer: Principal;
+}
+export type PostId = bigint;
+export type TemplateId = bigint;
+export interface CommunityPost {
+    id: PostId;
+    title: string;
+    creator: Principal;
+    contentType: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    };
+    createdAt: bigint;
+    description: string;
+}
+export interface UserProfile {
+    bio: string;
+    name: string;
+}
+export enum UserRole {
+    admin = "admin",
+    user = "user",
+    guest = "guest"
+}
+export enum Variant_pending_rejected_accepted {
+    pending = "pending",
+    rejected = "rejected",
+    accepted = "accepted"
+}
+export enum Variant_rejected_accepted {
+    rejected = "rejected",
+    accepted = "accepted"
+}
+export interface backendInterface {
+    _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
+    createCommunityPost(title: string, description: string, contentType: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    }): Promise<PostId>;
+    createMarketplaceListing(title: string, description: string, price: bigint, contentType: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    }): Promise<ListingId>;
+    expressInterest(listingId: ListingId, message: string): Promise<void>;
+    getAllCommunityPosts(): Promise<Array<CommunityPost>>;
+    getAllMarketplaceListings(): Promise<Array<MarketplaceListing>>;
+    getCallerUserProfile(): Promise<UserProfile | null>;
+    getCallerUserRole(): Promise<UserRole>;
+    getCommunityPost(id: PostId): Promise<CommunityPost | null>;
+    getCreatorListings(creator: Principal): Promise<Array<MarketplaceListing>>;
+    getCreatorPosts(creator: Principal): Promise<Array<CommunityPost>>;
+    getCreatorSubscribers(creator: Principal): Promise<Array<Principal>>;
+    getListingIntents(listingId: ListingId): Promise<Array<BuyerIntent>>;
+    getMarketplaceListing(id: ListingId): Promise<MarketplaceListing | null>;
+    getUserProfile(user: Principal): Promise<UserProfile | null>;
+    isCallerAdmin(): Promise<boolean>;
+    saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    subscribeToCreator(creator: Principal): Promise<void>;
+    updateIntentStatus(listingId: ListingId, buyer: Principal, newStatus: Variant_rejected_accepted): Promise<void>;
+}
+import type { BuyerIntent as _BuyerIntent, CommunityPost as _CommunityPost, ListingId as _ListingId, MarketplaceListing as _MarketplaceListing, PostId as _PostId, TemplateId as _TemplateId, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
-    async testAuthenticatedCaller(): Promise<Principal> {
+    async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.testAuthenticatedCaller();
+                const result = await this.actor._initializeAccessControlWithSecret(arg0);
                 return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.testAuthenticatedCaller();
+            const result = await this.actor._initializeAccessControlWithSecret(arg0);
             return result;
         }
     }
+    async assignCallerUserRole(arg0: Principal, arg1: UserRole): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.assignCallerUserRole(arg0, to_candid_UserRole_n1(this._uploadFile, this._downloadFile, arg1));
+            return result;
+        }
+    }
+    async createCommunityPost(arg0: string, arg1: string, arg2: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    }): Promise<PostId> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createCommunityPost(arg0, arg1, to_candid_variant_n3(this._uploadFile, this._downloadFile, arg2));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createCommunityPost(arg0, arg1, to_candid_variant_n3(this._uploadFile, this._downloadFile, arg2));
+            return result;
+        }
+    }
+    async createMarketplaceListing(arg0: string, arg1: string, arg2: bigint, arg3: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    }): Promise<ListingId> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.createMarketplaceListing(arg0, arg1, arg2, to_candid_variant_n3(this._uploadFile, this._downloadFile, arg3));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.createMarketplaceListing(arg0, arg1, arg2, to_candid_variant_n3(this._uploadFile, this._downloadFile, arg3));
+            return result;
+        }
+    }
+    async expressInterest(arg0: ListingId, arg1: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.expressInterest(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.expressInterest(arg0, arg1);
+            return result;
+        }
+    }
+    async getAllCommunityPosts(): Promise<Array<CommunityPost>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllCommunityPosts();
+                return from_candid_vec_n4(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllCommunityPosts();
+            return from_candid_vec_n4(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllMarketplaceListings(): Promise<Array<MarketplaceListing>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllMarketplaceListings();
+                return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllMarketplaceListings();
+            return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCallerUserProfile(): Promise<UserProfile | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCallerUserProfile();
+                return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCallerUserProfile();
+            return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCallerUserRole(): Promise<UserRole> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCallerUserRole();
+                return from_candid_UserRole_n12(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCallerUserRole();
+            return from_candid_UserRole_n12(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCommunityPost(arg0: PostId): Promise<CommunityPost | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCommunityPost(arg0);
+                return from_candid_opt_n14(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCommunityPost(arg0);
+            return from_candid_opt_n14(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCreatorListings(arg0: Principal): Promise<Array<MarketplaceListing>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCreatorListings(arg0);
+                return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCreatorListings(arg0);
+            return from_candid_vec_n8(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCreatorPosts(arg0: Principal): Promise<Array<CommunityPost>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCreatorPosts(arg0);
+                return from_candid_vec_n4(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCreatorPosts(arg0);
+            return from_candid_vec_n4(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getCreatorSubscribers(arg0: Principal): Promise<Array<Principal>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getCreatorSubscribers(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getCreatorSubscribers(arg0);
+            return result;
+        }
+    }
+    async getListingIntents(arg0: ListingId): Promise<Array<BuyerIntent>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getListingIntents(arg0);
+                return from_candid_vec_n15(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getListingIntents(arg0);
+            return from_candid_vec_n15(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getMarketplaceListing(arg0: ListingId): Promise<MarketplaceListing | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getMarketplaceListing(arg0);
+                return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getMarketplaceListing(arg0);
+            return from_candid_opt_n19(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getUserProfile(arg0: Principal): Promise<UserProfile | null> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getUserProfile(arg0);
+                return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getUserProfile(arg0);
+            return from_candid_opt_n11(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async isCallerAdmin(): Promise<boolean> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.isCallerAdmin();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.isCallerAdmin();
+            return result;
+        }
+    }
+    async saveCallerUserProfile(arg0: UserProfile): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.saveCallerUserProfile(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.saveCallerUserProfile(arg0);
+            return result;
+        }
+    }
+    async subscribeToCreator(arg0: Principal): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.subscribeToCreator(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.subscribeToCreator(arg0);
+            return result;
+        }
+    }
+    async updateIntentStatus(arg0: ListingId, arg1: Principal, arg2: Variant_rejected_accepted): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateIntentStatus(arg0, arg1, to_candid_variant_n20(this._uploadFile, this._downloadFile, arg2));
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateIntentStatus(arg0, arg1, to_candid_variant_n20(this._uploadFile, this._downloadFile, arg2));
+            return result;
+        }
+    }
+}
+function from_candid_BuyerIntent_n16(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _BuyerIntent): BuyerIntent {
+    return from_candid_record_n17(_uploadFile, _downloadFile, value);
+}
+function from_candid_CommunityPost_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _CommunityPost): CommunityPost {
+    return from_candid_record_n6(_uploadFile, _downloadFile, value);
+}
+function from_candid_MarketplaceListing_n9(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _MarketplaceListing): MarketplaceListing {
+    return from_candid_record_n10(_uploadFile, _downloadFile, value);
+}
+function from_candid_UserRole_n12(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _UserRole): UserRole {
+    return from_candid_variant_n13(_uploadFile, _downloadFile, value);
+}
+function from_candid_opt_n11(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_UserProfile]): UserProfile | null {
+    return value.length === 0 ? null : value[0];
+}
+function from_candid_opt_n14(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_CommunityPost]): CommunityPost | null {
+    return value.length === 0 ? null : from_candid_CommunityPost_n5(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_opt_n19(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: [] | [_MarketplaceListing]): MarketplaceListing | null {
+    return value.length === 0 ? null : from_candid_MarketplaceListing_n9(_uploadFile, _downloadFile, value[0]);
+}
+function from_candid_record_n10(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    id: _ListingId;
+    title: string;
+    creator: Principal;
+    contentType: {
+        template: _TemplateId;
+    } | {
+        sticker: bigint;
+    };
+    createdAt: bigint;
+    description: string;
+    price: bigint;
+}): {
+    id: ListingId;
+    title: string;
+    creator: Principal;
+    contentType: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    };
+    createdAt: bigint;
+    description: string;
+    price: bigint;
+} {
+    return {
+        id: value.id,
+        title: value.title,
+        creator: value.creator,
+        contentType: from_candid_variant_n7(_uploadFile, _downloadFile, value.contentType),
+        createdAt: value.createdAt,
+        description: value.description,
+        price: value.price
+    };
+}
+function from_candid_record_n17(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    status: {
+        pending: null;
+    } | {
+        rejected: null;
+    } | {
+        accepted: null;
+    };
+    listingId: _ListingId;
+    message: string;
+    buyer: Principal;
+}): {
+    status: Variant_pending_rejected_accepted;
+    listingId: ListingId;
+    message: string;
+    buyer: Principal;
+} {
+    return {
+        status: from_candid_variant_n18(_uploadFile, _downloadFile, value.status),
+        listingId: value.listingId,
+        message: value.message,
+        buyer: value.buyer
+    };
+}
+function from_candid_record_n6(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    id: _PostId;
+    title: string;
+    creator: Principal;
+    contentType: {
+        template: _TemplateId;
+    } | {
+        sticker: bigint;
+    };
+    createdAt: bigint;
+    description: string;
+}): {
+    id: PostId;
+    title: string;
+    creator: Principal;
+    contentType: {
+        __kind__: "template";
+        template: TemplateId;
+    } | {
+        __kind__: "sticker";
+        sticker: bigint;
+    };
+    createdAt: bigint;
+    description: string;
+} {
+    return {
+        id: value.id,
+        title: value.title,
+        creator: value.creator,
+        contentType: from_candid_variant_n7(_uploadFile, _downloadFile, value.contentType),
+        createdAt: value.createdAt,
+        description: value.description
+    };
+}
+function from_candid_variant_n13(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    admin: null;
+} | {
+    user: null;
+} | {
+    guest: null;
+}): UserRole {
+    return "admin" in value ? UserRole.admin : "user" in value ? UserRole.user : "guest" in value ? UserRole.guest : value;
+}
+function from_candid_variant_n18(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    pending: null;
+} | {
+    rejected: null;
+} | {
+    accepted: null;
+}): Variant_pending_rejected_accepted {
+    return "pending" in value ? Variant_pending_rejected_accepted.pending : "rejected" in value ? Variant_pending_rejected_accepted.rejected : "accepted" in value ? Variant_pending_rejected_accepted.accepted : value;
+}
+function from_candid_variant_n7(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    template: _TemplateId;
+} | {
+    sticker: bigint;
+}): {
+    __kind__: "template";
+    template: TemplateId;
+} | {
+    __kind__: "sticker";
+    sticker: bigint;
+} {
+    return "template" in value ? {
+        __kind__: "template",
+        template: value.template
+    } : "sticker" in value ? {
+        __kind__: "sticker",
+        sticker: value.sticker
+    } : value;
+}
+function from_candid_vec_n15(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_BuyerIntent>): Array<BuyerIntent> {
+    return value.map((x)=>from_candid_BuyerIntent_n16(_uploadFile, _downloadFile, x));
+}
+function from_candid_vec_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_CommunityPost>): Array<CommunityPost> {
+    return value.map((x)=>from_candid_CommunityPost_n5(_uploadFile, _downloadFile, x));
+}
+function from_candid_vec_n8(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Array<_MarketplaceListing>): Array<MarketplaceListing> {
+    return value.map((x)=>from_candid_MarketplaceListing_n9(_uploadFile, _downloadFile, x));
+}
+function to_candid_UserRole_n1(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): _UserRole {
+    return to_candid_variant_n2(_uploadFile, _downloadFile, value);
+}
+function to_candid_variant_n2(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: UserRole): {
+    admin: null;
+} | {
+    user: null;
+} | {
+    guest: null;
+} {
+    return value == UserRole.admin ? {
+        admin: null
+    } : value == UserRole.user ? {
+        user: null
+    } : value == UserRole.guest ? {
+        guest: null
+    } : value;
+}
+function to_candid_variant_n20(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: Variant_rejected_accepted): {
+    rejected: null;
+} | {
+    accepted: null;
+} {
+    return value == Variant_rejected_accepted.rejected ? {
+        rejected: null
+    } : value == Variant_rejected_accepted.accepted ? {
+        accepted: null
+    } : value;
+}
+function to_candid_variant_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
+    __kind__: "template";
+    template: TemplateId;
+} | {
+    __kind__: "sticker";
+    sticker: bigint;
+}): {
+    template: _TemplateId;
+} | {
+    sticker: bigint;
+} {
+    return value.__kind__ === "template" ? {
+        template: value.template
+    } : value.__kind__ === "sticker" ? {
+        sticker: value.sticker
+    } : value;
 }
 export interface CreateActorOptions {
     agent?: Agent;

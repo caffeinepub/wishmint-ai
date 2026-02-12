@@ -6,14 +6,25 @@ import { useActor } from '@/hooks/useActor';
 
 /**
  * Diagnostics banner that displays when IC-related configuration or runtime issues are detected.
- * Only shows when there are actual problems to report.
+ * Only shows in development environments to prevent confusing production users.
  */
 export function DeployDiagnosticsBanner() {
   const [dismissed, setDismissed] = useState(false);
   const [issues, setIssues] = useState<string[]>([]);
   const { actor, isFetching } = useActor();
 
+  // Check if we're in development mode
+  const isDevelopment = typeof window !== 'undefined' && 
+    (window.location.hostname === 'localhost' || 
+     window.location.hostname === '127.0.0.1' ||
+     window.location.port === '3000');
+
   useEffect(() => {
+    // Only run diagnostics in development
+    if (!isDevelopment) {
+      return;
+    }
+
     const detectedIssues: string[] = [];
 
     // Check if actor initialization failed after loading completed
@@ -21,19 +32,16 @@ export function DeployDiagnosticsBanner() {
       detectedIssues.push('Backend connection failed. The canister actor could not be initialized.');
     }
 
-    // Check if running in development but canister IDs are missing
-    if (typeof window !== 'undefined') {
-      const isDev = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-      if (isDev && !import.meta.env.CANISTER_ID_BACKEND) {
-        detectedIssues.push('Backend canister ID is missing. Run "dfx deploy" to set up canisters.');
-      }
+    // Check if canister IDs are missing
+    if (!import.meta.env.CANISTER_ID_BACKEND) {
+      detectedIssues.push('Backend canister ID is missing. Run "dfx deploy" to set up canisters.');
     }
 
     setIssues(detectedIssues);
-  }, [actor, isFetching]);
+  }, [actor, isFetching, isDevelopment]);
 
-  // Don't show banner if dismissed or no issues
-  if (dismissed || issues.length === 0) {
+  // Don't show banner if not in development, dismissed, or no issues
+  if (!isDevelopment || dismissed || issues.length === 0) {
     return null;
   }
 

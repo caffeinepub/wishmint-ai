@@ -20,16 +20,18 @@ export function useWhoAmI() {
       }
       
       try {
-        const principal = await actor.testAuthenticatedCaller();
-        return principal;
+        // Use getCallerUserRole to verify authentication
+        await actor.getCallerUserRole();
+        // If successful, return the identity principal
+        return identity?.getPrincipal() || null;
       } catch (error) {
         // If the backend traps (anonymous caller), return null gracefully
         const errorMessage = error instanceof Error ? error.message : String(error);
-        if (errorMessage.includes('Caller must be authenticated')) {
+        if (errorMessage.includes('Caller must be authenticated') || errorMessage.includes('Unauthorized')) {
           // Expected error for anonymous users
           return null;
         }
-        console.error('[useWhoAmI] Backend call to testAuthenticatedCaller failed:', errorMessage);
+        console.error('[useWhoAmI] Backend call failed:', errorMessage);
         return null;
       }
     },

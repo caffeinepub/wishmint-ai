@@ -6,9 +6,12 @@ import { TemplatesSection } from './sections/TemplatesSection';
 import { ExamplesSection } from './sections/ExamplesSection';
 import { PricingSection } from './sections/PricingSection';
 import { FaqSection } from './sections/FaqSection';
+import { CommunitySection } from './sections/CommunitySection';
+import { MarketplaceSection } from './sections/MarketplaceSection';
 import { FooterSection } from './sections/FooterSection';
 import { LegalSections } from './sections/LegalSections';
 import { DeployDiagnosticsBanner } from './components/DeployDiagnosticsBanner';
+import { PremiumCardDesignerModule } from './features/premiumCardDesigner/PremiumCardDesignerModule';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { usePlanSelection, type Plan } from './hooks/usePlanSelection';
 import { generateBirthdayPack } from './features/generator/generateBirthdayPack';
@@ -27,6 +30,9 @@ interface AppContextValue {
   demoMode: boolean;
   startDemo: () => void;
   exitDemo: () => void;
+  premiumDesignerOpen: boolean;
+  openPremiumDesigner: () => void;
+  closePremiumDesigner: () => void;
 }
 
 const AppContext = createContext<AppContextValue | undefined>(undefined);
@@ -53,6 +59,7 @@ function App() {
   const [outputs, setOutputs] = useState<BirthdayPack | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateId>('minimal');
   const [demoMode, setDemoMode] = useState(false);
+  const [premiumDesignerOpen, setPremiumDesignerOpen] = useState(false);
 
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity && !identity.getPrincipal().isAnonymous();
@@ -62,6 +69,8 @@ function App() {
   const generatorRef = useRef<HTMLDivElement>(null);
   const pricingRef = useRef<HTMLDivElement>(null);
   const examplesRef = useRef<HTMLDivElement>(null);
+  const communityRef = useRef<HTMLDivElement>(null);
+  const marketplaceRef = useRef<HTMLDivElement>(null);
   const nameInputRef = useRef<HTMLInputElement>(null);
   const authControlsRef = useRef<HTMLButtonElement>(null);
 
@@ -109,6 +118,14 @@ function App() {
     setDemoMode(false);
   };
 
+  const openPremiumDesigner = () => {
+    setPremiumDesignerOpen(true);
+  };
+
+  const closePremiumDesigner = () => {
+    setPremiumDesignerOpen(false);
+  };
+
   const handleHeroCTA = () => {
     if (!isAuthenticated) {
       // Focus sign-in button
@@ -148,28 +165,39 @@ function App() {
     demoMode,
     startDemo,
     exitDemo,
+    premiumDesignerOpen,
+    openPremiumDesigner,
+    closePremiumDesigner,
   };
 
   return (
     <AppContext.Provider value={contextValue}>
       <div className="min-h-screen bg-background text-foreground">
         <DeployDiagnosticsBanner />
-        <HeroSection
-          onGenerateClick={handleHeroCTA}
-          onTryDemo={startDemo}
-          onExamplesClick={scrollToExamples}
-          isAuthenticated={isAuthenticated}
-          selectedPlan={selectedPlan}
-          authControlsRef={authControlsRef}
-        />
-        <GeneratorSection ref={generatorRef} nameInputRef={nameInputRef as React.RefObject<HTMLInputElement>} />
-        {outputs && <OutputSection />}
-        <TemplatesSection />
-        <ExamplesSection ref={examplesRef} />
-        <PricingSection ref={pricingRef} />
-        <FaqSection />
-        <LegalSections />
-        <FooterSection />
+        {premiumDesignerOpen ? (
+          <PremiumCardDesignerModule />
+        ) : (
+          <>
+            <HeroSection
+              onGenerateClick={handleHeroCTA}
+              onTryDemo={startDemo}
+              onExamplesClick={scrollToExamples}
+              isAuthenticated={isAuthenticated}
+              selectedPlan={selectedPlan}
+              authControlsRef={authControlsRef}
+            />
+            <GeneratorSection ref={generatorRef} nameInputRef={nameInputRef as React.RefObject<HTMLInputElement>} />
+            {outputs && <OutputSection />}
+            <TemplatesSection />
+            <ExamplesSection ref={examplesRef} />
+            <PricingSection ref={pricingRef} />
+            <CommunitySection ref={communityRef} />
+            <MarketplaceSection ref={marketplaceRef} />
+            <FaqSection />
+            <LegalSections />
+            <FooterSection />
+          </>
+        )}
       </div>
     </AppContext.Provider>
   );

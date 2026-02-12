@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Copy, Download, MessageCircle, Lock } from 'lucide-react';
+import { Copy, Download, MessageCircle, Lock, Sparkles } from 'lucide-react';
 import { Reveal } from '../components/Reveal';
 import { useAppContext } from '../App';
 import { copyToClipboard } from '../lib/clipboard';
@@ -11,7 +11,7 @@ import { toast } from 'sonner';
 import { useState } from 'react';
 
 export function OutputSection() {
-  const { outputs, formData, selectedTemplate, isAuthenticated, demoMode } = useAppContext();
+  const { outputs, formData, selectedTemplate, isAuthenticated, demoMode, openPremiumDesigner } = useAppContext();
   const [isExporting, setIsExporting] = useState(false);
 
   if (!outputs) return null;
@@ -133,7 +133,8 @@ export function OutputSection() {
             <Button
               onClick={handleDownloadCard}
               size="lg"
-              className="gap-2 h-11 bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90"
+              variant="outline"
+              className="gap-2 h-11"
               disabled={!canDownload || isExporting}
               title={!canDownload ? 'Sign in to download card images' : ''}
             >
@@ -148,6 +149,14 @@ export function OutputSection() {
                   {isExporting ? 'Exporting...' : 'Download Card Image'}
                 </>
               )}
+            </Button>
+            <Button
+              onClick={openPremiumDesigner}
+              size="lg"
+              className="gap-2 h-11 bg-gradient-to-r from-neon-purple to-neon-green hover:opacity-90"
+            >
+              <Sparkles className="w-4 h-4" />
+              Create Premium Card
             </Button>
           </div>
         </Reveal>

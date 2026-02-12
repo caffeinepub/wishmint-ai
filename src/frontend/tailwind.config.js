@@ -101,6 +101,16 @@ export default {
                 'gradient-x': {
                     '0%, 100%': { backgroundPosition: '0% center' },
                     '50%': { backgroundPosition: '200% center' }
+                },
+                'gradient-slow': {
+                    '0%, 100%': { backgroundPosition: '0% 50%' },
+                    '50%': { backgroundPosition: '100% 50%' }
+                },
+                'float-emoji': {
+                    '0%, 100%': { transform: 'translateY(0) rotate(0deg)' },
+                    '25%': { transform: 'translateY(-10px) rotate(5deg)' },
+                    '50%': { transform: 'translateY(-5px) rotate(-5deg)' },
+                    '75%': { transform: 'translateY(-15px) rotate(3deg)' }
                 }
             },
             animation: {
@@ -108,7 +118,9 @@ export default {
                 'accordion-up': 'accordion-up 0.2s ease-out',
                 'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
                 gradient: 'gradient 15s ease infinite',
-                'gradient-x': 'gradient-x 3s linear infinite'
+                'gradient-x': 'gradient-x 3s linear infinite',
+                'gradient-slow': 'gradient-slow 8s ease infinite',
+                'float-emoji': 'float-emoji 4s ease-in-out infinite'
             }
         }
     },

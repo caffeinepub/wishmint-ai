@@ -8,19 +8,243 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
-export const Principal = IDL.Principal;
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
+});
+export const TemplateId = IDL.Nat;
+export const PostId = IDL.Nat;
+export const ListingId = IDL.Nat;
+export const CommunityPost = IDL.Record({
+  'id' : PostId,
+  'title' : IDL.Text,
+  'creator' : IDL.Principal,
+  'contentType' : IDL.Variant({ 'template' : TemplateId, 'sticker' : IDL.Nat }),
+  'createdAt' : IDL.Int,
+  'description' : IDL.Text,
+});
+export const MarketplaceListing = IDL.Record({
+  'id' : ListingId,
+  'title' : IDL.Text,
+  'creator' : IDL.Principal,
+  'contentType' : IDL.Variant({ 'template' : TemplateId, 'sticker' : IDL.Nat }),
+  'createdAt' : IDL.Int,
+  'description' : IDL.Text,
+  'price' : IDL.Nat,
+});
+export const UserProfile = IDL.Record({ 'bio' : IDL.Text, 'name' : IDL.Text });
+export const BuyerIntent = IDL.Record({
+  'status' : IDL.Variant({
+    'pending' : IDL.Null,
+    'rejected' : IDL.Null,
+    'accepted' : IDL.Null,
+  }),
+  'listingId' : ListingId,
+  'message' : IDL.Text,
+  'buyer' : IDL.Principal,
+});
 
 export const idlService = IDL.Service({
-  'testAuthenticatedCaller' : IDL.Func([], [Principal], []),
+  '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'createCommunityPost' : IDL.Func(
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Variant({ 'template' : TemplateId, 'sticker' : IDL.Nat }),
+      ],
+      [PostId],
+      [],
+    ),
+  'createMarketplaceListing' : IDL.Func(
+      [
+        IDL.Text,
+        IDL.Text,
+        IDL.Nat,
+        IDL.Variant({ 'template' : TemplateId, 'sticker' : IDL.Nat }),
+      ],
+      [ListingId],
+      [],
+    ),
+  'expressInterest' : IDL.Func([ListingId, IDL.Text], [], []),
+  'getAllCommunityPosts' : IDL.Func([], [IDL.Vec(CommunityPost)], ['query']),
+  'getAllMarketplaceListings' : IDL.Func(
+      [],
+      [IDL.Vec(MarketplaceListing)],
+      ['query'],
+    ),
+  'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+  'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+  'getCommunityPost' : IDL.Func([PostId], [IDL.Opt(CommunityPost)], ['query']),
+  'getCreatorListings' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Vec(MarketplaceListing)],
+      ['query'],
+    ),
+  'getCreatorPosts' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Vec(CommunityPost)],
+      ['query'],
+    ),
+  'getCreatorSubscribers' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Vec(IDL.Principal)],
+      ['query'],
+    ),
+  'getListingIntents' : IDL.Func(
+      [ListingId],
+      [IDL.Vec(BuyerIntent)],
+      ['query'],
+    ),
+  'getMarketplaceListing' : IDL.Func(
+      [ListingId],
+      [IDL.Opt(MarketplaceListing)],
+      ['query'],
+    ),
+  'getUserProfile' : IDL.Func(
+      [IDL.Principal],
+      [IDL.Opt(UserProfile)],
+      ['query'],
+    ),
+  'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+  'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+  'subscribeToCreator' : IDL.Func([IDL.Principal], [], []),
+  'updateIntentStatus' : IDL.Func(
+      [
+        ListingId,
+        IDL.Principal,
+        IDL.Variant({ 'rejected' : IDL.Null, 'accepted' : IDL.Null }),
+      ],
+      [],
+      [],
+    ),
 });
 
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
-  const Principal = IDL.Principal;
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
+  });
+  const TemplateId = IDL.Nat;
+  const PostId = IDL.Nat;
+  const ListingId = IDL.Nat;
+  const CommunityPost = IDL.Record({
+    'id' : PostId,
+    'title' : IDL.Text,
+    'creator' : IDL.Principal,
+    'contentType' : IDL.Variant({
+      'template' : TemplateId,
+      'sticker' : IDL.Nat,
+    }),
+    'createdAt' : IDL.Int,
+    'description' : IDL.Text,
+  });
+  const MarketplaceListing = IDL.Record({
+    'id' : ListingId,
+    'title' : IDL.Text,
+    'creator' : IDL.Principal,
+    'contentType' : IDL.Variant({
+      'template' : TemplateId,
+      'sticker' : IDL.Nat,
+    }),
+    'createdAt' : IDL.Int,
+    'description' : IDL.Text,
+    'price' : IDL.Nat,
+  });
+  const UserProfile = IDL.Record({ 'bio' : IDL.Text, 'name' : IDL.Text });
+  const BuyerIntent = IDL.Record({
+    'status' : IDL.Variant({
+      'pending' : IDL.Null,
+      'rejected' : IDL.Null,
+      'accepted' : IDL.Null,
+    }),
+    'listingId' : ListingId,
+    'message' : IDL.Text,
+    'buyer' : IDL.Principal,
+  });
   
   return IDL.Service({
-    'testAuthenticatedCaller' : IDL.Func([], [Principal], []),
+    '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'createCommunityPost' : IDL.Func(
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Variant({ 'template' : TemplateId, 'sticker' : IDL.Nat }),
+        ],
+        [PostId],
+        [],
+      ),
+    'createMarketplaceListing' : IDL.Func(
+        [
+          IDL.Text,
+          IDL.Text,
+          IDL.Nat,
+          IDL.Variant({ 'template' : TemplateId, 'sticker' : IDL.Nat }),
+        ],
+        [ListingId],
+        [],
+      ),
+    'expressInterest' : IDL.Func([ListingId, IDL.Text], [], []),
+    'getAllCommunityPosts' : IDL.Func([], [IDL.Vec(CommunityPost)], ['query']),
+    'getAllMarketplaceListings' : IDL.Func(
+        [],
+        [IDL.Vec(MarketplaceListing)],
+        ['query'],
+      ),
+    'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
+    'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
+    'getCommunityPost' : IDL.Func(
+        [PostId],
+        [IDL.Opt(CommunityPost)],
+        ['query'],
+      ),
+    'getCreatorListings' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(MarketplaceListing)],
+        ['query'],
+      ),
+    'getCreatorPosts' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(CommunityPost)],
+        ['query'],
+      ),
+    'getCreatorSubscribers' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Vec(IDL.Principal)],
+        ['query'],
+      ),
+    'getListingIntents' : IDL.Func(
+        [ListingId],
+        [IDL.Vec(BuyerIntent)],
+        ['query'],
+      ),
+    'getMarketplaceListing' : IDL.Func(
+        [ListingId],
+        [IDL.Opt(MarketplaceListing)],
+        ['query'],
+      ),
+    'getUserProfile' : IDL.Func(
+        [IDL.Principal],
+        [IDL.Opt(UserProfile)],
+        ['query'],
+      ),
+    'isCallerAdmin' : IDL.Func([], [IDL.Bool], ['query']),
+    'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
+    'subscribeToCreator' : IDL.Func([IDL.Principal], [], []),
+    'updateIntentStatus' : IDL.Func(
+        [
+          ListingId,
+          IDL.Principal,
+          IDL.Variant({ 'rejected' : IDL.Null, 'accepted' : IDL.Null }),
+        ],
+        [],
+        [],
+      ),
   });
 };
 

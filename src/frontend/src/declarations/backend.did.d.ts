@@ -10,9 +10,76 @@ import type { ActorMethod } from '@icp-sdk/core/agent';
 import type { IDL } from '@icp-sdk/core/candid';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export type Principal = Principal;
+export interface BuyerIntent {
+  'status' : { 'pending' : null } |
+    { 'rejected' : null } |
+    { 'accepted' : null },
+  'listingId' : ListingId,
+  'message' : string,
+  'buyer' : Principal,
+}
+export interface CommunityPost {
+  'id' : PostId,
+  'title' : string,
+  'creator' : Principal,
+  'contentType' : { 'template' : TemplateId } |
+    { 'sticker' : bigint },
+  'createdAt' : bigint,
+  'description' : string,
+}
+export type ListingId = bigint;
+export interface MarketplaceListing {
+  'id' : ListingId,
+  'title' : string,
+  'creator' : Principal,
+  'contentType' : { 'template' : TemplateId } |
+    { 'sticker' : bigint },
+  'createdAt' : bigint,
+  'description' : string,
+  'price' : bigint,
+}
+export type PostId = bigint;
+export type TemplateId = bigint;
+export interface UserProfile { 'bio' : string, 'name' : string }
+export type UserRole = { 'admin' : null } |
+  { 'user' : null } |
+  { 'guest' : null };
 export interface _SERVICE {
-  'testAuthenticatedCaller' : ActorMethod<[], Principal>,
+  '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'createCommunityPost' : ActorMethod<
+    [string, string, { 'template' : TemplateId } | { 'sticker' : bigint }],
+    PostId
+  >,
+  'createMarketplaceListing' : ActorMethod<
+    [
+      string,
+      string,
+      bigint,
+      { 'template' : TemplateId } |
+        { 'sticker' : bigint },
+    ],
+    ListingId
+  >,
+  'expressInterest' : ActorMethod<[ListingId, string], undefined>,
+  'getAllCommunityPosts' : ActorMethod<[], Array<CommunityPost>>,
+  'getAllMarketplaceListings' : ActorMethod<[], Array<MarketplaceListing>>,
+  'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getCallerUserRole' : ActorMethod<[], UserRole>,
+  'getCommunityPost' : ActorMethod<[PostId], [] | [CommunityPost]>,
+  'getCreatorListings' : ActorMethod<[Principal], Array<MarketplaceListing>>,
+  'getCreatorPosts' : ActorMethod<[Principal], Array<CommunityPost>>,
+  'getCreatorSubscribers' : ActorMethod<[Principal], Array<Principal>>,
+  'getListingIntents' : ActorMethod<[ListingId], Array<BuyerIntent>>,
+  'getMarketplaceListing' : ActorMethod<[ListingId], [] | [MarketplaceListing]>,
+  'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
+  'isCallerAdmin' : ActorMethod<[], boolean>,
+  'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  'subscribeToCreator' : ActorMethod<[Principal], undefined>,
+  'updateIntentStatus' : ActorMethod<
+    [ListingId, Principal, { 'rejected' : null } | { 'accepted' : null }],
+    undefined
+  >,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

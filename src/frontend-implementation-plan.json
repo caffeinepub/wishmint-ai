@@ -1,121 +1,37 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Pre-login Demo mode (try-before-sign-in) for Birthday Pack generator",
+  "title": "Add Google Analytics (gtag.js) tracking and CSP allowances",
   "requirements": [
     {
-      "id": "REQ-42",
-      "summary": "Add a pre-login Demo mode that lets anonymous users generate a Birthday Pack locally without signing in or selecting a plan.",
+      "id": "REQ-62",
+      "summary": "Load the provided Google Analytics gtag.js snippet on every page using measurement ID G-ZPB7R21LJ4.",
       "acceptanceCriteria": [
-        "When the user is not authenticated, the UI provides a clear entry point to start a demo (for example, a “Try Demo” button in the Hero section and/or Generator section).",
-        "In Demo mode, the Generator inputs are enabled and the user can run generator actions needed to experience the app (at minimum: Generate and Surprise Me).",
-        "Demo mode uses the existing local generation logic (no network calls required for generation).",
-        "User-facing text is in English and clearly labels the experience as “Demo” (or “Demo mode”)."
+        "The built app’s delivered HTML includes the exact Google tag (gtag.js) snippet with measurement ID G-ZPB7R21LJ4.",
+        "On a fresh load, the browser requests https://www.googletagmanager.com/gtag/js?id=G-ZPB7R21LJ4 successfully.",
+        "After page load, window.dataLayer exists and window.gtag is defined (or equivalent gtag function behavior is present)."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/App.tsx",
+          "path": "frontend/index.html",
           "operation": "modify",
-          "description": "Introduce Demo mode state in the app context (e.g., demoMode boolean + startDemo/exitDemo actions) so anonymous users can use the generator without auth/plan gating."
-        },
-        {
-          "path": "frontend/src/sections/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Add a clear, English-labeled “Try Demo” entry point for unauthenticated users and display Demo-friendly prompts alongside existing sign-in messaging. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/sections/GeneratorSection.tsx",
-          "operation": "modify",
-          "description": "Update the generator section to treat Demo mode as an allowed state so form inputs and core actions (Generate, Surprise Me) are enabled when demoMode is active, using existing local generation utilities. Verify the component's usage instructions before implementing."
+          "description": "Insert the exact provided Google tag (gtag.js) snippet into the document <head> so it loads on every page view, using measurement ID G-ZPB7R21LJ4."
         }
       ]
     },
     {
-      "id": "REQ-43",
-      "summary": "Adjust generator gating so Demo mode bypasses auth/plan gating while preserving existing authenticated behavior.",
+      "id": "REQ-63",
+      "summary": "Adjust deployed CSP to allow Google Analytics (gtag.js) resources while preserving existing Internet Identity and app functionality.",
       "acceptanceCriteria": [
-        "If the user is authenticated and has a selected plan, the generator behaves exactly as it does today.",
-        "If the user is not authenticated, the generator can still be used when Demo mode is enabled, without requiring plan selection.",
-        "If the user is not authenticated and Demo mode is not enabled, existing sign-in prompts can remain (but must not prevent entering Demo mode)."
+        "With CSP enabled in production, the GA script loads without CSP violations in the browser console.",
+        "Network requests needed by Google Analytics measurement (initiated by gtag.js) are not blocked by CSP.",
+        "Existing authentication (Internet Identity) and app API calls remain functional after the CSP change."
       ],
       "file_operations": [
         {
-          "path": "frontend/src/sections/GeneratorSection.tsx",
+          "path": "frontend/.ic-assets.json",
           "operation": "modify",
-          "description": "Refactor gating checks into a single derived flag (e.g., canUseGenerator) that is true for (authenticated + selected plan) OR (demoMode), ensuring all core generator actions and input disabled states use the new gating logic consistently. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Ensure context exposes the minimal flags needed by sections (e.g., isAuthenticated, selectedPlan, demoMode) so authenticated-with-plan flow remains unchanged while Demo mode can bypass plan selection when anonymous."
-        },
-        {
-          "path": "frontend/src/sections/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Keep existing primary CTA behavior for signed-in users while ensuring unauthenticated users are not blocked from entering Demo mode (e.g., primary CTA can remain sign-in-oriented, with a separate Demo CTA). Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-44",
-      "summary": "Provide demo onboarding that pre-fills realistic example data and auto-generates outputs, then scrolls the user to generator/outputs.",
-      "acceptanceCriteria": [
-        "Starting Demo mode pre-fills the form with valid data (including a non-empty Name) and produces a Birthday Pack in the Output section without requiring manual input.",
-        "The app scrolls the user to the appropriate section (generator and/or outputs) after starting Demo mode.",
-        "The demo data must be generated locally using existing constants and/or existing sample wish data already in the codebase (no external API calls)."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Implement startDemo() to (1) set demoMode=true, (2) prefill formData with realistic local sample values sourced from existing code (e.g., frontend/src/features/examples/sampleWishes.ts and/or generator constants), (3) run existing local generation (generateBirthdayPack) to populate outputs, and (4) scroll the user to the generator and/or outputs sections."
-        },
-        {
-          "path": "frontend/src/sections/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Wire the Hero “Try Demo” CTA to call the app-level startDemo() so the demo begins immediately and is clearly labeled as Demo mode in English. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-45",
-      "summary": "Disable or guard advanced/auth-only actions during Demo mode and show clear English prompts requiring sign-in.",
-      "acceptanceCriteria": [
-        "In Demo mode, any actions intended to be authentication-gated (for example, saving, premium export, or other advanced features already designed to require login) are disabled for anonymous users.",
-        "When an anonymous demo user attempts a gated advanced action (or when viewing a disabled control), the UI displays an English message that indicates sign-in is required (for example: “Sign in to download card images.”).",
-        "Core demo actions (generating and viewing outputs, and basic sharing/copying if allowed in the demo scope) remain functional offline."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Expose demoMode and isAuthenticated in context so downstream sections can consistently determine when the user is an anonymous demo user versus authenticated."
-        },
-        {
-          "path": "frontend/src/sections/OutputSection.tsx",
-          "operation": "modify",
-          "description": "Gate advanced export/download behavior for anonymous Demo mode users (e.g., disable the Download Card Image control and/or guard click) and show an English sign-in-required message near the control and/or via an interaction prompt, while keeping copy/share actions functional offline. Verify the component's usage instructions before implementing."
-        }
-      ]
-    },
-    {
-      "id": "REQ-46",
-      "summary": "Update the Hero section copy and CTAs to support Demo mode pre-login flow alongside sign-in.",
-      "acceptanceCriteria": [
-        "When not authenticated, the Hero section no longer presents sign-in as the only path; it also offers Demo mode as an option.",
-        "All Hero section prompt text is in English and remains consistent with the premium tone (clear, concise, non-technical).",
-        "Existing authenticated behavior of the primary CTA remains unchanged for signed-in users."
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/sections/HeroSection.tsx",
-          "operation": "modify",
-          "description": "Revise unauthenticated Hero prompts to present both options (sign in and Demo mode) in concise premium-tone English, and add a dedicated “Try Demo” CTA; preserve existing signed-in CTA behavior. Verify the component's usage instructions before implementing."
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add Hero wiring for the Demo CTA (e.g., pass onTryDemo callback) while keeping the existing onGenerateClick behavior unchanged for authenticated users."
+          "description": "Update the Content-Security-Policy header to allow loading gtag.js and sending analytics beacons by permitting required Google hosts (at minimum add https://www.googletagmanager.com to allowed script sources and add Google Analytics collection hosts such as https://www.google-analytics.com to connect-src), while keeping current allowances needed for Internet Identity (https://identity.ic0.app) and existing app connectivity unchanged. Ensure the CSP is applied to index.html responses as deployed (add/duplicate the CSP header under the index.html rule if the asset rules override headers)."
         }
       ]
     }

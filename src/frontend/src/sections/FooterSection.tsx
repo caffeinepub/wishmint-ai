@@ -23,6 +23,16 @@ export function FooterSection() {
             <h4 className="font-semibold text-base">Quick Links</h4>
             <ul className="space-y-2 text-sm text-muted-foreground">
               <li>
+                <a href="#community" className="hover:text-neon-purple transition-colors">
+                  Community
+                </a>
+              </li>
+              <li>
+                <a href="#marketplace" className="hover:text-neon-green transition-colors">
+                  Marketplace
+                </a>
+              </li>
+              <li>
                 <a href="#privacy" className="hover:text-neon-purple transition-colors">
                   Privacy Policy
                 </a>
